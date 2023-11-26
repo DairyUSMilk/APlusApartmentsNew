@@ -1,0 +1,32 @@
+{
+  "name": "cs554project",
+  "version": "1.0.0",
+  "description": "CS554 Final Project",
+  "main": "server.js",
+  "directories": {
+    "doc": "docs"
+  },
+  "type": "module",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/DairyUSMilk/CS554Project.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/DairyUSMilk/CS554Project/issues"
+  },
+  "homepage": "https://github.com/DairyUSMilk/CS554Project#readme",
+  "dependencies": {
+    "mongodb": "^6.3.0",
+    "@apollo/server": "^4.9.3",
+    "graphql": "^16.8.1",
+    "uuid": "^9.0.1",
+    "flat": "^2.0.1",
+    "redis": "^4.3.1"
+  }
+}
