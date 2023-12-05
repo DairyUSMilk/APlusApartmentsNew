@@ -5,6 +5,9 @@ import { FirebaseConfig } from './firebase/Config';
 import Home from './components/Home';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
+import Account from './components/Account';
+import ChangePassword from './components/ChangePassword';
+import ForgotPassword from './components/ForgotPassword';
 
 import { initializeApp } from "firebase/app";
 import { getAnalytics } from "firebase/analytics";
@@ -47,6 +50,18 @@ const router = createBrowserRouter([
           {
               path: '/sign-up',
               element: <SignUp />
+          },
+          {
+            path: '/account',
+            element: <Account />
+          },
+          {
+            path: '/change-password',
+            element: <ChangePassword />
+          },
+          {
+            path: '/forgot-password',
+            element: <ForgotPassword />
           },
 
       ],
