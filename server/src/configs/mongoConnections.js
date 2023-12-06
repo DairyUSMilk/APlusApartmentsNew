@@ -10,3 +10,5 @@ const dbConnection = async () => {
   }
   return _db;
 };
+
+export default dbConnection;
