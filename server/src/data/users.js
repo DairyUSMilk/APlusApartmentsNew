@@ -33,8 +33,7 @@ export const getUserById = async(id) => {
     if(!user){
         throw `No user exists with id ${id}`;
     }
-    formatUserObject(user);
-    return user;
+    return formatUserObject(user);
 }
 
 export const getAllRenters = async() => {
@@ -120,3 +119,5 @@ const formatUserObject = async(userObject) => {
     userObject._id = userObject._id.toString();
     return userObject;
 }
+
+//need to add function to add apartment listing to either bookmarked, or listing
