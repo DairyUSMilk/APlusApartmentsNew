@@ -1,7 +1,7 @@
 import { MongoClient } from "mongodb";
 import { mongoConfig } from "./settings.js";
 let _connection = undefined;
-let _db = underfined;
+let _db = undefined;
 
 const dbConnection = async () => {
   if (!_connection) {
