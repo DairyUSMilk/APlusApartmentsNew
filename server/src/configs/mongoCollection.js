@@ -12,3 +12,4 @@ const getCollectionFn = (collection) => {
 };
 export const users = getCollectionFn("users");
 export const apartments = getCollectionFn("apartments");
+export const reviews = getCollectionFn("reviews");

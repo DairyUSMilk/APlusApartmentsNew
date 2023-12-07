@@ -35,13 +35,13 @@ export const getApartmentById = async(id) => {
     return formatApartmentObject(apartment);
 }
 
-export const getAllApartments = async(id) => {
+export const getAllApartments = async() => {
     const apartmentCollection = await apartments();
-    const apartments = await apartmentCollection.find({}).toArray();
-    for(let i = 0; i < apartments.length; i++){
-        formatApartmentObject(apartments[i]);
+    const apartmentList = await apartmentCollection.find({}).toArray();
+    for(let i = 0; i < apartmentList.length; i++){
+        formatApartmentObject(apartmentList[i]);
     }
-    return apartments;
+    return apartmentList;
 }
 
 export const deleteApartmentById = async(id) => {
@@ -88,6 +88,35 @@ export const getAllApprovedApartments = async() => {
     return apartments
 }
 
+//if a parameter is left blank it is left unchanged
+export async function updateApartmentInfoById(id, 
+    name, description, address, city, state, dateListed, amenities, 
+    images, pricePerMonth, landlord, rating, isApproved){
+    const updateInfo = {};
+    const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
+    const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
+    
+    //TODO: Add parameter validation
+    for(let i = 0; i < parameterNames.length; i++){
+        if(!parameterValues[i]){
+            continue;
+        }
+        updateInfo[parameterNames[i]] = parameterValues[i];
+    }
+    
+    const apartmentCollection = await apartments();
+    const result = await apartmentCollection.updateOne(getIdFilter(id), {$set: updateInfo});
+    if(result.modifiedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+}
+
+const getParameterNames = (func) => {
+    const str = func.toString();
+    const paramName = str.slice(str.indexOf('(') + 1, str.indexOf(')')).match(/([^\s,]+)/g);
+    return paramName || [];
+}
+
 const getIdFilter = async(id) => {
     return {_id: new ObjectId(id)};
 }
@@ -95,4 +124,13 @@ const getIdFilter = async(id) => {
 const formatApartmentObject = async(apartmentObject) => {
     apartmentObject._id = apartmentObject._id.toString();
     return apartmentObject;
+}
+
+const getParameterValueArrayFromArguments = (args) => {
+    const output = [];
+    const keys = Object.keys(args);
+    for(let i = 0; i < keys.length; i++){
+        output.push(args[keys[i]]);
+    }
+    return output;
 }
