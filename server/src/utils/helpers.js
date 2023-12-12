@@ -1,35 +1,32 @@
 const exportedMethods = {
+
   checkString(strVal, varName) {
-    if (!strVal) throw `Error: You must supply a ${varName}!`;
-    if (typeof strVal !== "string") throw `Error: ${varName} must be a string!`;
+    if (!strVal) throw new Error(`You must supply ${varName}!`);
+    //check if input is empty
+    if (typeof strVal !== 'string') throw new Error(`${varName} must be a string!`);
+    //check if input is not a string
     strVal = strVal.trim();
     if (strVal.length === 0)
-      throw `Error: ${varName} cannot be an empty string or string with just spaces`;
-
+    //check if input is a string with just spaces
+      throw new Error(`${varName} cannot be an empty string or a string with just spaces`);
     return strVal;
   },
+
   checkName(strVal, varName) {
-    if (!strVal) throw `Error: You must supply a ${varName}!`;
-    if (typeof strVal !== "string") throw `Error: ${varName} must be a string!`;
-    strVal = strVal.trim();
-    if (strVal.length === 0)
-      throw `Error: ${varName} cannot be an empty string or string with just spaces`;
-
-    if (!isNaN(strVal))
-      throw `Error: ${strVal} is not a valid value for ${varName} as it only contains digits`;
-    if (!/^[a-zA-Z]+$/.test(strVal))
-      throw `Error: ${strVal} cannot have numbers or special characters`;
+    strVal = this.checkString(strVal, varName);
+    if (!/^[a-zA-Z\s\-']+$/.test(strVal))
+    //check if input is invalid
+      throw new Error(`${varName} must contain only letters, spaces, hyphens, or apostrophes`);
     return strVal;
   },
+
   checkId(id, varName) {
-    if (!id) throw `Error: You must provide a ${varName}`;
-    if (typeof id !== "string") throw `Error:${varName} must be a string`;
-    id = id.trim();
-    if (id.length === 0)
-      throw `Error: ${varName} cannot be an empty string or just spaces`;
-    if (!ObjectId.isValid(id)) throw `Error: ${varName} invalid object ID`;
+    id = this.checkString(id, varName);
+    //check if input is invalid
+    if (!ObjectId.isValid(id)) throw new Error(`${varName} is an invalid ObjectId`);
     return id;
   },
+
   checkState(state, varName) {
     const unitedStates = [
       "AL",
@@ -85,74 +82,57 @@ const exportedMethods = {
     ];
     state = this.checkString(state, varName);
     if (!unitedStates.includes(state.toUpperCase()))
-      throw `${varName} not exists in the states`;
+    //check if state is not listed above
+      throw `${state} is not a valid state abbreviation`;
     return state;
   },
+
   checkDOB(dob, varName) {
     dob = this.checkString(dob, varName);
-    const parts = dob.split("/");
-
-    // Check if there are exactly 3 parts (MM/DD/YYYY format)
-    if (parts.length !== 3) {
-      throw "Date must be in MM/DD/YYYY format";
-    }
-
-    const month = parseInt(parts[0], 10);
-    const day = parseInt(parts[1], 10);
-    const year = parseInt(parts[2], 10);
-
-    // Validate month (1 to 12)
-    if (month < 1 || month > 12) {
-      throw "Month is not valid";
-    }
-    // Validate year (reasonable range)
+    const parts = dob.split('/');
+    if (parts.length !== 3) throw new Error(`Date in ${varName} must be in MM/DD/YYYY format`);
+    //check the format of DOB
+    const [month, day, year] = parts.map(part => parseInt(part, 10));
     const currentYear = new Date().getFullYear();
-    if (year < 1000 || year > currentYear) {
-      throw "Year is not valid";
-    }
-    // Validate day based on month and year
+    if (month < 1 || month > 12 || year < 1000 || year > currentYear || isNaN(day))
+    //check if DOB is invaild
+      throw new Error(`Invalid date in ${varName}`);
     const maxDaysInMonth = new Date(year, month, 0).getDate();
-    if (day < 1 || day > maxDaysInMonth) {
-      throw "Day is not valid for the given month and year";
-    }
+    if (day < 1 || day > maxDaysInMonth) throw new Error(`Day is not valid in ${varName}`);
+    //check if the day is invalid
     return dob;
   },
+
   checkStringArray(arr, varName) {
-    if (!arr || !Array.isArray(arr))
-      throw `You must provide an array of ${varName}`;
-    if (arr.length < 1) throw "array must have at least 1";
-    for (let i in arr) {
-      if (typeof arr[i] !== "string" || arr[i].trim().length === 0) {
-        throw `One or more elements in ${varName} array is not a string or is an empty string`;
-      }
-      arr[i] = arr[i].trim();
-    }
+    if (!Array.isArray(arr)) 
+    //check if input is an array
+      throw new Error(`${varName} must be an array`);
+    if (arr.length === 0) 
+    //check if input is empty
+      throw new Error(`${varName} must contain at least one element`);
 
-    return arr;
+    return arr.map((item, index) => {
+      if (typeof item !== 'string' || item.trim().length === 0)
+      //check if input is string
+        throw new Error(`Element at index ${index} in ${varName} is not a valid string`);
+      return item.trim();
+    });
   },
-  checkNumber(num, varName) {
-    if (typeof num !== "number") {
-      throw `${varName || "provided variable"} is not a number`;
-    }
 
-    if (isNaN(num)) {
-      throw `${varName || "provided variable"} is NaN`;
-    }
-    if (num < 0) throw `${varName} can't be lower than 0`;
+  checkNumber(num, varName) {
+    if (typeof num !== 'number' || isNaN(num) || num < 0)
+    //check if input is a valid number
+      throw new Error(`${varName} must be a positive number`);
     return num;
   },
-  checkWholeNumber(num, varName) {
-    if (typeof num !== "number") {
-      throw `${varName || "provided variable"} is not a number`;
-    }
 
-    if (isNaN(num)) {
-      throw `${varName || "provided variable"} is NaN`;
-    }
+  checkWholeNumber(num, varName) {
+    this.checkNumber(num, varName);
     if (!Number.isInteger(num))
-      throw `${varName || "provided variable"} is not a whole number`;
-    if (num < 0) throw `${varName} can't be lower than 0`;
+    //check if the input is an integer
+      throw new Error(`${varName} must be a whole number`);
     return num;
   },
 };
+
 export default exportedMethods;
