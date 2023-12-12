@@ -10,4 +10,3 @@ export const dbConnection = async () => {
   }
   return _db;
 };
-

@@ -31,7 +31,7 @@ const client = new ApolloClient({
 });
 
 const app = initializeApp(FirebaseConfig);
-const analytics = getAnalytics(app);
+// const analytics = getAnalytics(app);
 
 const router = createBrowserRouter([
   {
