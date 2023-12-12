@@ -104,7 +104,9 @@ function SignUp() {
         </button>
       </form>
       <br />
-      <button className='btn btn-primary' onClick={() => googleSignIn()} />
+      <button className='btn btn-primary' onClick={() => googleSignIn()}>
+        Sign up with Google
+      </button>
     </div>
   );
 }
