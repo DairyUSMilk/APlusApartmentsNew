@@ -14,6 +14,7 @@ function Home() {
               id
               address
               description
+              images
               price
               amenities
               landlord {
@@ -25,7 +26,7 @@ function Home() {
       });
 
       try {
-        const response = await fetch('http://localhost:3000/', {
+        const response = await fetch('http://localhost:3000/graphql', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
@@ -59,7 +60,12 @@ function Home() {
               <h3>{apartment.address}</h3>
               <p>{apartment.description}</p>
               <p>{`Price: $${apartment.price}`}</p>
-              {/* add more apartment details here */}
+              <p>Amenities: {apartment.amenities.join(', ')}</p>
+              <p>Landlord: {apartment.landlord.name}</p>
+              {/* Display images here */}
+              {apartment.images && apartment.images.map((image, imgIndex) => (
+                <img key={imgIndex} src={image} alt={`Apartment at ${apartment.address}`} />
+              ))}
             </div>
           ))}
         </div>
