@@ -12,6 +12,7 @@
   "dependencies": {
     "@apollo/client": "^3.8.8",
     "@react-google-maps/api": "^2.19.2",
+    "axios": "^1.6.2",
     "firebase": "^10.7.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
