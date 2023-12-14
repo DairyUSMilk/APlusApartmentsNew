@@ -38,14 +38,14 @@ function Account() {
     const renderLandlordContent = () => (
         <div>
             <h3>Landlord Content</h3>
-            {/* Render building listings with edit/delete options */}
+            {/* Render building listings with edit/delete */}
         </div>
     );
 
     const renderAdminContent = () => (
         <div>
             <h3>Admin Content</h3>
-            {/* Render applications and reviews with approve/deny options */}
+            {/* Render applications and reviews with approve/deny */}
         </div>
     );
 
