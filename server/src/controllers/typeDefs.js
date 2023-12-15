@@ -7,7 +7,6 @@ export const typeDefs = `#graphql
     }
     type Renter{
         _id: String!
-        group: Group
         name: String!
         dateOfBirth: String!
         gender: String!
@@ -39,12 +38,6 @@ export const typeDefs = `#graphql
         content: String!
         datePosted: String!
     }
-    type Group{
-        id: String!
-        apartment: Apartment!
-        members: [Renter]
-        groupImages: [String]
-    }
     type Preferences {
         location: String
         priceRange: PriceRange
@@ -57,21 +50,19 @@ export const typeDefs = `#graphql
     }
     type Mutation{
         addRenter(
-            _id: String!,
-            group: Group,
-            name: String!,
-            dateOfBirth: String!,
-            gender: String!,
-            preferences: Preferences,
+            _id: String!
+            name: String!
+            dateOfBirth: String!
+            gender: String!
+            preferences: Preferences
             savedApartments: [Apartment]
         ): Renter
         editRenter(
-            _id: String!,
-            group: Group,
-            name: String,
-            dateOfBirth: String,
-            gender: String,
-            preferences: Preferences,
+            _id: String!
+            name: String
+            dateOfBirth: String
+            gender: String
+            preferences: Preferences
             savedApartments: [Apartment]
         ):Renter
         removeRenter(
