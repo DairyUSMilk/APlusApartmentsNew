@@ -1,6 +1,13 @@
 import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
 import { users as userCollection } from "../configs/mongoCollections.js";
+import redis from "redis";
+import flat from "flat";
+import validation from "./helper.js";
+import { v4 as uuid } from "uuid";
+const unflatten = flat.unflatten;
+const client = redis.createClient();
+client.connect().then(() => {});
 export const resolvers = {
   Query: {
     // Fetch all renters
