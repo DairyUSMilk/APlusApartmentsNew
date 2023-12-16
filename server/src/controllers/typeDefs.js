@@ -6,13 +6,12 @@ export const typeDefs = `#graphql
         getLandlordsById(_id: String!): Landlord
     }
     type Renter{
-        _id: String!,
-        group: Group,
-        name: String!,
-        age: Int!
-        gender: String!,
-        preferences: Preferences,
-        swipedApartments: [Apartment]
+        _id: String!
+        name: String!
+        dateOfBirth: String!
+        gender: String!
+        preferences: Preferences
+        savedApartments: [Apartment]
     }
     type Landlord {
         _id: String!,
@@ -30,12 +29,14 @@ export const typeDefs = `#graphql
         amenities: [String]
         landlord: Landlord!
         groups: Group
+        reviews: [Review]
     }
-    type Group{
-        id: String!
-        apartment: Apartment!
-        members: [Renter]
-        groupImages: [String]
+    type Review{
+        posterId: String!
+        apartmentId: String!
+        rating: Int!
+        content: String!
+        datePosted: String!
     }
     type Preferences {
         location: String
@@ -47,5 +48,62 @@ export const typeDefs = `#graphql
         min: Float
         max: Float
     }
+    type Mutation{
+        addRenter(
+            _id: String!
+            name: String!
+            dateOfBirth: String!
+            gender: String!
+            preferences: Preferences
+            savedApartments: [Apartment]
+        ): Renter
+        editRenter(
+            _id: String!
+            name: String
+            dateOfBirth: String
+            gender: String
+            preferences: Preferences
+            savedApartments: [Apartment]
+        ):Renter
+        removeRenter(
+            _id: String!
+        ): Renter
+        addLandlord(
+            _id: String!
+            name: String!
+            contactInfo: String!
+            ownedApartments: [Apartment]
+        ): Landlord
+        editLandlord(
+            _id: String!
+            name: String
+            contactInfo: String
+            ownedApartments: [Apartment]
+        )
+        removeLandlord(
+            _id: String!
+        ): Landlord
+        createReview(
+            posterId: String!
+            apartmentId: String!
+            rating: String!
+            content: String
+            datePosted: String
+        )
+        updateReview(
+            posterId: String!
+            apartmentId: String
+            rating: String
+            content: String
+            datePosted: String
+        )
+        deleteReview(
+            posterId: String!
+        )
+        approveReview(
+            posterId: String!
+        )
 
+
+    }
 `;

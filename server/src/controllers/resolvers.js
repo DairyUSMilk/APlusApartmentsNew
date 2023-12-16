@@ -1,23 +1,69 @@
 import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
 import { users as userCollection } from "../configs/mongoCollections.js";
-
 export const resolvers = {
   Query: {
     // Fetch all renters
-    renters: async () => {},
+    renters: async () => {
+      const users = await userCollection();
+      const renters = await users.find({ accountType: "Renter" }).toArray();
+      if (!renters) {
+        throw new GraphQLError(`Internal Server Error`, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+      return renters;
+    },
     // Fetch all landlords
-    landlords: async () => {},
+    landlords: async () => {
+      const users = await userCollection();
+      const landlords = await users.find({ accountType: "Landlord" }).toArray();
+      if (!landlords) {
+        throw new GraphQLError(`Internal Server Error`, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+      return landlords;
+    },
     // Fetch a single renter by ID
-    getRenterById: async (_, { _id }) => {},
+    getRenterById: async (_, args) => {
+      const users = await userCollection();
+      const renter = await users.findOne({
+        _id: args._id,
+        accountType: "Renter",
+      });
+      if (!renter) {
+        throw new GraphQLError("Renter Not Found", {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      return;
+    },
     // Fetch a single landlord by ID
-    getLandlordsById: async (_, { _id }) => {},
+    getLandlordsById: async (_, args) => {
+      const users = await userCollection();
+      const landlord = await users.findOne({
+        _id: args._id,
+        accountType: "Landlord",
+      });
+      if (!landlord) {
+        throw new GraphQLError("Landlord Not Found", {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+    },
+    reviews: async (_, args) => {
+      let allReviews;
+      try {
+        allReviews = await reviews.getAllReviewsByPosterId(args.posterId);
+        if (!allReviews)
+          throw new GraphQLError("Review Not Found", {
+            extensions: { code: "NOT_FOUND" },
+          });
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+      return allReviews;
+    },
   },
-  // Other type resolvers like Renter, Landlord, Apartment, Group could go here if needed
-  // ...
-  Mutation: {
-    createUser: async (_, args) => {
-      
-    }
-  }
 };
