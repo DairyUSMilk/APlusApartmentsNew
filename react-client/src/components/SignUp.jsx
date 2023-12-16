@@ -94,6 +94,29 @@ function SignUp() {
             />
           </label>
         </div>
+        <div className='form-group'>
+          <label>
+          Account Type:
+          </label>
+          <br />
+          <select className={'drop-item drop-select'}
+              name='dropdown'
+              value = {dropdownValue}
+              onChange = {handleDropdownValue}>
+              <option className={'drop-item drop-main'} value='main'>
+                Select Account Type
+              </option>
+              <option value="Renter">
+                Renter
+              </option>
+              <option value="Landlord">
+                Landlord
+              </option>
+              <option value="Admin">
+                Admin
+              </option>
+            </select>
+          </div>
         <button
           className='button'
           id='submitButton'
