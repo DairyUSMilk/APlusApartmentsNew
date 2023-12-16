@@ -14,11 +14,16 @@ export const Provider = ({children}) => {
 
   useEffect(() => {
     let listener = onAuthStateChanged(auth, (user) => {
-      let { loading, data, error } =  useQuery(getUserAccountType(user.uid));
       setCurrentUser(user);
-      setUserAccountType(data.getUserAccountType);
-      setLoading(loading);
-      setError(error);
+      if (currentUser.displayName) {
+        let { loading, data, error } =  useQuery(getUserAccountType(user.uid));
+        setLoading(loading);
+        setError(error);
+        setUserAccountType(data.getUserAccountType);
+      }
+      else {
+        setLoading(false);
+      }
     });
     return () => {
       if (listener) listener();

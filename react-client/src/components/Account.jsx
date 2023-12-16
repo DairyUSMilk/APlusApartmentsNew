@@ -4,7 +4,7 @@ import {Context} from '../firebase/Context';
 
 function Account() {
     const {currentUser} = useContext(Context);
-    if (currentUser) {
+     if ((currentUser && currentUser.displayName)) {
         return (
           <div>
             <h2>
@@ -34,7 +34,10 @@ function Account() {
     
           </div>
         );
-    } else {
+    } else if (currentUser) {
+        return <Navigate to='/sign-up-config' />;
+    }
+    else {
         return <Navigate to='/' />;
     }
 }

@@ -1,4 +1,7 @@
 import { GraphQLError } from "graphql";
+import * as reviews from "../data/reviews.js";
+import { users as userCollection } from "../configs/mongoCollections.js";
+
 export const resolvers = {
   Query: {
     // Fetch all renters
@@ -12,4 +15,9 @@ export const resolvers = {
   },
   // Other type resolvers like Renter, Landlord, Apartment, Group could go here if needed
   // ...
+  Mutation: {
+    createUser: async (_, args) => {
+      
+    }
+  }
 };

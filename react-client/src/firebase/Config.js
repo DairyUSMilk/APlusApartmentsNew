@@ -1,5 +1,5 @@
 export const FirebaseConfig = {
-    apiKey: "AIzaSyDDlAM00qAhELSDo_BaxVYVchWVbARIPkI",
+    apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
     authDomain: "cs554project-9ad69.firebaseapp.com",
     projectId: "cs554project-9ad69",
     storageBucket: "cs554project-9ad69.appspot.com",
