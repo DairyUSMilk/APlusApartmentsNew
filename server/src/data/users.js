@@ -33,8 +33,9 @@ export const createUser = async(
     const userCollection = await users();
     const output = await userCollection.insertOne(user);
     if(!output.acknowledged || !output.insertedId){
-        throw "User was not inserted into database";
+        throw `User with email ${email} was not inserted into database`;
     }
+    return await getUserById(output.insertedId.toString());
 }
 
 export const getUserById = async(id) => {
@@ -121,6 +122,7 @@ export const updateUserInfoById = async(id,
     if(result.modifiedCount !== 1){
         throw `No user exists with id ${id}`;
     }
+    return await getUserById(id);
 }
 
 //returns user object if attempt is
@@ -159,5 +161,6 @@ export const addApartmentToBookmark = async(userId, apartmentId) => {
     if (updateResult.modifiedCount !== 1) {
         throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
     }
+    return await getUserById(userId);
 };
 

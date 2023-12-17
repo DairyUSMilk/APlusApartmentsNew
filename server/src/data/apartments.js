@@ -39,6 +39,7 @@ export const createApartment = async(name, description, address, city,
     if(!output.acknowledged || !output.insertedId){
         throw `Apartment named ${name} was not inserted into database`;
     }
+    return await getApartmentById(output.insertedId);
 }
 
 export const getApartmentById = async(id) => {
@@ -74,6 +75,7 @@ export const approveApartmentById = async(id) => {
     if(result.modifiedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+    return await getApartmentById(id);
 }
 
 export const getApartmentsByLandlordId = async(id) => {
@@ -141,6 +143,7 @@ export async function updateApartmentInfoById(id,
     if(result.modifiedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+    return await getApartmentById(id);
 }
 
 const getParameterNames = (func) => {
