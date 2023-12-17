@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
+import { reviewsFunctions } from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
 
@@ -66,6 +67,23 @@ export const deleteApartmentById = async(id) => {
     if(result.deletedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+}
+
+export const updateApartmentRatingById = async(id) => {
+    const apartmentCollection = await apartments();
+    const apartment = await getApartmentById(id);
+    const reviews = await reviewsFunctions.getAllReviewsByApartmentId(id);
+    const sum = 0.0;
+    for(let i = 0; i < reviews.length; i++){
+        sum += reviews[i].rating;
+    }
+    const average = sum/reviews.length;
+    const updateInfo = {$set: {rating: average}};
+    const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
+    if(result.modifiedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+    return await getApartmentById(id);
 }
 
 export const approveApartmentById = async(id) => {
@@ -136,7 +154,6 @@ export async function updateApartmentInfoById(id,
         }
         updateInfo[parameterNames[i]] = parameterValues[i];
     }
-    
 
     const apartmentCollection = await apartments();
     const result = await apartmentCollection.updateOne(getIdFilter(id), {$set: updateInfo});
