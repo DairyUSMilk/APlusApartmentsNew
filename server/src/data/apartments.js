@@ -29,8 +29,6 @@ export const createApartment = async (
   rating = helpers.checkNumber(rating, "rating");
   isApproved = typeof isApproved === "boolean" ? isApproved : false;
 
-  // Added validation for parameters
-
   const apartment = {
     name: name,
     description: description,
@@ -169,7 +167,17 @@ export async function updateApartmentInfoById(
   if (isApproved !== undefined)
     updateInfo.isApproved =
       typeof isApproved === "boolean" ? isApproved : false;
-  // Added validation for parameters
+
+  const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
+  const parameterValues =
+    getParameterValueArrayFromArguments(arguments).slice(1);
+
+  for (let i = 0; i < parameterNames.length; i++) {
+    if (!parameterValues[i]) {
+      continue;
+    }
+    updateInfo[parameterNames[i]] = parameterValues[i];
+  }
 
   const apartmentCollection = await apartments();
   const result = await apartmentCollection.updateOne(getIdFilter(id), {

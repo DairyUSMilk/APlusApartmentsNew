@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {Navigate} from 'react-router-dom';
+import {Navigate, useNavigate} from 'react-router-dom';
 import {Context} from '../firebase/Context';
 import {resetPassword} from '../firebase/AuthFunctions';
 import { googleSignIn } from './SignIn';
@@ -23,6 +23,7 @@ function ForgotPassword() {
     if (currentUser) {
       return <Navigate to='/' />;
     }
+
     return (
       <div>
         <div className='card'>
@@ -42,14 +43,16 @@ function ForgotPassword() {
               </label>
             </div>
             
-            <button className='button' type='submit'>
+            <button className='button' type='submit' >
               Send Reset Email
             </button>
           </form>
   
           <br />
           <div>
-              <button className='btn btn-primary' onClick={() => googleSignIn()} />
+              <button className='btn btn-primary' onClick={() => googleSignIn()}>
+                Sign in with Google
+              </button>
           </div>      
         </div>
       </div>

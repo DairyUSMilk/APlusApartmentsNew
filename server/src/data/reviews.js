@@ -58,7 +58,17 @@ export async function updateReviewInfoById(
     updateInfo.isApproved =
       typeof isApproved === "boolean" ? isApproved : false;
 
-  //Added parameter validation
+  const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
+  const parameterValues =
+    getParameterValueArrayFromArguments(arguments).slice(1);
+
+  //TODO: Add parameter validation
+  for (let i = 0; i < parameterNames.length; i++) {
+    if (!parameterValues[i]) {
+      continue;
+    }
+    updateInfo[parameterNames[i]] = parameterValues[i];
+  }
 
   const reviewCollection = await reviews();
   const result = await reviewCollection.updateOne(getIdFilter(id), {
