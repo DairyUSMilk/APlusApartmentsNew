@@ -3,20 +3,54 @@ import {Navigate} from 'react-router-dom';
 import {addUserDisplayName} from '../firebase/AuthFunctions';
 import {Context} from '../firebase/Context';
 
-import { createUser } from '../graphql/Mutations';
+import { useMutation } from "@apollo/client";
+import { createRenter, createLandlord } from '../graphql/Mutations';
 
 function SignUpConfigureAccount() {
-  const [addUser, { loading, error }] = useMutation(createUser(currentUser.uid));
   const {currentUser} = useContext(Context);
+  const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
+
+  const [addRenter, { data: renterData }] = useMutation(createRenter());
+  const [addLandlord, { data: landlordData }] = useMutation(createLandlord());
+
+  const handleAccountTypeDropdownValue = (event) => {
+    setAccountTypeDropdownValue(event.target.value);
+  };
 
   const handleSignUp = async (event) => {
     event.preventDefault();
-    const {displayName, dateOfBirth, city, state, accountType} = event.target.elements;
-
+    const {displayName, dateOfBirth, gender, city, state, accountType} = event.target.elements;
+    //console.log(displayName, dateOfBirth, gender, city, state, accountType);
     try {
+      if(accountType.value === 'renter') {
+        console.log('here')
+        addRenter({variables: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: displayName.value,
+            dateOfBirth: dateOfBirth.value,
+            gender: gender.value,
+            city: city.value,
+            state: state.value
+        }}
+        )
+        console.log('done')
+      } else if (accountType.value === 'landlord') {
+        addLandlord({variables: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: displayName.value,
+            dateOfBirth: dateOfBirth.value,
+            gender: gender.value,
+            city: city.value,
+            state: state.value
+        }}
+        )
+      }
+      else {
+        alert("Please specify account type.");
+      }
       await addUserDisplayName(displayName.value);
-      addUser();
-
     } catch (error) {
       alert(error);
     }
@@ -110,10 +144,10 @@ function SignUpConfigureAccount() {
           Account Type:
           </label>
           <br />
-          <select className={'drop-item drop-select'}
-              name='dropdown'
-              value = {dropdownValue}
-              onChange = {handleDropdownValue}
+          <select className={'form-group'}
+              name='accountType'
+              value = {accountTypeDropdownValue}
+              onChange = {handleAccountTypeDropdownValue}
               required>
               <option className={'drop-item drop-main'} value='main'>
                 -Select Account Type-

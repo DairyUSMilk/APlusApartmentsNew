@@ -1,6 +1,7 @@
 import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
-import { users as userCollection } from "../configs/mongoCollections.js";
+import * as user from "../data/users.js";
+import { users as userCollection } from "../configs/mongoCollection.js";
 export const resolvers = {
   Query: {
     // Fetch all renters
@@ -66,4 +67,51 @@ export const resolvers = {
       return allReviews;
     },
   },
+  Mutation: {
+    addRenter: async(_, args) => {
+      try {
+        const newUser = await user.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          'renter'
+        );
+        return {
+          _id: newUser.uid,
+          name: newUser.name,
+          dateOfBirth: newUser.dateOfBirth,
+          gender: newUser.gender,
+          savedApartments: newUser.savedApartments
+        };
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    },
+    addLandlord: async(_, args) => {
+      try {
+        const newUser = await user.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          'landlord'
+        );
+        return {
+          _id: newUser.uid,
+          name: newUser.name,
+          contactInfo: newUser.email,
+          ownerApartments: newUser.savedApartments
+        };
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    }
+  }
 };

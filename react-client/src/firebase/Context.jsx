@@ -15,7 +15,7 @@ export const Provider = ({children}) => {
   useEffect(() => {
     let listener = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (currentUser.displayName) {
+      if (currentUser && currentUser.displayName) {
         let { loading, data, error } =  useQuery(getUserAccountType(user.uid));
         setLoading(loading);
         setError(error);

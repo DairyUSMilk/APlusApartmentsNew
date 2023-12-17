@@ -2,19 +2,22 @@ export const typeDefs = `#graphql
     type Query {
         renters: [Renter]
         landlords: [Landlord]
-        getRenterById(_id: String!): Renter
-        getLandlordsById(_id: String!): Landlord
+        reviews: [Review]
+        getRenterById(uid: String!): Renter
+        getLandlordsById(uid: String!): Landlord
     }
     type Renter{
-        _id: String!
+        uid: String!
         name: String!
         dateOfBirth: String!
         gender: String!
+        city: String!
+        state: String!
         preferences: Preferences
         savedApartments: [Apartment]
     }
     type Landlord {
-        _id: String!,
+        uid: String!,
         name: String!,
         contactInfo: String!
         ownedApartments: [Apartment]
@@ -28,7 +31,6 @@ export const typeDefs = `#graphql
         price: Float!
         amenities: [String]
         landlord: Landlord!
-        groups: Group
         reviews: [Review]
     }
     type Review{
@@ -50,38 +52,41 @@ export const typeDefs = `#graphql
     }
     type Mutation{
         addRenter(
-            _id: String!
+            uid: String!
             name: String!
             dateOfBirth: String!
             gender: String!
-            preferences: Preferences
-            savedApartments: [Apartment]
+            preferences: [String]
+            savedApartments: [String]
         ): Renter
         editRenter(
-            _id: String!
+            uid: String!
             name: String
             dateOfBirth: String
             gender: String
-            preferences: Preferences
-            savedApartments: [Apartment]
+            preferences: [String]
+            savedApartments: [String]
         ):Renter
         removeRenter(
-            _id: String!
+            uid: String!
         ): Renter
         addLandlord(
-            _id: String!
+            uid: String!
             name: String!
-            contactInfo: String!
-            ownedApartments: [Apartment]
+            dateOfBirth: String!
+            gender: String!
+            city: String!
+            state: String!
+            ownedApartments: [String]
         ): Landlord
         editLandlord(
-            _id: String!
+            uid: String!
             name: String
             contactInfo: String
-            ownedApartments: [Apartment]
-        )
+            ownedApartments: [String]
+        ): Landlord
         removeLandlord(
-            _id: String!
+            uid: String!
         ): Landlord
         createReview(
             posterId: String!
@@ -89,21 +94,20 @@ export const typeDefs = `#graphql
             rating: String!
             content: String
             datePosted: String
-        )
+        ): Review
         updateReview(
             posterId: String!
             apartmentId: String
             rating: String
             content: String
             datePosted: String
-        )
+        ): Review
         deleteReview(
             posterId: String!
-        )
+        ): Review
         approveReview(
             posterId: String!
-        )
-
+        ): Review
 
     }
 `;

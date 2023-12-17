@@ -1,5 +1,5 @@
 import { ObjectId } from "mongodb";
-import { apartments, reviews } from "./../configs/mongoCollection.js";
+import { apartments, reviews } from "../configs/mongoCollection.js";
 
 export const createReview = async (
   posterId,

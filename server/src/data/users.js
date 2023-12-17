@@ -1,9 +1,9 @@
 import { ObjectId } from "mongodb";
-import { users } from "./../configs/mongoCollection.js";
+import { users } from "../configs/mongoCollection.js";
 import bcrypt from "bcrypt";
 
 export const createUser = async(
-    name, email, password, city, state, dateOfBirth, accountType) => {
+    id, name, email, city, state, dateOfBirth, gender, accountType) => {
     accountType = accountType.toLowerCase();
     if(accountType.valueOf() !== "renter" && 
         accountType.valueOf() !== "landlord" && 
@@ -12,24 +12,29 @@ export const createUser = async(
     }
     //TODO: add validation for parameters
     const user = {
+        uid: id,
         name: name,
         email: email,
-        password: await bcrypt.hash(password, 16),
+        //password: await bcrypt.hash(password, 16),
         city: city,
         state: state,
         dateOfBirth: dateOfBirth, 
-        accountType: accountType
+        gender: gender,
+        accountType: accountType,
+        savedApartments: [],
+        ownedApartments: []
     }
     const userCollection = await users();
     const output = await userCollection.insertOne(user);
     if(!output.acknowledged || !output.insertedId){
         throw "User was not inserted into database";
     }
+    return await getUserById(id);
 }
 
 export const getUserById = async(id) => {
     const userCollection = await users();
-    const user = await userCollection.findOne(getIdFilter(id));
+    const user = await userCollection.findOne({uid: id});
     if(!user){
         throw `No user exists with id ${id}`;
     }

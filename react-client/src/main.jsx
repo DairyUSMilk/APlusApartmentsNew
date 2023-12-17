@@ -8,9 +8,10 @@ import SignUp from './components/SignUp';
 import Account from './components/Account';
 import ChangePassword from './components/ChangePassword';
 import ForgotPassword from './components/ForgotPassword';
+import SignUpConfigureAccount from './components/SignUpConfigureAccount.jsx';
 
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+//import { getAnalytics } from "firebase/analytics";
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
