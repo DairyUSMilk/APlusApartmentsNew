@@ -73,7 +73,9 @@ function SignIn() {
 
         <br />
         <div>
-            <button className='btn btn-primary' onClick={() => googleSignIn()} />
+            <button className='btn btn-primary' onClick={() => googleSignIn()}>
+                Sign in with Google
+            </button>
         </div>      
       </div>
     </div>

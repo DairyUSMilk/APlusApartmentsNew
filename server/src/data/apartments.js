@@ -2,6 +2,7 @@ import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
 import helpers from './helpers';
 
+
 export const createApartment = async(name, description, address, city, 
     state, dateListed, amenities, images, pricePerMonth, landlord, 
     rating, isApproved) => {
@@ -18,8 +19,6 @@ export const createApartment = async(name, description, address, city,
         landlord = helpers.checkId(landlord, "landlord"); 
         rating = helpers.checkNumber(rating, "rating"); 
         isApproved = typeof isApproved === 'boolean' ? isApproved : false;
-    
-    // Added validation for parameters
 
     const apartment = {
         name: name,
@@ -109,6 +108,7 @@ export async function updateApartmentInfoById(id,
     name, description, address, city, state, dateListed, amenities, 
     images, pricePerMonth, landlord, rating, isApproved){
 
+
     id = helpers.checkId(id, "id");
     const updateInfo = {};
 
@@ -124,7 +124,17 @@ export async function updateApartmentInfoById(id,
     if (landlord !== undefined) updateInfo.landlord = helpers.checkId(landlord, "landlord");
     if (rating !== undefined) updateInfo.rating = helpers.checkNumber(rating, "rating");
     if (isApproved !== undefined) updateInfo.isApproved = typeof isApproved === 'boolean' ? isApproved : false;
-    // Added validation for parameters
+
+    const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
+    const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
+
+    for(let i = 0; i < parameterNames.length; i++){
+        if(!parameterValues[i]){
+            continue;
+        }
+        updateInfo[parameterNames[i]] = parameterValues[i];
+    }
+    
 
     const apartmentCollection = await apartments();
     const result = await apartmentCollection.updateOne(getIdFilter(id), {$set: updateInfo});

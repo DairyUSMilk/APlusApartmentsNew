@@ -39,9 +39,18 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     if (content !== undefined) updateInfo.content = helpers.checkString(content, "content");
     if (datePosted !== undefined) updateInfo.datePosted = helpers.checkDate(datePosted, "datePosted");
     if (isApproved !== undefined) updateInfo.isApproved = typeof isApproved === 'boolean' ? isApproved : false;
-  
-    //Added parameter validation
-    
+
+    const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
+    const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
+
+    //TODO: Add parameter validation
+    for(let i = 0; i < parameterNames.length; i++){
+        if(!parameterValues[i]){
+            continue;
+        }
+        updateInfo[parameterNames[i]] = parameterValues[i];
+    }
+
     const reviewCollection = await reviews();
     const result = await reviewCollection.updateOne(getIdFilter(id), {$set: updateInfo});
     if(result.modifiedCount !== 1){
@@ -141,3 +150,4 @@ const getParameterValueArrayFromArguments = (args) => {
     }
     return output;
 }
+
