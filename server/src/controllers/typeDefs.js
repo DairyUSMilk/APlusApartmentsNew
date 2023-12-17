@@ -3,10 +3,12 @@ export const typeDefs = `#graphql
         renters: [Renter]
         landlords: [Landlord]
         reviews: [Review]
+        apartments: [Apartment]
         getRenterById(uid: String!): Renter
         getLandlordById(uid: String!): Landlord
         getAdminById(uid: String!): Admin
         getUserAccountType(uid: String!): String
+        getApartmentById(_id: String!): Apartment
     }
     type Renter{
         uid: String!
@@ -21,7 +23,10 @@ export const typeDefs = `#graphql
         name: String!
         contactInfo: String!
         ownedApartments: [Apartment]
-
+    }
+    type Admin {
+        uid: String!,
+        name: String!
     }
     type Apartment {
         id: String!
@@ -53,7 +58,6 @@ export const typeDefs = `#graphql
     type Mutation{
         addRenter(
             uid: String!
-            email: String!
             name: String!
             email: String!
             password: String!
@@ -61,8 +65,6 @@ export const typeDefs = `#graphql
             state: String!
             dateOfBirth: String!
             gender: String!
-            city: String!
-            state: String!
             preferences: [String]
             savedApartments: [String]
         ): Renter
@@ -82,7 +84,10 @@ export const typeDefs = `#graphql
             amenities: [String]!
             landlord: Landlord!
             reviews: [Review]
-        )
+        ): Apartment
+        removeApartment(
+            _id: String!
+        ): Apartment
         removeRenter(
             uid: String!
         ): Renter
@@ -105,6 +110,22 @@ export const typeDefs = `#graphql
         removeLandlord(
             uid: String!
         ): Landlord
+        addAdmin(
+            uid: String!
+            email: String!
+            name: String!
+            dateOfBirth: String!
+            gender: String!
+            city: String!
+            state: String!
+        ): Admin
+        editAdmin(
+            uid: String!
+            name: String
+        ): Admin
+        removeAdmin(
+            uid: String!
+        ): Admin
         createReview(
             posterId: String!
             apartmentId: String!

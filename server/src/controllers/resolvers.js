@@ -2,12 +2,10 @@ import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
 import * as users from "../data/users.js";
 import * as apartments from "../data/apartments.js";
-import { users as userCollection } from "../configs/mongoCollections.js";
 import redis from "redis";
 import flat from "flat";
 import validation from "../utils/helpers.js";
 import { v4 as uuid } from "uuid";
-import { apartments } from "../configs/mongoCollection.js";
 const unflatten = flat.unflatten;
 const client = redis.createClient();
 client.connect().then(() => {});
@@ -77,7 +75,7 @@ export const resolvers = {
     },
     // Fetch a single renter by ID
     getRenterById: async (_, args) => {
-      let id = args._id.trim();
+      let id = args.uid.trim();
       let exists = await client.exists(`renter.${id}`);
       if (exists) {
         console.log("renter in cache");
@@ -109,7 +107,7 @@ export const resolvers = {
     },
     // Fetch a single landlord by ID
     getLandlordsById: async (_, args) => {
-      let id = args._id.trim();
+      let id = args.uid.trim();
       let exists = await client.exists(`landlord.${id}`);
       if (exists) {
         console.log("landlord in cache");
@@ -170,7 +168,7 @@ export const resolvers = {
       }
     },
     getApartmentById: async (_, args) => {
-      let id = args._id.trim();
+      let id = args.uid.trim();
       let exists = await client.exists(`apartment.${id}`);
       if (exists) {
         console.log("apartment in cache");
@@ -219,29 +217,6 @@ export const resolvers = {
     },
   },
   Mutation: {
-    addRenter: async(_, args) => {
-      try {
-        const newUser = await user.createUser(
-          args.uid,
-          args.name,
-          args.email,
-          args.city,
-          args.state,
-          args.dateOfBirth,
-          args.gender,
-          'renter'
-        );
-        return {
-          uid: newUser.uid,
-          name: newUser.name,
-          dateOfBirth: newUser.dateOfBirth,
-          gender: newUser.gender,
-          savedApartments: newUser.bookmarkedApartments
-        };
-      } catch (e) {
-        throw new GraphQLError(e.message);
-      }
-    },
     addLandlord: async(_, args) => {
       try {
         const newUser = await user.createUser(
@@ -255,7 +230,7 @@ export const resolvers = {
           'landlord'
         );
         return {
-          _id: newUser.uid,
+          uid: newUser.uid,
           name: newUser.name,
           contactInfo: newUser.email,
           ownedApartments: newUser.savedApartments
@@ -263,12 +238,11 @@ export const resolvers = {
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
-    }
-  }
-  Mutation: {
+    },
     addRenter: async (_, args) => {
-      let name, email, password, city, state, dateOfBirth, accountType;
+      let uid, name, email, password, city, state, dateOfBirth, accountType;
       try {
+        uid = validation.checkString(args.uid);
         name = validation.checkName(args.name);
         email = validation.checkString(args.email);
         dateOfBirth = validation.checkDOB(args.dateOfBirth);
@@ -283,6 +257,7 @@ export const resolvers = {
       }
       try {
         const newRenter = await users.createUser(
+          uid,
           name,
           email,
           password,
@@ -291,7 +266,7 @@ export const resolvers = {
           dateOfBirth,
           accountType
         );
-        await client.set(`renter.${newRenter._id}`);
+        await client.set(`renter.${newRenter.uid}`);
         return newRenter;
       } catch (e) {
         throw new GraphQLError(e, {
@@ -302,7 +277,7 @@ export const resolvers = {
     editRenter: async (_, args) => {
       let editedRenter;
       try {
-        let renterId = validation.checkString(args._id);
+        let renterId = validation.checkString(args.uid);
         const renter = await users.getUserById(renterId);
         if (renter) {
           if (args.name) {
@@ -334,7 +309,7 @@ export const resolvers = {
           );
         } else
           throw new GraphQLError(
-            `Can't find renter with an Id of ${args._id}`,
+            `Can't find renter with an Id of ${args.uid}`,
             {
               extensions: { code: "NOT_FOUND" },
             }
@@ -349,7 +324,7 @@ export const resolvers = {
     removeRenter: async (_, args) => {
       let renterId;
       try {
-        renterId = validation.checkString(args._id, "remove renterId");
+        renterId = validation.checkString(args.uid, "remove renterId");
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "BAD_USER_INPUT" },
@@ -426,7 +401,7 @@ export const resolvers = {
           apartment.isApproved
         );
         await client.set(
-          `apartment.${newApartment._id}`,
+          `apartment.${newApartment.uid}`,
           JSON.stringify(newApartment)
         );
         return newApartment;
@@ -442,13 +417,13 @@ export const resolvers = {
       try {
         removedApartment = await apartments.deleteApartmentById(id);
       } catch (e) {
-        new GraphQLError(`Could not delete apartment with _id of ${args._id}`, {
+        new GraphQLError(`Could not delete apartment with uid of ${args.uid}`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
       try {
         let landlord = await users.getUserById(removedApartment.landlordId);
-        await client.del(`apartment.${removedApartment._id}`);
+        await client.del(`apartment.${removedApartment.uid}`);
         await client.del(`apartments`);
       } catch (e) {
         throw new GraphQLError(e, {
