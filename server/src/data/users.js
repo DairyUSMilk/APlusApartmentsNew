@@ -8,7 +8,6 @@ export const createUser = async(
         name = helpers.checkString(name, "name");
         email = helpers.checkEmail(email, "email");
         password = helpers.checkString(password, "password"); 
-        // Consider adding more specific password validations
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
         dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
@@ -20,7 +19,6 @@ export const createUser = async(
     }
 
     const hashedPassword = await bcrypt.hash(password, 16);
-    //Added validation for parameters
     const user = {
         name,
         email,
@@ -46,6 +44,15 @@ export const getUserById = async(id) => {
         throw `No user exists with id ${id}`;
     }
     return formatUserObject(user);
+}
+
+export const getAllUsers = async() => {
+    const userCollection = await users();
+    const allUsers = await userCollection.find({}).toArray();
+    for(let i = 0; i < allUsers.length; i++){
+        formatUserObject(allUsers[i]);
+    }
+    return allUsers;
 }
 
 export const getAllRenters = async() => {
@@ -79,6 +86,13 @@ export const updateUserInfoById = async(id,
     name, email, password, city, 
     state, dateOfBirth, accountType) => {
     const updateInfo = {};
+    name = helpers.checkString(name, "name");
+    email = helpers.checkEmail(email, "email");
+    password = helpers.checkString(password, "password"); 
+    city = helpers.checkString(city, "city");
+    state = helpers.checkState(state, "state");
+    dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
+    accountType = helpers.checkString(accountType, "accountType").toLowerCase();
 
     if(name){
         updateInfo["name"] = name;
@@ -147,5 +161,3 @@ export const addApartmentToBookmark = async(userId, apartmentId) => {
     }
 };
 
-
-//need to add function to add apartment listing to either bookmarked, or listing

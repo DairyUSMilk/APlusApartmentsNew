@@ -133,6 +133,14 @@ const exportedMethods = {
       throw new Error(`${varName} must be a whole number`);
     return num;
   },
+  checkEmail(email, varName) {
+    this.checkString(email);
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!pattern.test(email)){
+        throw new Error(`${varName} must be a valid email`);
+    }
+    return email;
+  }
 };
 
 export default exportedMethods;
