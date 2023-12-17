@@ -2,10 +2,12 @@ import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
 import * as users from "../data/users.js";
 import * as apartments from "../data/apartments.js";
+
 import redis from "redis";
 import flat from "flat";
 import validation from "../utils/helpers.js";
 import { v4 as uuid } from "uuid";
+
 const unflatten = flat.unflatten;
 const client = redis.createClient();
 client.connect().then(() => {});
@@ -219,7 +221,7 @@ export const resolvers = {
   Mutation: {
     addLandlord: async(_, args) => {
       try {
-        const newUser = await user.createUser(
+        const newUser = await users.createUser(
           args.uid,
           args.name,
           args.email,
@@ -227,23 +229,24 @@ export const resolvers = {
           args.state,
           args.dateOfBirth,
           args.gender,
-          'landlord'
+          "landlord"
         );
         return {
           uid: newUser.uid,
           name: newUser.name,
           contactInfo: newUser.email,
-          ownedApartments: newUser.savedApartments
+          ownedApartments: newUser.savedApartments,
         };
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
-    },
+    }
+  },
+  Mutation: {
     addRenter: async (_, args) => {
       let uid, name, email, password, city, state, dateOfBirth, accountType;
       try {
         uid = validation.checkString(args.uid);
-        name = validation.checkName(args.name);
         email = validation.checkString(args.email);
         dateOfBirth = validation.checkDOB(args.dateOfBirth);
         password = args.password;

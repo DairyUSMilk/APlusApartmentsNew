@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
-import helpers from './../utils/helpers.js';
+import helpers from "../utils/helpers.js";
 
 export const createApartment = async (
   name,
@@ -28,8 +28,6 @@ export const createApartment = async (
   landlord = helpers.checkId(landlord, "landlord");
   rating = helpers.checkNumber(rating, "rating");
   isApproved = typeof isApproved === "boolean" ? isApproved : false;
-
-  // Added validation for parameters
 
   const apartment = {
     name: name,
@@ -169,7 +167,17 @@ export async function updateApartmentInfoById(
   if (isApproved !== undefined)
     updateInfo.isApproved =
       typeof isApproved === "boolean" ? isApproved : false;
-  // Added validation for parameters
+
+  const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
+  const parameterValues =
+    getParameterValueArrayFromArguments(arguments).slice(1);
+
+  for (let i = 0; i < parameterNames.length; i++) {
+    if (!parameterValues[i]) {
+      continue;
+    }
+    updateInfo[parameterNames[i]] = parameterValues[i];
+  }
 
   const apartmentCollection = await apartments();
   const result = await apartmentCollection.updateOne(getIdFilter(id), {

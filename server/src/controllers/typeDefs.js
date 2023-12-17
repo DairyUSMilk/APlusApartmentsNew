@@ -35,7 +35,7 @@ export const typeDefs = `#graphql
         images: [String]
         price: Float!
         amenities: [String]
-        landlord: Landlord!
+        landlord: Landlord
         reviews: [Review]
     }
     type Review{
@@ -82,11 +82,10 @@ export const typeDefs = `#graphql
             images: [String]
             price: Float!
             amenities: [String]!
-            landlord: Landlord!
-            reviews: [Review]
+            landlordId: String!
         ): Apartment
         removeApartment(
-            _id: String!
+            uid: String!
         ): Apartment
         removeRenter(
             uid: String!

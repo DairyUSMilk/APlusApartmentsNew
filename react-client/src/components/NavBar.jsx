@@ -48,9 +48,9 @@ const NavBarSignedIn = () => {
   
   const SignOutButton = () => {
     return (
-      <button className='button' type='button' onClick={logOut}>
+      <NavLink to='/' onClick={logOut}>
         Sign Out
-      </button>
+      </NavLink>
     );
   };
 
