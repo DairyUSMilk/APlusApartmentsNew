@@ -1,35 +1,51 @@
 import { ObjectId } from "mongodb";
 import { users } from "./../configs/mongoCollection.js";
 import bcrypt from "bcrypt";
-import helpers from './helpers';
+import helpers from './../utils/helpers.js';
 
 export const createUser = async(
-    name, email, password, city, state, dateOfBirth, accountType) => {
+    uid, name, email, city, state, dateOfBirth, gender, accountType) => {
+        console.log("here");
+        uid = helpers.checkString(uid, "firebase id");
         name = helpers.checkString(name, "name");
         email = helpers.checkEmail(email, "email");
-        password = helpers.checkString(password, "password"); 
+        //password = helpers.checkString(password, "password"); 
         // Consider adding more specific password validations
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
         dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
+        gender = helpers.checkString(gender, "gender");
         accountType = helpers.checkString(accountType, "accountType").toLowerCase();
     
+        console.log(
+          uid,
+          name,
+          email,
+          city,
+          state,
+          dateOfBirth,
+          gender,
+          accountType
+        )
 
     if (!["renter", "landlord", "admin"].includes(accountType)) {
         throw "AccountType attribute must be either 'renter', 'landlord', or 'admin'";
     }
 
-    const hashedPassword = await bcrypt.hash(password, 16);
+    //const hashedPassword = await bcrypt.hash(password, 16);
     //Added validation for parameters
     const user = {
+        uid,
         name,
         email,
-        password: hashedPassword,
+        //password: hashedPassword,
         city,
         state,
         dateOfBirth,
+        gender,
         accountType,
-        bookmarkedApartments: [] 
+        bookmarkedApartments: [],
+        ownedApartments: []
         // Assuming it's an array to store bookmarked apartment IDs
     }
     const userCollection = await users();
@@ -37,14 +53,17 @@ export const createUser = async(
     if(!output.acknowledged || !output.insertedId){
         throw "User was not inserted into database";
     }
+    return await getUserById(uid);
 }
 
 export const getUserById = async(id) => {
     const userCollection = await users();
-    const user = await userCollection.findOne(getIdFilter(id));
+    const user = await userCollection.findOne({uid: id});
     if(!user){
         throw `No user exists with id ${id}`;
     }
+    console.log(formatUserObject(user));
+
     return formatUserObject(user);
 }
 

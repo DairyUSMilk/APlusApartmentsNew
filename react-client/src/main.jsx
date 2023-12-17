@@ -6,6 +6,7 @@ import Home from './components/Home';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Account from './components/Account';
+import AccountDetails from './components/AccountDetails.jsx';
 import ChangePassword from './components/ChangePassword';
 import ForgotPassword from './components/ForgotPassword';
 import SignUpConfigureAccount from './components/SignUpConfigureAccount.jsx';

@@ -17,7 +17,7 @@ const NavBarSignedIn = () => {
             <NavLink to='/'>Home</NavLink>
           </li>
           <li>
-            <NavLink to='/account'>Account</NavLink>
+            <NavLink to='account'>Account</NavLink>
           </li>
           <li>
             <SignOutButton />
@@ -35,11 +35,11 @@ const NavBarSignedIn = () => {
             <NavLink to='/'>Home</NavLink>
           </li>
           <li>
-            <NavLink to='/sign-up'>Sign up</NavLink>
+            <NavLink to='sign-up'>Sign up</NavLink>
           </li>
   
           <li>
-            <NavLink to='/sign-in'>Sign In</NavLink>
+            <NavLink to='sign-in'>Sign In</NavLink>
           </li>
         </ul>
       </nav>

@@ -83,7 +83,7 @@ const exportedMethods = {
     state = this.checkString(state, varName);
     if (!unitedStates.includes(state.toUpperCase()))
     //check if state is not listed above
-      throw `${state} is not a valid state abbreviation`;
+      throw new Error(`${state} is not a valid state abbreviation`);
     return state;
   },
 
@@ -133,6 +133,16 @@ const exportedMethods = {
       throw new Error(`${varName} must be a whole number`);
     return num;
   },
+
+ checkEmail(email, varName) {
+  //The regular expression ^[^\s@]+@[^\s@]+\.[^\s@]+$ matches any string that contains an @ symbol,
+  // followed by a domain name that includes at least one . character, and does not contain any whitespace characters.
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!emailRegex.test(email)) {
+    throw new Error(`${varName} must be a valid email`);
+  }
+  return email;
+}
 };
 
 export default exportedMethods;

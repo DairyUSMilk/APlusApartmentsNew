@@ -4,21 +4,21 @@ export const typeDefs = `#graphql
         landlords: [Landlord]
         reviews: [Review]
         getRenterById(uid: String!): Renter
-        getLandlordsById(uid: String!): Landlord
+        getLandlordById(uid: String!): Landlord
+        getAdminById(uid: String!): Admin
+        getUserAccountType(uid: String!): String
     }
     type Renter{
         uid: String!
         name: String!
         dateOfBirth: String!
         gender: String!
-        city: String!
-        state: String!
         preferences: Preferences
         savedApartments: [Apartment]
     }
     type Landlord {
         uid: String!,
-        name: String!,
+        name: String!
         contactInfo: String!
         ownedApartments: [Apartment]
 
@@ -53,9 +53,12 @@ export const typeDefs = `#graphql
     type Mutation{
         addRenter(
             uid: String!
+            email: String!
             name: String!
             dateOfBirth: String!
             gender: String!
+            city: String!
+            state: String!
             preferences: [String]
             savedApartments: [String]
         ): Renter
@@ -72,6 +75,7 @@ export const typeDefs = `#graphql
         ): Renter
         addLandlord(
             uid: String!
+            email: String!
             name: String!
             dateOfBirth: String!
             gender: String!

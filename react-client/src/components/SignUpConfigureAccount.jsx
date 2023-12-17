@@ -19,28 +19,31 @@ function SignUpConfigureAccount() {
 
   const handleSignUp = async (event) => {
     event.preventDefault();
-    const {displayName, dateOfBirth, gender, city, state, accountType} = event.target.elements;
+    let {displayName, dateOfBirth, gender, city, state, accountType} = event.target.elements;
     //console.log(displayName, dateOfBirth, gender, city, state, accountType);
+    const date = new Date(dateOfBirth.value);
+    const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()+1) + '/' + date.getFullYear();
+    console.log(formattedDob);
+
     try {
       if(accountType.value === 'renter') {
-        console.log('here')
         addRenter({variables: {
             uid: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
-            dateOfBirth: dateOfBirth.value,
+            dateOfBirth: formattedDob,
             gender: gender.value,
             city: city.value,
             state: state.value
         }}
-        )
-        console.log('done')
+        );
+
       } else if (accountType.value === 'landlord') {
         addLandlord({variables: {
             uid: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
-            dateOfBirth: dateOfBirth.value,
+            dateOfBirth: formattedDob,
             gender: gender.value,
             city: city.value,
             state: state.value

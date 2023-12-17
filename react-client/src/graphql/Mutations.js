@@ -1,4 +1,4 @@
-import { useMutation, gql } from "@apollo/client";
+import { gql } from "@apollo/client";
 
 export function createRenter() {
     return gql`
@@ -20,7 +20,7 @@ export function createRenter() {
         city: $city
         state: $state
         ) {
-        _id
+        uid
         name
         dateOfBirth
         gender
@@ -49,7 +49,7 @@ export function createLandlord() {
         city: $city
         state: $state
         ) {
-        _id
+        uid
         name
         contactInfo
     }

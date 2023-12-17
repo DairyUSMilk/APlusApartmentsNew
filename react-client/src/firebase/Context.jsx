@@ -1,47 +1,46 @@
 import React, {useState, useEffect} from 'react';
 import {getAuth, onAuthStateChanged} from 'firebase/auth';
-import { useQuery } from "@apollo/client";
+import { useLazyQuery } from "@apollo/client";
 
 import { getUserAccountType } from '../graphql/Queries';
+
 export const Context = React.createContext();
 
 export const Provider = ({children}) => {
   const [currentUser, setCurrentUser] = useState(null);
-  const [userAccountType, setUserAccountType] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
   const auth = getAuth();
+
+  const [userAccountType, { data: accountType, loading: isLoading }] = useLazyQuery(getUserAccountType());
 
   useEffect(() => {
     let listener = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (currentUser && currentUser.displayName) {
-        let { loading, data, error } =  useQuery(getUserAccountType(user.uid));
-        setLoading(loading);
-        setError(error);
-        setUserAccountType(data.getUserAccountType);
+      if (user && user.displayName) {
+        userAccountType({
+          variables: {uid: user.uid}
+        })
       }
-      else {
-        setLoading(false);
-      }
+      setLoading(false);
     });
     return () => {
       if (listener) listener();
     };
   }, []);
 
-  if (loading) {
+  if (loading || isLoading) {
     return (
-      <div>
-      </div>
+      <h2> Loading... </h2>
     );
   }
-  if(error) {
-    throw Error(error.message)
+
+  let currentAccountType = null;
+  if (accountType) {
+    currentAccountType = accountType.getUserAccountType;
   }
 
   return (
-    <Context.Provider value={{currentUser, userAccountType}}>
+    <Context.Provider value={{currentUser, currentAccountType}}>
       {children}
     </Context.Provider>
   );

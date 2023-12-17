@@ -7,7 +7,7 @@ export const resolvers = {
     // Fetch all renters
     renters: async () => {
       const users = await userCollection();
-      const renters = await users.find({ accountType: "Renter" }).toArray();
+      const renters = await users.find({ accountType: "renter" }).toArray();
       if (!renters) {
         throw new GraphQLError(`Internal Server Error`, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -18,7 +18,7 @@ export const resolvers = {
     // Fetch all landlords
     landlords: async () => {
       const users = await userCollection();
-      const landlords = await users.find({ accountType: "Landlord" }).toArray();
+      const landlords = await users.find({ accountType: "landlord" }).toArray();
       if (!landlords) {
         throw new GraphQLError(`Internal Server Error`, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -30,28 +30,32 @@ export const resolvers = {
     getRenterById: async (_, args) => {
       const users = await userCollection();
       const renter = await users.findOne({
-        _id: args._id,
-        accountType: "Renter",
+        uid: args.uid,
+        accountType: "renter",
       });
       if (!renter) {
         throw new GraphQLError("Renter Not Found", {
           extensions: { code: "NOT_FOUND" },
         });
       }
-      return;
+      return renter;
     },
     // Fetch a single landlord by ID
-    getLandlordsById: async (_, args) => {
+    getLandlordById: async (_, args) => {
       const users = await userCollection();
       const landlord = await users.findOne({
         _id: args._id,
-        accountType: "Landlord",
+        accountType: "landlord",
       });
       if (!landlord) {
         throw new GraphQLError("Landlord Not Found", {
           extensions: { code: "NOT_FOUND" },
         });
       }
+    },
+    getUserAccountType: async (_, args) => {
+      const retievedUser = await user.getUserById(args.uid);
+      return retievedUser.accountType;
     },
     reviews: async (_, args) => {
       let allReviews;
@@ -81,14 +85,14 @@ export const resolvers = {
           'renter'
         );
         return {
-          _id: newUser.uid,
+          uid: newUser.uid,
           name: newUser.name,
           dateOfBirth: newUser.dateOfBirth,
           gender: newUser.gender,
-          savedApartments: newUser.savedApartments
+          savedApartments: newUser.bookmarkedApartments
         };
       } catch (e) {
-        throw new GraphQLError(`Internal Server Error`);
+        throw new GraphQLError(e.message);
       }
     },
     addLandlord: async(_, args) => {
@@ -107,7 +111,7 @@ export const resolvers = {
           _id: newUser.uid,
           name: newUser.name,
           contactInfo: newUser.email,
-          ownerApartments: newUser.savedApartments
+          ownedApartments: newUser.savedApartments
         };
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
