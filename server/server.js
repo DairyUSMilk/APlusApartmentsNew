@@ -15,12 +15,13 @@ const { url } = await startStandaloneServer(server, {
 });
 console.log(`🚀  Server ready at: ${url}`);
 
-for(let i = 0; i < 10; i++){
-    users.createUser(`Name ${i}`, 
+for(let i = 1; i <= 10; i++){
+    await users.createUser(`Name ${i}`, 
         `email${i}@email.com`,
         `password$%${i}`,
         `city${i}`,
         `NY`,
-        `${i}/${i}/2002`
+        `${i}/${i}/2002`,
+        "renter"
     );
 }

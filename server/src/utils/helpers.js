@@ -139,6 +139,7 @@ const exportedMethods = {
     if(!pattern.test(email)){
         throw new Error(`${varName} must be a valid email`);
     }
+    return email;
   }
 };
 
