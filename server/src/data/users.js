@@ -1,40 +1,47 @@
 import { ObjectId } from "mongodb";
-import { users } from "../configs/mongoCollection.js";
+import { users } from "./../configs/mongoCollection.js";
 import bcrypt from "bcrypt";
+import helpers from './helpers';
 
 export const createUser = async(
-    id, name, email, city, state, dateOfBirth, gender, accountType) => {
-    accountType = accountType.toLowerCase();
-    if(accountType.valueOf() !== "renter" && 
-        accountType.valueOf() !== "landlord" && 
-        accountType.valueOf() !== "admin"){
+    name, email, password, city, state, dateOfBirth, accountType) => {
+        name = helpers.checkString(name, "name");
+        email = helpers.checkEmail(email, "email");
+        password = helpers.checkString(password, "password"); 
+        // Consider adding more specific password validations
+        city = helpers.checkString(city, "city");
+        state = helpers.checkState(state, "state");
+        dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
+        accountType = helpers.checkString(accountType, "accountType").toLowerCase();
+    
+
+    if (!["renter", "landlord", "admin"].includes(accountType)) {
         throw "AccountType attribute must be either 'renter', 'landlord', or 'admin'";
     }
-    //TODO: add validation for parameters
+
+    const hashedPassword = await bcrypt.hash(password, 16);
+    //Added validation for parameters
     const user = {
-        uid: id,
-        name: name,
-        email: email,
-        //password: await bcrypt.hash(password, 16),
-        city: city,
-        state: state,
-        dateOfBirth: dateOfBirth, 
-        gender: gender,
-        accountType: accountType,
-        savedApartments: [],
-        ownedApartments: []
+        name,
+        email,
+        password: hashedPassword,
+        city,
+        state,
+        dateOfBirth,
+        accountType,
+        bookmarkedApartments: [] 
+        // Assuming it's an array to store bookmarked apartment IDs
     }
     const userCollection = await users();
     const output = await userCollection.insertOne(user);
     if(!output.acknowledged || !output.insertedId){
         throw "User was not inserted into database";
     }
-    return await getUserById(id);
 }
 
 export const getUserById = async(id) => {
     const userCollection = await users();
-    const user = await userCollection.findOne({uid: id});
+    const user = await userCollection.findOne(getIdFilter(id));
     if(!user){
         throw `No user exists with id ${id}`;
     }
@@ -124,5 +131,21 @@ const formatUserObject = async(userObject) => {
     userObject._id = userObject._id.toString();
     return userObject;
 }
+
+export const addApartmentToBookmark = async(userId, apartmentId) => {
+    userId = helpers.checkId(userId, "userId");
+    apartmentId = helpers.checkId(apartmentId, "apartmentId");
+
+    const userCollection = await users();
+    const updateResult = await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $addToSet: { bookmarkedApartments: new ObjectId(apartmentId) } }
+    );
+
+    if (updateResult.modifiedCount !== 1) {
+        throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
+    }
+};
+
 
 //need to add function to add apartment listing to either bookmarked, or listing
