@@ -3,8 +3,7 @@ import { apartments, reviews } from "./../configs/mongoCollection.js";
 import helpers from './../utils/helpers.js';
 
 export const createReview = async(posterId, apartmentId, rating, content,
-    datePosted
-    ) => {
+    datePosted) => {
       posterId = helpers.checkId(posterId, "posterId");
       apartmentId = helpers.checkId(apartmentId, "apartmentId");
       rating = helpers.checkNumber(rating, "rating"); // Add range check if needed
@@ -26,6 +25,7 @@ export const createReview = async(posterId, apartmentId, rating, content,
       if (!output.acknowledged || !output.insertedId) {
         throw "Review was not inserted into database";
       }
+      return await getReviewById(output.insertedId);
     };
 
 export async function updateReviewInfoById(id, posterId, apartmentId,
@@ -55,6 +55,7 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     if(result.modifiedCount !== 1){
         throw `No review exists with id ${id}`;
     }
+    return await getReviewById(id);
 }
 
 export const getReviewById = async(id) => {
@@ -78,6 +79,7 @@ export const approveReviewById = async(id) => {
     if(result.modifiedCount !== 1){
         throw `No review exists with id ${id}`;
     }
+    return await getReviewById(id);
 }
 
 export const getAllReviewsByPosterId = async(posterId) => {
