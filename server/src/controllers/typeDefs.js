@@ -55,6 +55,10 @@ export const typeDefs = `#graphql
             uid: String!
             email: String!
             name: String!
+            email: String!
+            password: String!
+            city: String!
+            state: String!
             dateOfBirth: String!
             gender: String!
             city: String!
@@ -70,6 +74,15 @@ export const typeDefs = `#graphql
             preferences: [String]
             savedApartments: [String]
         ):Renter
+        addApartment(
+            address: String!
+            description: String
+            images: [String]
+            price: Float!
+            amenities: [String]!
+            landlord: Landlord!
+            reviews: [Review]
+        )
         removeRenter(
             uid: String!
         ): Renter
