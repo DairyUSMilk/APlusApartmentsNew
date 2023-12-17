@@ -87,7 +87,7 @@ const exportedMethods = {
     return state;
   },
 
-  checkDOB(dob, varName) {
+  checkDate(dob, varName) {
     dob = this.checkString(dob, varName);
     const parts = dob.split('/');
     if (parts.length !== 3) throw new Error(`Date in ${varName} must be in MM/DD/YYYY format`);

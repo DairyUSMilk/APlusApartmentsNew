@@ -10,7 +10,7 @@ export const createUser = async(
         password = helpers.checkString(password, "password"); 
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
-        dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
+        dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
         accountType = helpers.checkString(accountType, "accountType").toLowerCase();
     
 
@@ -92,7 +92,7 @@ export const updateUserInfoById = async(id,
     password = helpers.checkString(password, "password"); 
     city = helpers.checkString(city, "city");
     state = helpers.checkState(state, "state");
-    dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
+    dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
     accountType = helpers.checkString(accountType, "accountType").toLowerCase();
 
     if(name){

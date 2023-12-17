@@ -43,7 +43,6 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
     const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
 
-    //TODO: Add parameter validation
     for(let i = 0; i < parameterNames.length; i++){
         if(!parameterValues[i]){
             continue;
