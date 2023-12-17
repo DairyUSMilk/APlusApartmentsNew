@@ -3,8 +3,10 @@ export const typeDefs = `#graphql
         renters: [Renter]
         landlords: [Landlord]
         reviews: [Review]
+        apartments: [Apartment]
         getRenterById(uid: String!): Renter
         getLandlordsById(uid: String!): Landlord
+        getApartmentById(uid: String!): Apartment
     }
     type Renter{
         uid: String!
@@ -30,7 +32,7 @@ export const typeDefs = `#graphql
         images: [String]
         price: Float!
         amenities: [String]
-        landlord: Landlord!
+        landlord: Landlord
         reviews: [Review]
     }
     type Review{
@@ -77,9 +79,11 @@ export const typeDefs = `#graphql
             images: [String]
             price: Float!
             amenities: [String]!
-            landlord: Landlord!
-            reviews: [Review]
-        )
+            landlordId: String!
+        ): Apartment
+        removeApartment(
+            uid: String!
+        ): Apartment
         removeRenter(
             uid: String!
         ): Renter

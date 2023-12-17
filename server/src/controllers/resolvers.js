@@ -2,12 +2,12 @@ import { GraphQLError } from "graphql";
 import * as reviews from "../data/reviews.js";
 import * as users from "../data/users.js";
 import * as apartments from "../data/apartments.js";
-import { users as userCollection } from "../configs/mongoCollections.js";
+
 import redis from "redis";
 import flat from "flat";
 import validation from "../utils/helpers.js";
 import { v4 as uuid } from "uuid";
-import { apartments } from "../configs/mongoCollection.js";
+
 const unflatten = flat.unflatten;
 const client = redis.createClient();
 client.connect().then(() => {});
@@ -215,9 +215,9 @@ export const resolvers = {
     },
   },
   Mutation: {
-    addRenter: async(_, args) => {
+    addRenter: async (_, args) => {
       try {
-        const newUser = await user.createUser(
+        const newUser = await users.createUser(
           args.uid,
           args.name,
           args.email,
@@ -225,22 +225,22 @@ export const resolvers = {
           args.state,
           args.dateOfBirth,
           args.gender,
-          'renter'
+          "renter"
         );
         return {
           _id: newUser.uid,
           name: newUser.name,
           dateOfBirth: newUser.dateOfBirth,
           gender: newUser.gender,
-          savedApartments: newUser.savedApartments
+          savedApartments: newUser.savedApartments,
         };
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
     },
-    addLandlord: async(_, args) => {
+    addLandlord: async (_, args) => {
       try {
-        const newUser = await user.createUser(
+        const newUser = await users.createUser(
           args.uid,
           args.name,
           args.email,
@@ -248,51 +248,16 @@ export const resolvers = {
           args.state,
           args.dateOfBirth,
           args.gender,
-          'landlord'
+          "landlord"
         );
         return {
           _id: newUser.uid,
           name: newUser.name,
           contactInfo: newUser.email,
-          ownerApartments: newUser.savedApartments
+          ownerApartments: newUser.savedApartments,
         };
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
-      }
-    }
-  }
-  Mutation: {
-    addRenter: async (_, args) => {
-      let name, email, password, city, state, dateOfBirth, accountType;
-      try {
-        name = validation.checkName(args.name);
-        email = validation.checkString(args.email);
-        dateOfBirth = validation.checkDOB(args.dateOfBirth);
-        password = args.password;
-        city = args.city;
-        state = args.state;
-        accountType = "renter";
-      } catch (e) {
-        throw new GraphQLError(`User input not valid: ${e}`, {
-          extensions: { code: "BAD_USER_INPUT" },
-        });
-      }
-      try {
-        const newRenter = await users.createUser(
-          name,
-          email,
-          password,
-          city,
-          state,
-          dateOfBirth,
-          accountType
-        );
-        await client.set(`renter.${newRenter._id}`);
-        return newRenter;
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
       }
     },
     editRenter: async (_, args) => {
