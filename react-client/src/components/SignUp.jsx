@@ -1,5 +1,5 @@
 import React, {useContext, useState} from 'react';
-import {Navigate} from 'react-router-dom';
+import {Navigate, useNavigate} from 'react-router-dom';
 import {createUser} from '../firebase/AuthFunctions';
 import {Context} from '../firebase/Context';
 import { googleSignIn } from './SignIn';
@@ -8,9 +8,11 @@ function SignUp() {
   const {currentUser} = useContext(Context);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
+  const navigate = useNavigate();
+
   const handleSignUp = async (event) => {
     event.preventDefault();
-    const {displayName, email, password, matchPassword} = event.target.elements;
+    const {email, password, matchPassword} = event.target.elements;
     if (password.value !== matchPassword.value) {
       setPasswordsMatch(false);
       return false;
@@ -20,8 +22,18 @@ function SignUp() {
       await createUser(
         email.value,
         password.value,
-        displayName.value
       );
+      navigate('/sign-up-config');
+    } catch (error) {
+      alert(error);
+    }
+  };
+
+  const handleGoogleSignUp = async (event) => {
+    event.preventDefault();
+    try {
+      googleSignIn();
+      navigate('/sign-up-config');
     } catch (error) {
       alert(error);
     }
@@ -38,20 +50,6 @@ function SignUp() {
             <h4 className='error'>{'Passwords do not match'}</h4>
         ) : null}
       <form onSubmit={handleSignUp}>
-        <div className='form-group'>
-          <label>
-            Name:
-            <br />
-            <input
-              className='form-control'
-              required
-              name='displayName'
-              type='text'
-              placeholder='Name'
-              autoFocus={true}
-            />
-          </label>
-        </div>
         <div className='form-group'>
           <label>
             Email:
@@ -104,7 +102,7 @@ function SignUp() {
         </button>
       </form>
       <br />
-      <button className='btn btn-primary' onClick={() => googleSignIn()} />
+      <button className='btn btn-primary' onClick={handleGoogleSignUp} />
     </div>
   );
 }

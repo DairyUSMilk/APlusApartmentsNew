@@ -215,6 +215,53 @@ export const resolvers = {
     },
   },
   Mutation: {
+    addRenter: async(_, args) => {
+      try {
+        const newUser = await user.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          'renter'
+        );
+        return {
+          _id: newUser.uid,
+          name: newUser.name,
+          dateOfBirth: newUser.dateOfBirth,
+          gender: newUser.gender,
+          savedApartments: newUser.savedApartments
+        };
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    },
+    addLandlord: async(_, args) => {
+      try {
+        const newUser = await user.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          'landlord'
+        );
+        return {
+          _id: newUser.uid,
+          name: newUser.name,
+          contactInfo: newUser.email,
+          ownerApartments: newUser.savedApartments
+        };
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    }
+  }
+  Mutation: {
     addRenter: async (_, args) => {
       let name, email, password, city, state, dateOfBirth, accountType;
       try {

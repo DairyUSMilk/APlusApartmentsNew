@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
+import helpers from "./helpers";
 
 export const createApartment = async (
   name,
@@ -11,11 +12,25 @@ export const createApartment = async (
   amenities,
   images,
   pricePerMonth,
-  landlordId,
+  landlord,
   rating,
   isApproved
 ) => {
-  //TODO: add validation for parameters
+  name = helpers.checkString(name, "name");
+  description = helpers.checkString(description, "description");
+  address = helpers.checkString(address, "address");
+  city = helpers.checkString(city, "city");
+  state = helpers.checkState(state, "state");
+  dateListed = helpers.checkString(dateListed, "dateListed");
+  amenities = helpers.checkStringArray(amenities, "amenities");
+  images = helpers.checkStringArray(images, "images");
+  pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
+  landlord = helpers.checkId(landlord, "landlord");
+  rating = helpers.checkNumber(rating, "rating");
+  isApproved = typeof isApproved === "boolean" ? isApproved : false;
+
+  // Added validation for parameters
+
   const apartment = {
     name: name,
     description: description,
@@ -26,7 +41,7 @@ export const createApartment = async (
     amenities: amenities,
     images: images,
     pricePerMonth: pricePerMonth,
-    landlord: landlordId,
+    landlord: landlord,
     rating: rating,
     isApproved: isApproved,
   };
@@ -35,7 +50,6 @@ export const createApartment = async (
   if (!output.acknowledged || !output.insertedId) {
     throw `Apartment named ${name} was not inserted into database`;
   }
-  return await getApartmentById(output.insertedId);
 };
 
 export const getApartmentById = async (id) => {
@@ -126,18 +140,36 @@ export async function updateApartmentInfoById(
   rating,
   isApproved
 ) {
+  id = helpers.checkId(id, "id");
   const updateInfo = {};
-  const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
-  const parameterValues =
-    getParameterValueArrayFromArguments(arguments).slice(1);
 
-  //TODO: Add parameter validation
-  for (let i = 0; i < parameterNames.length; i++) {
-    if (!parameterValues[i]) {
-      continue;
-    }
-    updateInfo[parameterNames[i]] = parameterValues[i];
-  }
+  if (name !== undefined) updateInfo.name = helpers.checkString(name, "name");
+  if (description !== undefined)
+    updateInfo.description = helpers.checkString(description, "description");
+  if (address !== undefined)
+    updateInfo.address = helpers.checkString(address, "address");
+  if (city !== undefined) updateInfo.city = helpers.checkString(city, "city");
+  if (state !== undefined)
+    updateInfo.state = helpers.checkState(state, "state");
+  if (dateListed !== undefined)
+    updateInfo.dateListed = helpers.checkString(dateListed, "dateListed");
+  if (amenities !== undefined)
+    updateInfo.amenities = helpers.checkStringArray(amenities, "amenities");
+  if (images !== undefined)
+    updateInfo.images = helpers.checkStringArray(images, "images");
+  if (pricePerMonth !== undefined)
+    updateInfo.pricePerMonth = helpers.checkNumber(
+      pricePerMonth,
+      "pricePerMonth"
+    );
+  if (landlord !== undefined)
+    updateInfo.landlord = helpers.checkId(landlord, "landlord");
+  if (rating !== undefined)
+    updateInfo.rating = helpers.checkNumber(rating, "rating");
+  if (isApproved !== undefined)
+    updateInfo.isApproved =
+      typeof isApproved === "boolean" ? isApproved : false;
+  // Added validation for parameters
 
   const apartmentCollection = await apartments();
   const result = await apartmentCollection.updateOne(getIdFilter(id), {
