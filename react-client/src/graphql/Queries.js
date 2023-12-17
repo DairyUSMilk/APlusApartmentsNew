@@ -46,12 +46,6 @@ export function getAdmin() {
     query ($id: String!) {
     getAdminById(uid: $id) {
         name
-        contactInfo
-        ownedApartments {
-            id
-            address
-            price
-        }
     }
     }
     `;

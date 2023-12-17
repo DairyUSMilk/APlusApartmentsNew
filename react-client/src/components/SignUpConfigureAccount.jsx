@@ -4,14 +4,15 @@ import {addUserDisplayName} from '../firebase/AuthFunctions';
 import {Context} from '../firebase/Context';
 
 import { useMutation } from "@apollo/client";
-import { createRenter, createLandlord } from '../graphql/Mutations';
+import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations';
 
 function SignUpConfigureAccount() {
-  const {currentUser} = useContext(Context);
+  const {currentUser, accountType} = useContext(Context);
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
-  const [addRenter, { data: renterData }] = useMutation(createRenter());
-  const [addLandlord, { data: landlordData }] = useMutation(createLandlord());
+  const [addRenter] = useMutation(createRenter());
+  const [addLandlord] = useMutation(createLandlord());
+  const [addAdmin] = useMutation(createAdmin());
 
   const handleAccountTypeDropdownValue = (event) => {
     setAccountTypeDropdownValue(event.target.value);
@@ -20,7 +21,6 @@ function SignUpConfigureAccount() {
   const handleSignUp = async (event) => {
     event.preventDefault();
     let {displayName, dateOfBirth, gender, city, state, accountType} = event.target.elements;
-    //console.log(displayName, dateOfBirth, gender, city, state, accountType);
     const date = new Date(dateOfBirth.value);
     const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()+1) + '/' + date.getFullYear();
     console.log(formattedDob);
@@ -37,9 +37,20 @@ function SignUpConfigureAccount() {
             state: state.value
         }}
         );
-
       } else if (accountType.value === 'landlord') {
         addLandlord({variables: {
+            uid: currentUser.uid,
+            email: currentUser.email,
+            name: displayName.value,
+            dateOfBirth: formattedDob,
+            gender: gender.value,
+            city: city.value,
+            state: state.value
+        }}
+        )
+      }
+      else if (accountType.value === 'admin') {
+        addAdmin({variables: {
             uid: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
@@ -59,7 +70,7 @@ function SignUpConfigureAccount() {
     }
   };
 
-  if ((currentUser && currentUser.displayName)) {
+  if (currentUser && accountType) {
     return <Navigate to='/' />;
   }
 

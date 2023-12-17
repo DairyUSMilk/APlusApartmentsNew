@@ -57,75 +57,30 @@ export function createLandlord() {
     `;
 }
 
-
-/*
-
-export function createUser(accountType) {
-    let ADD_RENTER = gql`
-    mutation AddRenter(
+export function createAdmin() {
+    return gql`
+    mutation AddAdmin(
         $uid: String!,
-        $email: String!
-        $name: String!
-        $dateOfBirth: String!
-        $gender: String!
-        $accountType: String!
+        $email: String!,
+        $name: String!,
+        $dateOfBirth: String!,
+        $gender: String!,
+        $city: String!,
+        $state: String!,
     ) {
-    addRenter(
+    addAmin(
         uid: $uid
         email: $email
         name: $name
         dateOfBirth: $dateOfBirth
         gender: $gender
-        accountType:"$accountType
+        city: $city
+        state: $state
         ) {
-        _id
+        uid
         name
-        dateOfBirth
-        gender
     }
     }
     `;
-
-    if (accountType === 'landlord') {
-        ADD_RENTER = gql`
-        mutation AddLandlord(
-            $uid: String!,
-            $email: String!
-            $name: String!
-            $dateOfBirth: String!
-            $gender: String!
-            $accountType: String!
-        ) {
-        addLandlord(
-            uid: $uid
-            email: $email
-            name: $name
-            dateOfBirth: $dateOfBirth
-            gender: $gender
-            accountType:"$accountType
-            ) {
-            _id
-            name
-            contactInfo
-        }
-        }
-        `;
-    }
-
-    return ADD_RENTER;
 }
 
-
-
-
-
-
-(
-        $id: String!,
-        $email: String!,
-        $name: String!,
-        dateOfBirth: String!,
-        gender: String!,
-        accountType: String!
-        )
-        */
