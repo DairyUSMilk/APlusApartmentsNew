@@ -8,7 +8,6 @@ export const createUser = async(
         name = helpers.checkString(name, "name");
         email = helpers.checkEmail(email, "email");
         password = helpers.checkString(password, "password"); 
-        // Consider adding more specific password validations
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
         dateOfBirth = helpers.checkDOB(dateOfBirth, "dateOfBirth");
@@ -20,7 +19,6 @@ export const createUser = async(
     }
 
     const hashedPassword = await bcrypt.hash(password, 16);
-    //Added validation for parameters
     const user = {
         name,
         email,
