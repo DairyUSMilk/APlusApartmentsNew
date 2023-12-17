@@ -76,10 +76,12 @@ export const getAllLandlords = async() => {
 
 export const deleteUserById = async(id) => {
     const userCollection = await users();
+    const user = await getUserById(id);
     const result = await userCollection.deleteOne(getIdFilter(id));
     if(result.deletedCount !== 1){
         throw `No user exists with id ${id}`;
     }
+    return user;
 }
 
 //if a field is left blank, it is left unmodified

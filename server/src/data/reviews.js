@@ -1,5 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments, reviews } from "./../configs/mongoCollection.js";
+import { apartmentFunctions } from "./apartments.js";
 import helpers from './../utils/helpers.js';
 
 export const createReview = async(posterId, apartmentId, rating, content,
@@ -25,6 +26,7 @@ export const createReview = async(posterId, apartmentId, rating, content,
       if (!output.acknowledged || !output.insertedId) {
         throw "Review was not inserted into database";
       }
+      await apartmentFunctions.updateReviewInfoById(id);
       return await getReviewById(output.insertedId);
     };
 
@@ -55,6 +57,7 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     if(result.modifiedCount !== 1){
         throw `No review exists with id ${id}`;
     }
+    await apartmentFunctions.updateReviewInfoById(id);
     return await getReviewById(id);
 }
 
@@ -66,10 +69,13 @@ export const getReviewById = async(id) => {
 
 export const deleteReviewById = async(id) => {
     const reviewCollection = await reviews();
+    const review = await getReviewById(id);
     const result = await reviewCollection.deleteOne(getIdFilter(id));
     if(result.deletedCount !== 1){
         throw `No review exists with id ${id}`;
     }
+    await apartmentFunctions.updateReviewInfoById(id);
+    return review;
 }
 
 export const approveReviewById = async(id) => {

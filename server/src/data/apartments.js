@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
-import { reviewsFunctions } from "./reviews.js";
+import { reviewFunctions } from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
 
@@ -63,16 +63,18 @@ export const getAllApartments = async() => {
 
 export const deleteApartmentById = async(id) => {
     const apartmentCollection = await apartments();
+    const apartment = await getApartmentById(id);
     const result = await apartmentCollection.deleteOne(getIdFilter(id));
     if(result.deletedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+    return apartment;
 }
 
 export const updateApartmentRatingById = async(id) => {
     const apartmentCollection = await apartments();
     const apartment = await getApartmentById(id);
-    const reviews = await reviewsFunctions.getAllReviewsByApartmentId(id);
+    const reviews = await reviewFunctions.getAllReviewsByApartmentId(id);
     const sum = 0.0;
     for(let i = 0; i < reviews.length; i++){
         sum += reviews[i].rating;
