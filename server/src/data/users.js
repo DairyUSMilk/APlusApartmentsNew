@@ -34,6 +34,11 @@ export const createUser = async (
   if (!output.acknowledged || !output.insertedId) {
     throw "User was not inserted into database";
   }
+  const id = insertInfo.insertedId.toString();
+  return await userCollection.findOne(
+    { _id: new ObjectId(id) },
+    { projection: { password: 0 } }
+  );
 };
 
 export const getUserById = async (id) => {
@@ -69,10 +74,11 @@ export const getAllLandlords = async () => {
 
 export const deleteUserById = async (id) => {
   const userCollection = await users();
-  const result = await userCollection.deleteOne(getIdFilter(id));
-  if (result.deletedCount !== 1) {
+  const result = await userCollection.findOneAndDelete(getIdFilter(id));
+  if (!result) {
     throw `No user exists with id ${id}`;
   }
+  return result;
 };
 
 //if a field is left blank, it is left unmodified
@@ -117,6 +123,7 @@ export const updateUserInfoById = async (
   if (result.modifiedCount !== 1) {
     throw `No user exists with id ${id}`;
   }
+  return await getUserById(id);
 };
 
 //returns user object if attempt is

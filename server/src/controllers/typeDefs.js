@@ -28,7 +28,6 @@ export const typeDefs = `#graphql
         price: Float!
         amenities: [String]
         landlord: Landlord!
-        groups: Group
         reviews: [Review]
     }
     type Review{
@@ -50,8 +49,11 @@ export const typeDefs = `#graphql
     }
     type Mutation{
         addRenter(
-            _id: String!
             name: String!
+            email: String!
+            password: String!
+            city: String!
+            state: String!
             dateOfBirth: String!
             gender: String!
             preferences: Preferences
@@ -65,11 +67,19 @@ export const typeDefs = `#graphql
             preferences: Preferences
             savedApartments: [Apartment]
         ):Renter
+        addApartment(
+            address: String!
+            description: String
+            images: [String]
+            price: Float!
+            amenities: [String]!
+            landlord: Landlord!
+            reviews: [Review]
+        )
         removeRenter(
             _id: String!
         ): Renter
         addLandlord(
-            _id: String!
             name: String!
             contactInfo: String!
             ownedApartments: [Apartment]
