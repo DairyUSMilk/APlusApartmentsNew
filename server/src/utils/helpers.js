@@ -83,7 +83,7 @@ const exportedMethods = {
     state = this.checkString(state, varName);
     if (!unitedStates.includes(state.toUpperCase()))
     //check if state is not listed above
-      throw `${state} is not a valid state abbreviation`;
+      throw new Error(`${state} is not a valid state abbreviation`);
     return state;
   },
 
@@ -133,6 +133,7 @@ const exportedMethods = {
       throw new Error(`${varName} must be a whole number`);
     return num;
   },
+  
   checkEmail(email, varName) {
     this.checkString(email);
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

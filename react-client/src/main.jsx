@@ -6,11 +6,13 @@ import Home from './components/Home';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Account from './components/Account';
+import AccountDetails from './components/AccountDetails.jsx';
 import ChangePassword from './components/ChangePassword';
 import ForgotPassword from './components/ForgotPassword';
+import SignUpConfigureAccount from './components/SignUpConfigureAccount.jsx';
 
 import { initializeApp } from "firebase/app";
-import { getAnalytics } from "firebase/analytics";
+//import { getAnalytics } from "firebase/analytics";
 
 import { createBrowserRouter, RouterProvider } from 'react-router-dom';
 
@@ -31,7 +33,7 @@ const client = new ApolloClient({
 });
 
 const app = initializeApp(FirebaseConfig);
-// const analytics = getAnalytics(app);
+//const analytics = getAnalytics(app);
 
 const router = createBrowserRouter([
   {
@@ -50,6 +52,10 @@ const router = createBrowserRouter([
           {
               path: '/sign-up',
               element: <SignUp />
+          },
+          {
+            path: '/sign-up-config',
+            element: <SignUpConfigureAccount />
           },
           {
             path: '/account',

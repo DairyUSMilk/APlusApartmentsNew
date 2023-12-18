@@ -51,7 +51,6 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
         }
         updateInfo[parameterNames[i]] = parameterValues[i];
     }
-
     const reviewCollection = await reviews();
     const result = await reviewCollection.updateOne(getIdFilter(id), {$set: updateInfo});
     if(result.modifiedCount !== 1){
@@ -152,17 +151,18 @@ const formatReviewObject = async(reviewObject) => {
 }
 
 const getParameterNames = (func) => {
-    const str = func.toString();
-    const paramName = str.slice(str.indexOf('(') + 1, str.indexOf(')')).match(/([^\s,]+)/g);
-    return paramName || [];
-}
+  const str = func.toString();
+  const paramName = str
+    .slice(str.indexOf("(") + 1, str.indexOf(")"))
+    .match(/([^\s,]+)/g);
+  return paramName || [];
+};
 
 const getParameterValueArrayFromArguments = (args) => {
-    const output = [];
-    const keys = Object.keys(args);
-    for(let i = 0; i < keys.length; i++){
-        output.push(args[keys[i]]);
-    }
-    return output;
-}
-
+  const output = [];
+  const keys = Object.keys(args);
+  for (let i = 0; i < keys.length; i++) {
+    output.push(args[keys[i]]);
+  }
+  return output;
+};

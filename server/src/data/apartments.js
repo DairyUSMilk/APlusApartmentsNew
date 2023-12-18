@@ -3,7 +3,6 @@ import { apartments } from "./../configs/mongoCollection.js";
 import { reviewFunctions } from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
-
 export const createApartment = async(name, description, address, city, 
     state, dateListed, amenities, images, pricePerMonth, landlord, 
     rating, isApproved) => {
@@ -166,25 +165,27 @@ export async function updateApartmentInfoById(id,
 }
 
 const getParameterNames = (func) => {
-    const str = func.toString();
-    const paramName = str.slice(str.indexOf('(') + 1, str.indexOf(')')).match(/([^\s,]+)/g);
-    return paramName || [];
-}
+  const str = func.toString();
+  const paramName = str
+    .slice(str.indexOf("(") + 1, str.indexOf(")"))
+    .match(/([^\s,]+)/g);
+  return paramName || [];
+};
 
-const getIdFilter = async(id) => {
-    return {_id: new ObjectId(id)};
-}
+const getIdFilter = async (id) => {
+  return { _id: new ObjectId(id) };
+};
 
-const formatApartmentObject = async(apartmentObject) => {
-    apartmentObject._id = apartmentObject._id.toString();
-    return apartmentObject;
-}
+const formatApartmentObject = async (apartmentObject) => {
+  apartmentObject._id = apartmentObject._id.toString();
+  return apartmentObject;
+};
 
 const getParameterValueArrayFromArguments = (args) => {
-    const output = [];
-    const keys = Object.keys(args);
-    for(let i = 0; i < keys.length; i++){
-        output.push(args[keys[i]]);
-    }
-    return output;
-}
+  const output = [];
+  const keys = Object.keys(args);
+  for (let i = 0; i < keys.length; i++) {
+    output.push(args[keys[i]]);
+  }
+  return output;
+};
