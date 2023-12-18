@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
-
+import { reviewFunctions } from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
 export const createApartment = async(name, description, address, city, 
@@ -39,6 +39,7 @@ export const createApartment = async(name, description, address, city,
     if(!output.acknowledged || !output.insertedId){
         throw `Apartment named ${name} was not inserted into database`;
     }
+    return await getApartmentById(output.insertedId);
 }
 
 export const getApartmentById = async(id) => {
@@ -61,10 +62,29 @@ export const getAllApartments = async() => {
 
 export const deleteApartmentById = async(id) => {
     const apartmentCollection = await apartments();
+    const apartment = await getApartmentById(id);
     const result = await apartmentCollection.deleteOne(getIdFilter(id));
     if(result.deletedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+    return apartment;
+}
+
+export const updateApartmentRatingById = async(id) => {
+    const apartmentCollection = await apartments();
+    const apartment = await getApartmentById(id);
+    const reviews = await reviewFunctions.getAllReviewsByApartmentId(id);
+    const sum = 0.0;
+    for(let i = 0; i < reviews.length; i++){
+        sum += reviews[i].rating;
+    }
+    const average = sum/reviews.length;
+    const updateInfo = {$set: {rating: average}};
+    const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
+    if(result.modifiedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+    return await getApartmentById(id);
 }
 
 export const approveApartmentById = async(id) => {
@@ -74,6 +94,7 @@ export const approveApartmentById = async(id) => {
     if(result.modifiedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
+    return await getApartmentById(id);
 }
 
 export const getApartmentsByLandlordId = async(id) => {
@@ -104,69 +125,43 @@ export const getAllApprovedApartments = async() => {
 }
 
 //if a parameter is left blank it is left unchanged
-export async function updateApartmentInfoById(
-  id,
-  name,
-  description,
-  address,
-  city,
-  state,
-  dateListed,
-  amenities,
-  images,
-  pricePerMonth,
-  landlord,
-  rating,
-  isApproved
-) {
-  id = helpers.checkId(id, "id");
-  const updateInfo = {};
+export async function updateApartmentInfoById(id, 
+    name, description, address, city, state, dateListed, amenities, 
+    images, pricePerMonth, landlord, rating, isApproved){
 
-  if (name !== undefined) updateInfo.name = helpers.checkString(name, "name");
-  if (description !== undefined)
-    updateInfo.description = helpers.checkString(description, "description");
-  if (address !== undefined)
-    updateInfo.address = helpers.checkString(address, "address");
-  if (city !== undefined) updateInfo.city = helpers.checkString(city, "city");
-  if (state !== undefined)
-    updateInfo.state = helpers.checkState(state, "state");
-  if (dateListed !== undefined)
-    updateInfo.dateListed = helpers.checkString(dateListed, "dateListed");
-  if (amenities !== undefined)
-    updateInfo.amenities = helpers.checkStringArray(amenities, "amenities");
-  if (images !== undefined)
-    updateInfo.images = helpers.checkStringArray(images, "images");
-  if (pricePerMonth !== undefined)
-    updateInfo.pricePerMonth = helpers.checkNumber(
-      pricePerMonth,
-      "pricePerMonth"
-    );
-  if (landlord !== undefined)
-    updateInfo.landlord = helpers.checkId(landlord, "landlord");
-  if (rating !== undefined)
-    updateInfo.rating = helpers.checkNumber(rating, "rating");
-  if (isApproved !== undefined)
-    updateInfo.isApproved =
-      typeof isApproved === "boolean" ? isApproved : false;
 
-  const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
-  const parameterValues =
-    getParameterValueArrayFromArguments(arguments).slice(1);
+    id = helpers.checkId(id, "id");
+    const updateInfo = {};
 
-  for (let i = 0; i < parameterNames.length; i++) {
-    if (!parameterValues[i]) {
-      continue;
+    if (name !== undefined) updateInfo.name = helpers.checkString(name, "name");
+    if (description !== undefined) updateInfo.description = helpers.checkString(description, "description");
+    if (address !== undefined) updateInfo.address = helpers.checkString(address, "address");
+    if (city !== undefined) updateInfo.city = helpers.checkString(city, "city");
+    if (state !== undefined) updateInfo.state = helpers.checkState(state, "state");
+    if (dateListed !== undefined) updateInfo.dateListed = helpers.checkString(dateListed, "dateListed");
+    if (amenities !== undefined) updateInfo.amenities = helpers.checkStringArray(amenities, "amenities");
+    if (images !== undefined) updateInfo.images = helpers.checkStringArray(images, "images");
+    if (pricePerMonth !== undefined) updateInfo.pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
+    if (landlord !== undefined) updateInfo.landlord = helpers.checkId(landlord, "landlord");
+    if (rating !== undefined) updateInfo.rating = helpers.checkNumber(rating, "rating");
+    if (isApproved !== undefined) updateInfo.isApproved = typeof isApproved === 'boolean' ? isApproved : false;
+
+    const parameterNames = getParameterNames(updateApartmentInfoById).slice(1);
+    const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
+
+    for(let i = 0; i < parameterNames.length; i++){
+        if(!parameterValues[i]){
+            continue;
+        }
+        updateInfo[parameterNames[i]] = parameterValues[i];
     }
-    updateInfo[parameterNames[i]] = parameterValues[i];
-  }
 
-  const apartmentCollection = await apartments();
-  const result = await apartmentCollection.updateOne(getIdFilter(id), {
-    $set: updateInfo,
-  });
-  if (result.modifiedCount !== 1) {
-    throw `No apartment exists with id ${id}`;
-  }
+    const apartmentCollection = await apartments();
+    const result = await apartmentCollection.updateOne(getIdFilter(id), {$set: updateInfo});
+    if(result.modifiedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+    return await getApartmentById(id);
 }
 
 const getParameterNames = (func) => {

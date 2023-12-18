@@ -1,11 +1,10 @@
 import { ObjectId } from "mongodb";
 import { apartments, reviews } from "./../configs/mongoCollection.js";
-
+import { apartmentFunctions } from "./apartments.js";
 import helpers from './../utils/helpers.js';
 
 export const createReview = async(posterId, apartmentId, rating, content,
-    datePosted
-    ) => {
+    datePosted) => {
       posterId = helpers.checkId(posterId, "posterId");
       apartmentId = helpers.checkId(apartmentId, "apartmentId");
       rating = helpers.checkNumber(rating, "rating"); // Add range check if needed
@@ -27,6 +26,8 @@ export const createReview = async(posterId, apartmentId, rating, content,
       if (!output.acknowledged || !output.insertedId) {
         throw "Review was not inserted into database";
       }
+      await apartmentFunctions.updateApartmentRatingById(id);
+      return await getReviewById(output.insertedId);
     };
 
 export async function updateReviewInfoById(id, posterId, apartmentId,
@@ -44,111 +45,110 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
     const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
 
-    //TODO: Add parameter validation
     for(let i = 0; i < parameterNames.length; i++){
         if(!parameterValues[i]){
             continue;
         }
         updateInfo[parameterNames[i]] = parameterValues[i];
     }
-    updateInfo[parameterNames[i]] = parameterValues[i];
-  }
-
-  const reviewCollection = await reviews();
-  const result = await reviewCollection.updateOne(getIdFilter(id), {
-    $set: updateInfo,
-  });
-  if (result.modifiedCount !== 1) {
-    throw `No review exists with id ${id}`;
-  }
+    const reviewCollection = await reviews();
+    const result = await reviewCollection.updateOne(getIdFilter(id), {$set: updateInfo});
+    if(result.modifiedCount !== 1){
+        throw `No review exists with id ${id}`;
+    }
+    await apartmentFunctions.updateApartmentRatingById(id);
+    return await getReviewById(id);
 }
 
-export const getReviewById = async (id) => {
-  const reviewCollection = await reviews();
-  const review = await reviewCollection.findOne(getIdFilter(id));
-  return formatReviewObject(review);
-};
+export const getReviewById = async(id) => {
+    const reviewCollection = await reviews();
+    const review = await reviewCollection.findOne(getIdFilter(id));
+    return formatReviewObject(review);
+}
 
-export const deleteReviewById = async (id) => {
-  const reviewCollection = await reviews();
-  const result = await reviewCollection.deleteOne(getIdFilter(id));
-  if (result.deletedCount !== 1) {
-    throw `No review exists with id ${id}`;
-  }
-};
+export const deleteReviewById = async(id) => {
+    const reviewCollection = await reviews();
+    const review = await getReviewById(id);
+    const result = await reviewCollection.deleteOne(getIdFilter(id));
+    if(result.deletedCount !== 1){
+        throw `No review exists with id ${id}`;
+    }
+    await apartmentFunctions.updateApartmentRatingById(id);
+    return review;
+}
 
-export const approveReviewById = async (id) => {
-  const reviewCollection = await reviews();
-  const updateInfo = { $set: { isApproved: true } };
-  const result = await reviewCollection.updateOne(getIdFilter(id), updateInfo);
-  if (result.modifiedCount !== 1) {
-    throw `No review exists with id ${id}`;
-  }
-};
+export const approveReviewById = async(id) => {
+    const reviewCollection = await reviews();
+    const updateInfo = {$set: {isApproved: true}};
+    const result = await reviewCollection.updateOne(getIdFilter(id), updateInfo);
+    if(result.modifiedCount !== 1){
+        throw `No review exists with id ${id}`;
+    }
+    return await getReviewById(id);
+}
 
-export const getAllReviewsByPosterId = async (posterId) => {
-  const reviewCollection = await reviews();
-  const reviewList = await reviewCollection
-    .find({ posterId: posterId })
-    .toArray();
-  for (let i = 0; i < reviewList.length; i++) {
-    formatReviewObject(reviewList[i]);
-  }
-  return reviewList;
-};
+export const setApprovalStatusById = async(id, newApprovalStatus) => {
+    if(newApprovalStatus){
+        return approveReviewById(id);
+    }
+    return await deleteReviewById(id);
+}
 
-export const getAllReviewsByApartmentId = async (apartmentId) => {
-  const reviewCollection = await reviews();
-  const reviewList = await reviewCollection
-    .find({ apartmentId: apartmentId })
-    .toArray();
-  for (let i = 0; i < reviewList.length; i++) {
-    formatReviewObject(reviewList[i]);
-  }
-  return reviewList;
-};
+export const getAllReviewsByPosterId = async(posterId) => {
+    const reviewCollection = await reviews();
+    const reviewList = await reviewCollection.find({posterId: posterId}).toArray();
+    for(let i = 0; i < reviewList.length; i++){
+        formatReviewObject(reviewList[i]);
+    }
+    return reviewList;
+}
 
-export const getAllReviews = async () => {
-  const reviewCollection = await reviews();
-  const allReviews = await reviewCollection.find({}).toArray();
-  for (let i = 0; i < allReviews.length; i++) {
-    formatReviewObject(allReviews[i]);
-  }
-  return allReviews;
-};
+export const getAllReviewsByApartmentId = async(apartmentId) => {
+    const reviewCollection = await reviews();
+    const reviewList = await reviewCollection.find({apartmentId: apartmentId}).toArray();
+    for(let i = 0; i < reviewList.length; i++){
+        formatReviewObject(reviewList[i]);
+    }
+    return reviewList;
+}
 
-export const getAllReviewsPendingApproval = async () => {
-  const reviewCollection = await reviews();
-  const reviewList = await reviewCollection
-    .find({ isApproved: false })
-    .toArray();
-  for (let i = 0; i < reviewList.length; i++) {
-    formatReviewObject(reviewList[i]);
-  }
-  return reviewList;
-};
+export const getAllReviews = async() => {
+    const reviewCollection = await reviews();
+    const allReviews = await reviewCollection.find({}).toArray();
+    for(let i = 0; i < allReviews.length; i++){
+        formatReviewObject(allReviews[i]);
+    }
+    return allReviews;
+}
 
-export const getAllApprovedReviews = async () => {
-  const reviewCollection = await reviews();
-  const reviewList = await reviewCollection
-    .find({ isApproved: true })
-    .toArray();
-  for (let i = 0; i < reviewList.length; i++) {
-    formatReviewObject(reviewList[i]);
-  }
-  return reviewList;
-};
+export const getAllReviewsPendingApproval = async() => {
+    const reviewCollection = await reviews();
+    const reviewList = await reviewCollection.find({isApproved: false}).toArray();
+    for(let i = 0; i < reviewList.length; i++){
+        formatReviewObject(reviewList[i]);
+    }
+    return reviewList;
+}
 
-const getIdFilter = async (id) => {
-  return { _id: new ObjectId(id) };
-};
+export const getAllApprovedReviews = async() => {
+    const reviewCollection = await reviews();
+    const reviewList = await reviewCollection.find({isApproved: true}).toArray();
+    for(let i = 0; i < reviewList.length; i++){
+        formatReviewObject(reviewList[i]);
+    }
+    return reviewList;
+}
 
-const formatReviewObject = async (reviewObject) => {
-  delete reviewObject.password;
-  å;
-  reviewObject._id = reviewObject._id.toString();
-  return reviewObject;
-};
+
+const getIdFilter = async(id) => {
+    return {_id: new ObjectId(id)};
+}
+
+const formatReviewObject = async(reviewObject) => {
+    delete reviewObject.password;å
+    reviewObject._id = reviewObject._id.toString();
+    return reviewObject;
+}
 
 const getParameterNames = (func) => {
   const str = func.toString();
