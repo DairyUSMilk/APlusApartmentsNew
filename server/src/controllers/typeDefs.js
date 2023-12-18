@@ -15,7 +15,6 @@ export const typeDefs = `#graphql
         name: String!
         dateOfBirth: String!
         gender: String!
-        preferences: Preferences
         savedApartments: [Apartment]
     }
     type Landlord {
@@ -45,16 +44,6 @@ export const typeDefs = `#graphql
         content: String!
         datePosted: String!
     }
-    type Preferences {
-        location: String
-        priceRange: PriceRange
-        other: [String]
-    }
-
-    type PriceRange {
-        min: Float
-        max: Float
-    }
     type Mutation{
         addRenter(
             uid: String!
@@ -64,7 +53,6 @@ export const typeDefs = `#graphql
             state: String!
             dateOfBirth: String!
             gender: String!
-            preferences: [String]
             savedApartments: [String]
         ): Renter
         editRenter(
@@ -72,7 +60,6 @@ export const typeDefs = `#graphql
             name: String
             dateOfBirth: String
             gender: String
-            preferences: [String]
             savedApartments: [String]
         ):Renter
         addApartment(
