@@ -4,8 +4,7 @@ import * as reviewFunctions from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
 export const createApartment = async(name, description, address, city, 
-    state, dateListed, amenities, images, pricePerMonth, landlord, 
-    rating, isApproved) => {
+    state, dateListed, amenities, images, pricePerMonth, landlord) => {
 
         name = helpers.checkString(name, "name");
         description = helpers.checkString(description, "description");
@@ -17,8 +16,6 @@ export const createApartment = async(name, description, address, city,
         images = helpers.checkStringArray(images, "images");
         pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
         landlord = helpers.checkId(landlord, "landlord"); 
-        rating = helpers.checkNumber(rating, "rating"); 
-        isApproved = typeof isApproved === 'boolean' ? isApproved : false;
 
     const apartment = {
         name: name,
@@ -31,8 +28,8 @@ export const createApartment = async(name, description, address, city,
         images: images, 
         pricePerMonth: pricePerMonth,
         landlord: landlord,
-        rating: rating,
-        isApproved: isApproved
+        rating: 0.0,
+        isApproved: false
     }
     const apartmentCollection = await apartments();
     const output = await apartmentCollection.insertOne(apartment);
@@ -74,7 +71,7 @@ export const updateApartmentRatingById = async(id) => {
     const apartmentCollection = await apartments();
     const apartment = await getApartmentById(id);
     const reviews = await reviewFunctions.getAllReviewsByApartmentId(id);
-    const sum = 0.0;
+    let sum = 0.0;
     for(let i = 0; i < reviews.length; i++){
         sum += reviews[i].rating;
     }
