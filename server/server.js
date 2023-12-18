@@ -14,14 +14,3 @@ const { url } = await startStandaloneServer(server, {
   listen: { port: 3000 },
 });
 console.log(`🚀  Server ready at: ${url}`);
-
-for(let i = 1; i <= 10; i++){
-    await users.createUser(`Name ${i}`, 
-        `email${i}@email.com`,
-        `password$%${i}`,
-        `city${i}`,
-        `NY`,
-        `${i}/${i}/2002`,
-        "renter"
-    );
-}

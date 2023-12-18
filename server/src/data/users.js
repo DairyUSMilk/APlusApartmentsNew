@@ -4,10 +4,9 @@ import bcrypt from "bcrypt";
 import helpers from './../utils/helpers.js';
 
 export const createUser = async(
-    name, email, password, city, state, dateOfBirth, accountType) => {
+    name, email, city, state, dateOfBirth, accountType) => {
         name = helpers.checkString(name, "name");
         email = helpers.checkEmail(email, "email");
-        password = helpers.checkString(password, "password"); 
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
         dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
@@ -18,11 +17,9 @@ export const createUser = async(
         throw "AccountType attribute must be either 'renter', 'landlord', or 'admin'";
     }
 
-    const hashedPassword = await bcrypt.hash(password, 16);
     const user = {
         name,
         email,
-        password: hashedPassword,
         city,
         state,
         dateOfBirth,
@@ -91,7 +88,6 @@ export const updateUserInfoById = async(id,
     const updateInfo = {};
     name = helpers.checkString(name, "name");
     email = helpers.checkEmail(email, "email");
-    password = helpers.checkString(password, "password"); 
     city = helpers.checkString(city, "city");
     state = helpers.checkState(state, "state");
     dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
@@ -102,9 +98,6 @@ export const updateUserInfoById = async(id,
     }
     if(email){
         updateInfo["email"] = email;
-    }
-    if(password){
-        updateInfo["password"] = await bcrypt.hash(password, 16);
     }
     if(city){
         updateInfo["city"] = city;
