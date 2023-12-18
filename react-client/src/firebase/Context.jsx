@@ -1,5 +1,6 @@
 import React, {useState, useEffect} from 'react';
 import {getAuth, onAuthStateChanged} from 'firebase/auth';
+
 export const Context = React.createContext();
 
 export const Provider = ({children}) => {
@@ -19,8 +20,7 @@ export const Provider = ({children}) => {
 
   if (loading) {
     return (
-      <div>
-      </div>
+      <h2> Loading... </h2>
     );
   }
 

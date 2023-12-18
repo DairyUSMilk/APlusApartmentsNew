@@ -2,24 +2,30 @@ export const typeDefs = `#graphql
     type Query {
         renters: [Renter]
         landlords: [Landlord]
-        getRenterById(_id: String!): Renter
-        getLandlordsById(_id: String!): Landlord
+        reviews: [Review]
+        apartments: [Apartment]
+        getRenterById(uid: String!): Renter
+        getLandlordById(uid: String!): Landlord
+        getAdminById(uid: String!): Admin
+        getUserAccountType(uid: String!): String
+        getApartmentById(_id: String!): Apartment
     }
     type Renter{
-        _id: String!,
-        group: Group,
-        name: String!,
-        age: Int!
-        gender: String!,
-        preferences: Preferences,
-        swipedApartments: [Apartment]
+        uid: String!
+        name: String!
+        dateOfBirth: String!
+        gender: String!
+        savedApartments: [Apartment]
     }
     type Landlord {
-        _id: String!,
-        name: String!,
+        uid: String!,
+        name: String!
         contactInfo: String!
         ownedApartments: [Apartment]
-
+    }
+    type Admin {
+        uid: String!,
+        name: String!
     }
     type Apartment {
         id: String!
@@ -28,24 +34,103 @@ export const typeDefs = `#graphql
         images: [String]
         price: Float!
         amenities: [String]
-        landlord: Landlord!
-        groups: Group
+        landlord: Landlord
+        reviews: [Review]
     }
-    type Group{
-        id: String!
-        apartment: Apartment!
-        members: [Renter]
-        groupImages: [String]
+    type Review{
+        posterId: String!
+        apartmentId: String!
+        rating: Int!
+        content: String!
+        datePosted: String!
     }
-    type Preferences {
-        location: String
-        priceRange: PriceRange
-        other: [String]
-    }
+    type Mutation{
+        addRenter(
+            uid: String!
+            email: String!
+            name: String!
+            city: String!
+            state: String!
+            dateOfBirth: String!
+            gender: String!
+            savedApartments: [String]
+        ): Renter
+        editRenter(
+            uid: String!
+            name: String
+            dateOfBirth: String
+            gender: String
+            savedApartments: [String]
+        ):Renter
+        addApartment(
+            address: String!
+            description: String
+            images: [String]
+            price: Float!
+            amenities: [String]!
+            landlordId: String!
+        ): Apartment
+        removeApartment(
+            uid: String!
+        ): Apartment
+        removeRenter(
+            uid: String!
+        ): Renter
+        addLandlord(
+            uid: String!
+            email: String!
+            name: String!
+            dateOfBirth: String!
+            gender: String!
+            city: String!
+            state: String!
+            ownedApartments: [String]
+        ): Landlord
+        editLandlord(
+            uid: String!
+            name: String
+            contactInfo: String
+            ownedApartments: [String]
+        ): Landlord
+        removeLandlord(
+            uid: String!
+        ): Landlord
+        addAdmin(
+            uid: String!
+            email: String!
+            name: String!
+            dateOfBirth: String!
+            gender: String!
+            city: String!
+            state: String!
+        ): Admin
+        editAdmin(
+            uid: String!
+            name: String
+        ): Admin
+        removeAdmin(
+            uid: String!
+        ): Admin
+        createReview(
+            posterId: String!
+            apartmentId: String!
+            rating: String!
+            content: String
+            datePosted: String
+        ): Review
+        updateReview(
+            posterId: String!
+            apartmentId: String
+            rating: String
+            content: String
+            datePosted: String
+        ): Review
+        deleteReview(
+            posterId: String!
+        ): Review
+        approveReview(
+            posterId: String!
+        ): Review
 
-    type PriceRange {
-        min: Float
-        max: Float
     }
-
 `;

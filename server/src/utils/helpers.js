@@ -83,11 +83,11 @@ const exportedMethods = {
     state = this.checkString(state, varName);
     if (!unitedStates.includes(state.toUpperCase()))
     //check if state is not listed above
-      throw `${state} is not a valid state abbreviation`;
+      throw new Error(`${state} is not a valid state abbreviation`);
     return state;
   },
 
-  checkDOB(dob, varName) {
+  checkDate(dob, varName) {
     dob = this.checkString(dob, varName);
     const parts = dob.split('/');
     if (parts.length !== 3) throw new Error(`Date in ${varName} must be in MM/DD/YYYY format`);
@@ -133,6 +133,15 @@ const exportedMethods = {
       throw new Error(`${varName} must be a whole number`);
     return num;
   },
+  
+  checkEmail(email, varName) {
+    this.checkString(email);
+    const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if(!pattern.test(email)){
+        throw new Error(`${varName} must be a valid email`);
+    }
+    return email;
+  }
 };
 
 export default exportedMethods;

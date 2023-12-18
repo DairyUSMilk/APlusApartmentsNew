@@ -1,30 +1,38 @@
 import { ObjectId } from "mongodb";
 import { users } from "./../configs/mongoCollection.js";
 import bcrypt from "bcrypt";
+import helpers from './../utils/helpers.js';
 
 export const createUser = async(
-    name, email, password, city, state, dateOfBirth, accountType) => {
-    accountType = accountType.toLowerCase();
-    if(accountType.valueOf() !== "renter" && 
-        accountType.valueOf() !== "landlord" && 
-        accountType.valueOf() !== "admin"){
+    name, email, city, state, dateOfBirth, accountType) => {
+        name = helpers.checkString(name, "name");
+        email = helpers.checkEmail(email, "email");
+        city = helpers.checkString(city, "city");
+        state = helpers.checkState(state, "state");
+        dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
+        accountType = helpers.checkString(accountType, "accountType").toLowerCase();
+    
+
+    if (!["renter", "landlord", "admin"].includes(accountType)) {
         throw "AccountType attribute must be either 'renter', 'landlord', or 'admin'";
     }
-    //TODO: add validation for parameters
+
     const user = {
-        name: name,
-        email: email,
-        password: await bcrypt.hash(password, 16),
-        city: city,
-        state: state,
-        dateOfBirth: dateOfBirth, 
-        accountType: accountType
+        name,
+        email,
+        city,
+        state,
+        dateOfBirth,
+        accountType,
+        bookmarkedApartments: [] 
+        // Assuming it's an array to store bookmarked apartment IDs
     }
     const userCollection = await users();
     const output = await userCollection.insertOne(user);
     if(!output.acknowledged || !output.insertedId){
-        throw "User was not inserted into database";
+        throw `User with email ${email} was not inserted into database`;
     }
+    return await getUserById(output.insertedId.toString());
 }
 
 export const getUserById = async(id) => {
@@ -34,6 +42,15 @@ export const getUserById = async(id) => {
         throw `No user exists with id ${id}`;
     }
     return formatUserObject(user);
+}
+
+export const getAllUsers = async() => {
+    const userCollection = await users();
+    const allUsers = await userCollection.find({}).toArray();
+    for(let i = 0; i < allUsers.length; i++){
+        formatUserObject(allUsers[i]);
+    }
+    return allUsers;
 }
 
 export const getAllRenters = async() => {
@@ -56,10 +73,12 @@ export const getAllLandlords = async() => {
 
 export const deleteUserById = async(id) => {
     const userCollection = await users();
+    const user = await getUserById(id);
     const result = await userCollection.deleteOne(getIdFilter(id));
     if(result.deletedCount !== 1){
         throw `No user exists with id ${id}`;
     }
+    return user;
 }
 
 //if a field is left blank, it is left unmodified
@@ -67,15 +86,18 @@ export const updateUserInfoById = async(id,
     name, email, password, city, 
     state, dateOfBirth, accountType) => {
     const updateInfo = {};
+    name = helpers.checkString(name, "name");
+    email = helpers.checkEmail(email, "email");
+    city = helpers.checkString(city, "city");
+    state = helpers.checkState(state, "state");
+    dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
+    accountType = helpers.checkString(accountType, "accountType").toLowerCase();
 
     if(name){
         updateInfo["name"] = name;
     }
     if(email){
         updateInfo["email"] = email;
-    }
-    if(password){
-        updateInfo["password"] = await bcrypt.hash(password, 16);
     }
     if(city){
         updateInfo["city"] = city;
@@ -95,6 +117,7 @@ export const updateUserInfoById = async(id,
     if(result.modifiedCount !== 1){
         throw `No user exists with id ${id}`;
     }
+    return await getUserById(id);
 }
 
 //returns user object if attempt is
@@ -120,4 +143,19 @@ const formatUserObject = async(userObject) => {
     return userObject;
 }
 
-//need to add function to add apartment listing to either bookmarked, or listing
+export const addApartmentToBookmark = async(userId, apartmentId) => {
+    userId = helpers.checkId(userId, "userId");
+    apartmentId = helpers.checkId(apartmentId, "apartmentId");
+
+    const userCollection = await users();
+    const updateResult = await userCollection.updateOne(
+        { _id: new ObjectId(userId) },
+        { $addToSet: { bookmarkedApartments: new ObjectId(apartmentId) } }
+    );
+
+    if (updateResult.modifiedCount !== 1) {
+        throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
+    }
+    return await getUserById(userId);
+};
+
