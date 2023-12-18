@@ -1,61 +1,43 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Context } from '../firebase/Context';
+import { useQuery } from "@apollo/client";
+
+import { getUserAccountType } from '../graphql/Queries';
+
+import AccountDetails from './AccountDetails';
 
 function Account() {
-    const { currentUser } = useContext(Context);
-    const [userData, setUserData] = useState(null);
-
-    const fetchUserData = async () => {
-        if (currentUser && currentUser.id) {
-            try {
-                const response = await fetch(`http://localhost:3000/user/${currentUser.id}`);
-                const data = await response.json();
-                setUserData(data);
-            } catch (error) {
-                console.error('Error fetching user data:', error);
-            }
-        }
-    };
-
-    useEffect(() => {
-        if (currentUser) {
-            fetchUserData();
-        }
-    }, [currentUser]);
+    const  {currentUser} = useContext(Context);
 
     if (!currentUser) {
         return <Navigate to='/' />;
     }
 
-    const renderRenterContent = () => (
-        <div>
-            <h3>Renter Content</h3>
-            {/* Render bookmarked apartments and reviews */}
-        </div>
-    );
+    if (currentUser && !currentUser.displayName) {
+        return <Navigate to='/sign-up-config' />;
+    }
 
-    const renderLandlordContent = () => (
-        <div>
-            <h3>Landlord Content</h3>
-            {/* Render building listings with edit/delete */}
-        </div>
-    );
+    const { data, loading, error } = useQuery(getUserAccountType(), {
+        variables: {uid: currentUser.uid}
+    });
 
-    const renderAdminContent = () => (
-        <div>
-            <h3>Admin Content</h3>
-            {/* Render applications and reviews with approve/deny */}
-        </div>
-    );
+    if (loading) {
+        return (
+          <h2> Loading... </h2>
+        );
+    }
 
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    let currentAccountType = data.getUserAccountType;
+    
     return (
         <div>
             <h2>Account Page</h2>
-            {userData?.accountType === 'renter' && renderRenterContent()}
-            {userData?.accountType === 'landlord' && renderLandlordContent()}
-            {userData?.accountType === 'admin' && renderAdminContent()}
-
+            <AccountDetails uid={currentUser.uid} accountType={currentAccountType} />
             <Link to='/change-password' className='btn btn-primary'>
                 Change Password
             </Link>

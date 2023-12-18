@@ -25,7 +25,9 @@ function SignIn() {
     }
   };
 
+  console.log(currentUser)
   if (currentUser) {
+    console.log('here')
     return <Navigate to='/' />;
   }
   return (

@@ -12,12 +12,16 @@ import {
     reauthenticateWithCredential
   } from 'firebase/auth';
   
-  async function createUser(email, password, displayName) {
+  async function createUser(email, password) {
     const auth = getAuth();
     await createUserWithEmailAndPassword(auth, email, password);
-    await updateProfile(auth.currentUser, {displayName: displayName});
   }
   
+  async function addUserDisplayName(displayName) {
+    const auth = getAuth();
+    await updateProfile(auth.currentUser, {displayName: displayName});
+  }
+
   async function changePassword(email, oldPassword, newPassword) {
     let auth = getAuth();
     let credential = EmailAuthProvider.credential(email, oldPassword);
@@ -50,6 +54,7 @@ import {
   
   export {
     createUser,
+    addUserDisplayName,
     logIn,
     googleLogIn,
     resetPassword,
