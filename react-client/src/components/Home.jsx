@@ -1,75 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
+import { Context } from '../firebase/Context';
+import { useQuery, useLazyQuery } from '@apollo/client';
+import { getApprovedApartments, getUserAccountType } from '../graphql/Queries';
+import ApartmentCard from './ApartmentCard';
+
+import CardGroup from 'react-bootstrap/CardGroup';
 import '../index.css';
 
 function Home() {
-  const [apartments, setApartments] = useState([]);
-  const [loading, setLoading] = useState(true);
+  const  {currentUser} = useContext(Context);
 
-  useEffect(() => {
-    const fetchApartments = async () => {
-      const query = JSON.stringify({
-        query: `
-          query {
-            apartments {
-              id
-              address
-              description
-              images
-              price
-              amenities
-              landlord {
-                name
-              }
-            }
-          }
-        `,
-      });
+  const { data, loading, error } = useQuery(getApprovedApartments());
+  const [ getAccountType, { data: accountTypeData, loading: accountTypeLoading, error: AccountTypeError }] = useLazyQuery(getUserAccountType());
 
-      try {
-        const response = await fetch('http://localhost:3000/graphql', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: query,
-        });
+  if (currentUser && currentUser.displayName) {
+    getAccountType( {variables: {id: currentUser.uid}} );
+  }
+  if (loading || accountTypeLoading) {
+      return (
+        <h2> Loading... </h2>
+      );
+  }
 
-        const result = await response.json();
-        if (result.data && result.data.apartments) {
-          setApartments(result.data.apartments);
-        }
-      } catch (error) {
-        console.error('Error fetching apartments:', error);
-      } finally {
-        setLoading(false);
-      }
-    };
+  if (error || AccountTypeError) {
+      throw new Error(error.message);
+  }
 
-    fetchApartments();
-  }, []);
+  let accountType = null;
+  if(accountTypeData) {
+    accountType = accountTypeData.getUserAccountType;
+  }
+
+  let apartmentList =  
+    data &&
+    data.apartments.map((apartment) => {
+        return <ApartmentCard apartment={apartment} userId={currentUser.uid} accountType={accountType} key={apartment.id} />;
+    });
 
   return (
     <div className='card'>
-      <h2>Home Page - Apartments for Rent</h2>
-      {loading ? (
-        <p>Loading apartments...</p>
-      ) : (
-        <div className="apartments-list">
-          {apartments.map((apartment, index) => (
-            <div key={index} className="apartment">
-              <h3>{apartment.address}</h3>
-              <p>{apartment.description}</p>
-              <p>{`Price: $${apartment.price}`}</p>
-              <p>Amenities: {apartment.amenities.join(', ')}</p>
-              <p>Landlord: {apartment.landlord.name}</p>
-              {/* Display images here */}
-              {apartment.images && apartment.images.map((image, imgIndex) => (
-                <img key={imgIndex} src={image} alt={`Apartment at ${apartment.address}`} />
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+      <h2>Apartments for Rent</h2>
+      <CardGroup>{apartmentList}</CardGroup>
     </div>
   );
 }

@@ -105,7 +105,7 @@ export function getPendingReviews() {
     `;
 }
 
-export function getUserApartments() {
+export function getApprovedApartments() {
     return gql`
     {
     apartments {
@@ -125,6 +125,7 @@ export function getUserApartments() {
         landlord {
             name
         }
+    }
     }
     `;
 }
