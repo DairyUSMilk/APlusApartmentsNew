@@ -58,9 +58,8 @@ export const typeDefs = `#graphql
     type Mutation{
         addRenter(
             uid: String!
-            name: String!
             email: String!
-            password: String!
+            name: String!
             city: String!
             state: String!
             dateOfBirth: String!

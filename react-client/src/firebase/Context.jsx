@@ -1,8 +1,5 @@
 import React, {useState, useEffect} from 'react';
 import {getAuth, onAuthStateChanged} from 'firebase/auth';
-import { useLazyQuery } from "@apollo/client";
-
-import { getUserAccountType } from '../graphql/Queries';
 
 export const Context = React.createContext();
 
@@ -11,16 +8,9 @@ export const Provider = ({children}) => {
   const [loading, setLoading] = useState(true);
   const auth = getAuth();
 
-  const [userAccountType, { data: accountType, loading: isLoading }] = useLazyQuery(getUserAccountType());
-
   useEffect(() => {
     let listener = onAuthStateChanged(auth, (user) => {
       setCurrentUser(user);
-      if (user && user.displayName) {
-        userAccountType({
-          variables: {uid: user.uid}
-        })
-      }
       setLoading(false);
     });
     return () => {
@@ -28,19 +18,14 @@ export const Provider = ({children}) => {
     };
   }, []);
 
-  if (loading || isLoading) {
+  if (loading) {
     return (
       <h2> Loading... </h2>
     );
   }
 
-  let currentAccountType = null;
-  if (accountType) {
-    currentAccountType = accountType.getUserAccountType;
-  }
-
   return (
-    <Context.Provider value={{currentUser, currentAccountType}}>
+    <Context.Provider value={{currentUser}}>
       {children}
     </Context.Provider>
   );

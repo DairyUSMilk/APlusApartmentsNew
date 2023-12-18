@@ -98,8 +98,15 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          await client.set(`renter.${id}`, JSON.stringify(renter));
-          return renter;
+          const renterFields = {
+            uid: renter.uid,
+            name: renter.name, 
+            dateOfBirth: renter.dateOfBirth,
+            gender: renter.gender,
+            savedApartments: renter.bookmarkedApartments
+          }
+          await client.set(`renter.${id}`, JSON.stringify(renterFields));
+          return renterFields;
         } catch (e) {
           throw new GraphQLError(e, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -108,7 +115,7 @@ export const resolvers = {
       }
     },
     // Fetch a single landlord by ID
-    getLandlordsById: async (_, args) => {
+    getLandlordById: async (_, args) => {
       let id = args.uid.trim();
       let exists = await client.exists(`landlord.${id}`);
       if (exists) {
@@ -130,8 +137,49 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          await client.set(`landlord.${id}`, JSON.stringify(landlord));
-          return landlord;
+          const landlordFields = {
+            uid: landlord.uid,
+            name: landlord.name,
+            contactInfo: landlord.email,
+            ownedApartments: landlord.bookmarkedApartments
+          };
+          await client.set(`landlord.${id}`, JSON.stringify(landlordFields));
+          return landlordFields;
+        } catch (e) {
+          throw new GraphQLError(e, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      }
+    },
+    getAdminById: async (_, args) => {
+      let id = args.uid.trim();
+      let exists = await client.exists(`admin.${id}`);
+      if (exists) {
+        console.log("admin in cache");
+        try {
+          let detailAdmin = await client.get(`admin.${id}`);
+          return JSON.parse(detailAdmin);
+        } catch (e) {
+          throw new GraphQLError(e, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      } else {
+        console.log("admin not in cache");
+        try {
+          const admin = await users.getUserById(id);
+          if (!admin) {
+            throw new GraphQLError("Admin Not Found", {
+              extensions: { code: "NOT_FOUND" },
+            });
+          }
+          const adminFields = {
+            uid: admin.uid,
+            name: admin.name
+          };
+          await client.set(`admin.${id}`, JSON.stringify(adminFields));
+          return adminFields;
         } catch (e) {
           throw new GraphQLError(e, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -201,7 +249,8 @@ export const resolvers = {
       }
     },
     getUserAccountType: async (_, args) => {
-      const retievedUser = await user.getUserById(args.uid);
+      const retievedUser = await users.getUserById(args.uid);
+      console.log("retirevedUser", retievedUser.accountType);
       return retievedUser.accountType;
     },
     reviews: async (_, args) => {
@@ -219,7 +268,30 @@ export const resolvers = {
     },
   },
   Mutation: {
-    addLandlord: async(_, args) => {
+    addRenter: async (_, args) => {
+      try {
+        const newUser = await users.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          "renter"
+        );
+        return {
+          uid: newUser.uid,
+          name: newUser.name,
+          dateOfBirth: newUser.dateOfBirth,
+          gender: newUser.gender,
+          savedApartments: newUser.bookmarkedApartments,
+        };
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    },
+    addLandlord: async (_, args) => {
       try {
         const newUser = await users.createUser(
           args.uid,
@@ -235,46 +307,30 @@ export const resolvers = {
           uid: newUser.uid,
           name: newUser.name,
           contactInfo: newUser.email,
-          ownedApartments: newUser.savedApartments,
+          ownedApartments: newUser.bookmarkedApartments,
+        };
+      } catch (e) {
+        throw new GraphQLError(e.message);
+      }
+    },
+    addAdmin: async(_, args) => {
+      try {
+        const newUser = await users.createUser(
+          args.uid,
+          args.name,
+          args.email,
+          args.city,
+          args.state,
+          args.dateOfBirth,
+          args.gender,
+          "admin"
+        );
+        return {
+          uid: newUser.uid,
+          name: newUser.name,
         };
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
-      }
-    }
-  },
-  Mutation: {
-    addRenter: async (_, args) => {
-      let uid, name, email, password, city, state, dateOfBirth, accountType;
-      try {
-        uid = validation.checkString(args.uid);
-        email = validation.checkString(args.email);
-        dateOfBirth = validation.checkDOB(args.dateOfBirth);
-        password = args.password;
-        city = args.city;
-        state = args.state;
-        accountType = "renter";
-      } catch (e) {
-        throw new GraphQLError(`User input not valid: ${e}`, {
-          extensions: { code: "BAD_USER_INPUT" },
-        });
-      }
-      try {
-        const newRenter = await users.createUser(
-          uid,
-          name,
-          email,
-          password,
-          city,
-          state,
-          dateOfBirth,
-          accountType
-        );
-        await client.set(`renter.${newRenter.uid}`);
-        return newRenter;
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
       }
     },
     editRenter: async (_, args) => {

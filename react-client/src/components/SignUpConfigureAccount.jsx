@@ -1,12 +1,14 @@
 import React, {useContext, useState} from 'react';
-import {Navigate} from 'react-router-dom';
-import {addUserDisplayName} from '../firebase/AuthFunctions';
-import {Context} from '../firebase/Context';
+import { Navigate, useNavigate } from "react-router-dom";
+import { addUserDisplayName } from '../firebase/AuthFunctions';
+import { Context } from '../firebase/Context';
 
 import { useMutation } from "@apollo/client";
 import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations';
 
 function SignUpConfigureAccount() {
+  const navigate = useNavigate();
+
   const {currentUser, accountType} = useContext(Context);
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
@@ -22,7 +24,8 @@ function SignUpConfigureAccount() {
     event.preventDefault();
     let {displayName, dateOfBirth, gender, city, state, accountType} = event.target.elements;
     const date = new Date(dateOfBirth.value);
-    const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()+1) + '/' + date.getFullYear();
+    date.setDate(date.getDate() + 1);
+    const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()) + '/' + date.getFullYear();
     console.log(formattedDob);
 
     try {
@@ -64,6 +67,7 @@ function SignUpConfigureAccount() {
       else {
         alert("Please specify account type.");
       }
+      navigate('/account');
       await addUserDisplayName(displayName.value);
     } catch (error) {
       alert(error);

@@ -68,7 +68,7 @@ export function createAdmin() {
         $city: String!,
         $state: String!,
     ) {
-    addAmin(
+    addAdmin(
         uid: $uid
         email: $email
         name: $name

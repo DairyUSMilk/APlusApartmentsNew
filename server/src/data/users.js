@@ -7,13 +7,13 @@ export const createUser = async (
   uid, 
   name,
   email,
-  password,
+  //password,
   city,
   state,
-  dateOfBirth, gender,
+  dateOfBirth, 
+  gender,
   accountType
 ) => {
-
   uid = helpers.checkString(uid, "firebase id");
   name = helpers.checkString(name, "name");
   email = helpers.checkEmail(email, "email");
@@ -29,20 +29,19 @@ export const createUser = async (
     throw "AccountType attribute must be either 'renter', 'landlord', or 'admin'";
   }
 
-    const hashedPassword = await bcrypt.hash(password, 16);
+    //const hashedPassword = await bcrypt.hash(password, 16);
     //Added validation for parameters
     const user = {
         uid,
         name,
         email,
-        password: hashedPassword,
+        //password: hashedPassword,
         city,
         state,
         dateOfBirth,
         gender,
         accountType,
         bookmarkedApartments: [],
-        ownedApartments: []
         // Assuming it's an array to store bookmarked apartment IDs
     }
     const userCollection = await users();
@@ -59,7 +58,6 @@ export const getUserById = async(id) => {
     if(!user){
         throw `No user exists with id ${id}`;
     }
-
     return formatUserObject(user);
 }
 
@@ -99,7 +97,7 @@ export const updateUserInfoById = async (
   id,
   name,
   email,
-  password,
+  //password,
   city,
   state,
   dateOfBirth,
@@ -112,9 +110,6 @@ export const updateUserInfoById = async (
   }
   if (email) {
     updateInfo["email"] = email;
-  }
-  if (password) {
-    updateInfo["password"] = await bcrypt.hash(password, 16);
   }
   if (city) {
     updateInfo["city"] = city;

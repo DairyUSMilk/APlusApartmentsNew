@@ -2,16 +2,16 @@ import { gql } from "@apollo/client";
 
 export function getUserAccountType() {
     return gql`
-    query ($id: String!) {
-    getUserAccountType(uid: $id)
+    query ($uid: String!) {
+    getUserAccountType(uid: $uid)
     }
     `;
 }
 
 export function getRenter() {
     return gql`
-    query ($id: String!) {
-    getRenterById(uid: $id) {
+    query ($uid: String!) {
+    getRenterById(uid: $uid) {
         name
         dateOfBirth
         gender
@@ -27,8 +27,8 @@ export function getRenter() {
 
 export function getLandlord() {
     return gql`
-    query ($id: String!) {
-    getLandlordById(uid: $id) {
+    query ($uid: String!) {
+    getLandlordById(uid: $uid) {
         name
         contactInfo
         ownedApartments {
@@ -43,8 +43,8 @@ export function getLandlord() {
 
 export function getAdmin() {
     return gql`
-    query ($id: String!) {
-    getAdminById(uid: $id) {
+    query ($uid: String!) {
+    getAdminById(uid: $uid) {
         name
     }
     }
@@ -53,8 +53,8 @@ export function getAdmin() {
 
 export function getApartmentReviews() {
     return gql`
-    query ($id: String!) {
-    getReviewsByApartmentId(_id: $id) {
+    query ($uid: String!) {
+    getReviewsByApartmentId(_id: $uid) {
         posterId
         rating
         content
@@ -66,8 +66,8 @@ export function getApartmentReviews() {
 export function getUserReviews() {
     return gql`
     {
-    query ($id: String!) {
-    getReviewsByUserId(_id: $id) {
+    query ($uid: String!) {
+    getReviewsByUserId(_id: $uid) {
         apartmentId
         rating
         content

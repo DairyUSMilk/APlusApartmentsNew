@@ -5,7 +5,8 @@ import { getRenter } from '../graphql/Queries';
 import { getLandlord } from '../graphql/Queries';
 import { getAdmin } from '../graphql/Queries';
 
-function AccountDetails({uid}, {accountType}) {
+function AccountDetails({uid, accountType}) {
+    console.log(uid, accountType)
     let query = null;
     if (accountType === 'renter') {
         query = getRenter();
@@ -20,13 +21,22 @@ function AccountDetails({uid}, {accountType}) {
         throw new Error("Invalid account type. Are you sure you're correcly signed in?")
     }
 
-    const {loading: userLoading, data: userData }  = useQuery(query, {
-        variables: {id: uid}
+    const {data: userData, loading, error }  = useQuery(query, {
+        variables: {uid: uid}
     });
 
+    if (loading) {
+        return (
+          <h2> Loading... </h2>
+        );
+    }
+    if (error) {
+        throw new Error(error.message);
+    }
+    
     let data = null;
     
-    if (userData && accountType === 'renter') {
+    if (accountType === 'renter') {
         data = (
         <div className="user">
               <h2>Renter Details</h2>
@@ -39,8 +49,7 @@ function AccountDetails({uid}, {accountType}) {
         </div>
       );
     }
-
-    else if (userData && accountType === 'landLord') {
+    else if (accountType === 'landlord') {
         data = (
         <div className="user">
               <h2>Landlord Details</h2>
@@ -53,8 +62,7 @@ function AccountDetails({uid}, {accountType}) {
         </div>
       );
     }
-
-    if (userData && accountType === 'admin') {
+    else if (accountType === 'admin') {
         data = (
         <div className="user">
               <h2>Admin Details</h2>
@@ -63,9 +71,10 @@ function AccountDetails({uid}, {accountType}) {
       );
     }
 
+    console.log(userData)
+
    return (
      <div className='card'>
-     <h2>Renter Details</h2>
      {userLoading ? (
        <p>Loading renter data...</p>
      ) : (

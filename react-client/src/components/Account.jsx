@@ -1,25 +1,43 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, Navigate } from 'react-router-dom';
 import { Context } from '../firebase/Context';
+import { useQuery } from "@apollo/client";
+
+import { getUserAccountType } from '../graphql/Queries';
 
 import AccountDetails from './AccountDetails';
 
 function Account() {
-    const { currentUser, userAccountType } = useContext(Context);
+    const  {currentUser} = useContext(Context);
 
     if (!currentUser) {
         return <Navigate to='/' />;
     }
 
-    if (!userAccountType) {
-        return <Navigate to='sign-up-config' />;
+    if (currentUser && !currentUser.displayName) {
+        return <Navigate to='/sign-up-config' />;
     }
 
+    const { data, loading, error } = useQuery(getUserAccountType(), {
+        variables: {uid: currentUser.uid}
+    });
+
+    if (loading) {
+        return (
+          <h2> Loading... </h2>
+        );
+    }
+
+    if (error) {
+        throw new Error(error.message);
+    }
+
+    let currentAccountType = data.getUserAccountType;
+    
     return (
         <div>
             <h2>Account Page</h2>
-            <AccountDetails uid = {currentUser.uid} accountType = {userAccountType} />
-
+            <AccountDetails uid={currentUser.uid} accountType={currentAccountType} />
             <Link to='/change-password' className='btn btn-primary'>
                 Change Password
             </Link>

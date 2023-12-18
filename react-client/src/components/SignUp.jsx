@@ -2,7 +2,7 @@ import React, { useContext, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { createUser } from "../firebase/AuthFunctions";
 import { Context } from "../firebase/Context";
-import { googleSignIn } from "./SignIn";
+import { googleLogIn } from "../firebase/AuthFunctions";
 
 function SignUp() {
   const { currentUser } = useContext(Context);
@@ -29,7 +29,7 @@ function SignUp() {
   const handleGoogleSignUp = async (event) => {
     event.preventDefault();
     try {
-      googleSignIn();
+      await googleLogIn();
       navigate("/sign-up-config");
     } catch (error) {
       alert(error);
@@ -99,7 +99,7 @@ function SignUp() {
         </button>
       </form>
       <br />
-      <button className="btn btn-primary" onClick={() => googleSignIn()}>
+      <button className="btn btn-primary" onClick={handleGoogleSignUp}>
         Sign up with Google
       </button>
     </div>
