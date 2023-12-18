@@ -26,7 +26,7 @@ export const createReview = async(posterId, apartmentId, rating, content,
       if (!output.acknowledged || !output.insertedId) {
         throw "Review was not inserted into database";
       }
-      await apartmentFunctions.updateReviewInfoById(id);
+      await apartmentFunctions.updateApartmentRatingById(id);
       return await getReviewById(output.insertedId);
     };
 
@@ -57,7 +57,7 @@ export async function updateReviewInfoById(id, posterId, apartmentId,
     if(result.modifiedCount !== 1){
         throw `No review exists with id ${id}`;
     }
-    await apartmentFunctions.updateReviewInfoById(id);
+    await apartmentFunctions.updateApartmentRatingById(id);
     return await getReviewById(id);
 }
 
@@ -74,7 +74,7 @@ export const deleteReviewById = async(id) => {
     if(result.deletedCount !== 1){
         throw `No review exists with id ${id}`;
     }
-    await apartmentFunctions.updateReviewInfoById(id);
+    await apartmentFunctions.updateApartmentRatingById(id);
     return review;
 }
 
@@ -86,6 +86,13 @@ export const approveReviewById = async(id) => {
         throw `No review exists with id ${id}`;
     }
     return await getReviewById(id);
+}
+
+export const setApprovalStatusById = async(id, newApprovalStatus) => {
+    if(newApprovalStatus){
+        return approveReviewById(id);
+    }
+    return await deleteReviewById(id);
 }
 
 export const getAllReviewsByPosterId = async(posterId) => {
