@@ -1,19 +1,18 @@
 import { GoogleMap, Marker, useLoadScript } from "@react-google-maps/api";
-import { useMemo, useState, useEffect } from "react";
+import { useState, useEffect } from "react";
+import AddressForm from "./AddressForm";
 import "../../public/Map.css";
 
-const Map = () => {
+const Map = ({apartments: markerList = []}) => {
     const [center, setCenter] = useState({ lat: 40.745067, lng: -70.024408}); //default near hoboken
-    // const [markers, setMarkers] = useState([]); //will use to store markers for each apartment
+    // const [markers, setMarkers] = useState(markerList); //will use to store markers for each apartment
     const [userAddress, setUserAddress] = useState({
         name: '',
         street_address: '',
         city: '',
         state: '',
         zip_code: '',
-        googleMapLink: ''
     }); //store user input address/city to center map on (NOT GEOLOCATION (lat/long))
-
 
     useEffect(() => {
         const success = (position) => {
@@ -31,8 +30,10 @@ const Map = () => {
         }
     }, []);
 
+
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: import.meta.env.VITE_LIBRARIES.split(" ")
     });
     
     if (loadError) {
@@ -43,59 +44,24 @@ const Map = () => {
     if (!isLoaded) {
         return <div>Loading map</div>;
     }
+
+    const updateCoords = ({lat, lng}) => { //change map center to user input address
+        setCenter({lat, lng});
+    }
     
 
     return (
         <div className="Map">
             {!isLoaded ? (
-                <h1>Loading...</h1>
+                <h1>Loading Map...</h1>
             ) : (
                 <>
-                {/* <div>
-                    <h1>Add New Parlor</h1>
-                    <form onSubmit={this.handleSubmit}>
-                    <input id="autocomplete"
-                        className="input-field"
-                        ref="input"
-                        type="text"/>
-                        <input 
-                        name={"name"}
-                        value={this.state.name}
-                        placeholder={"Name"}
-                        onChange={this.handleChange}
-                        />
-                        <input 
-                        name={"street_address"}
-                        value={this.state.street_address}
-                        placeholder={"Street Address"}
-                        onChange={this.handleChange}
-                        />
-                        <input 
-                        name={"city"}
-                        value={this.state.city}
-                        placeholder={"City"}
-                        onChange={this.handleChange}
-                        />
-                        <input
-                        name={"state"}
-                        value={this.state.state}
-                        placeholder={"State"}
-                        onChange={this.handleChange}
-                        />
-                        <input 
-                        name={"zip_code"}
-                        value={this.state.zip_code}
-                        placeholder={"Zipcode"}
-                        onChange={this.handleChange}
-                        />
-                        <button onSubmit={this.handleSubmit}>Submit</button>
-                    </form>
-                </div> */}
-                <GoogleMap
-                mapContainerClassName="map-container"
-                center={center}
-                zoom={15}
-                />
+                    <AddressForm updateCoords={updateCoords} mapCenter = {center} />
+                    <GoogleMap
+                        mapContainerClassName="map-container"
+                        center={center}
+                        zoom={15}
+                    />
                 </>
             )}
         </div>
