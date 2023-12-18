@@ -1,6 +1,6 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
-import { reviewFunctions } from "./reviews.js";
+import * as reviewFunctions from "./reviews.js";
 import helpers from './../utils/helpers.js';
 
 export const createApartment = async(name, description, address, city, 
