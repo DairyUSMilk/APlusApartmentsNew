@@ -2,8 +2,8 @@ export const typeDefs = `#graphql
     type Query {
         renters: [Renter]
         landlords: [Landlord]
-        reviews: [Review]
         apartments: [Apartment]
+        reviews(posterId: String!): [Review]
         getRenterById(uid: String!): Renter
         getLandlordById(uid: String!): Landlord
         getAdminById(uid: String!): Admin
@@ -38,6 +38,7 @@ export const typeDefs = `#graphql
         reviews: [Review]
     }
     type Review{
+        id: String!
         posterId: String!
         apartmentId: String!
         rating: Int!
@@ -114,22 +115,23 @@ export const typeDefs = `#graphql
         createReview(
             posterId: String!
             apartmentId: String!
-            rating: String!
+            rating: Int!
             content: String
             datePosted: String
         ): Review
         updateReview(
+            id: String!
             posterId: String!
             apartmentId: String
-            rating: String
+            rating: Int
             content: String
             datePosted: String
         ): Review
         deleteReview(
-            posterId: String!
+            id: String!
         ): Review
         approveReview(
-            posterId: String!
+            id: String!
         ): Review
 
     }

@@ -1,9 +1,11 @@
 import React from 'react';
 import { useQuery } from "@apollo/client";
 
-import { getRenter } from '../graphql/Queries';
-import { getLandlord } from '../graphql/Queries';
-import { getAdmin } from '../graphql/Queries';
+import { getRenter, getLandlord, getAdmin } from '../graphql/Queries';
+import ApartmentCard from './ApartmentCard';
+import ReviewList from './ReviewList';
+import PendingReviews from './PendingReviews';
+import PendingApartments from './PendingApartments';
 
 function AccountDetails({uid, accountType}) {
     console.log(uid, accountType)
@@ -21,20 +23,22 @@ function AccountDetails({uid, accountType}) {
         throw new Error("Invalid account type. Are you sure you're correcly signed in?")
     }
 
-    const {data: userData, loading, error }  = useQuery(query, {
+    const {data: userData, loading: userLoading, error:userError }  = useQuery(query, {
         variables: {uid: uid}
     });
 
-    if (loading) {
+    if (userLoading) {
         return (
           <h2> Loading... </h2>
         );
     }
-    if (error) {
+    if (userError) {
         throw new Error(error.message);
     }
     
     let data = null;
+    let apartmentList = null;
+    let reviewList = null;
     
     if (accountType === 'renter') {
         data = (
@@ -48,6 +52,12 @@ function AccountDetails({uid, accountType}) {
               <p>{userData.getRenterById.gender}</p>
         </div>
       );
+      apartmentList =  
+        userData &&
+        userData.getRenterById.savedApartments.map((apartment) => {
+            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
+        });
+      reviewList = (<ReviewList userId={uid} accountType={accountType} />);
     }
     else if (accountType === 'landlord') {
         data = (
@@ -61,6 +71,12 @@ function AccountDetails({uid, accountType}) {
               <p>{userData.getLandlordById.gender}</p>
         </div>
       );
+      apartmentList =  
+        userData &&
+        userData.getLandlordById.savedApartments.map((apartment) => {
+            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
+        });
+        reviewList = (<ReviewList userId={uid} accountType={accountType} />);
     }
     else if (accountType === 'admin') {
         data = (
@@ -69,17 +85,15 @@ function AccountDetails({uid, accountType}) {
               <h3>{userData.getAdminById.name}</h3>
         </div>
       );
+      apartmentList = (<PendingApartments />);
+      reviewList = (<PendingReviews />);
     }
-
-    console.log(userData)
 
    return (
      <div className='card'>
-     {userLoading ? (
-       <p>Loading renter data...</p>
-     ) : (
-       data
-     )}
+       {data}
+       <CardGroup>{apartmentList}</CardGroup>
+       <CardGroup>{reviewList}</CardGroup>
    </div>
     );
 

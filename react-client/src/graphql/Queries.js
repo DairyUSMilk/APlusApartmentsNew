@@ -19,6 +19,9 @@ export function getRenter() {
             id
             address
             price
+            landlord {
+                uid
+            }
         }
     }
     }
@@ -51,14 +54,28 @@ export function getAdmin() {
     `;
 }
 
-export function getApartmentReviews() {
+export function getApartment() {
     return gql`
-    query ($uid: String!) {
-    getReviewsByApartmentId(_id: $uid) {
-        posterId
-        rating
-        content
-        datePosted
+    query ($id: String!) {
+    getApartmentById(_id: $id) {
+        id
+        address
+        description
+        images
+        price
+        amenities
+        landlord {
+            uid
+            name
+            contactInfo
+        }
+        reviews {
+            posterId
+            rating
+            content
+            datePosted
+        }
+    }
     }
     `;
 }
@@ -66,8 +83,8 @@ export function getApartmentReviews() {
 export function getUserReviews() {
     return gql`
     {
-    query ($uid: String!) {
-    getReviewsByUserId(_id: $uid) {
+    query ($posterId: String!) {
+    reviews(posterId: $posterId) {
         apartmentId
         rating
         content
@@ -79,7 +96,7 @@ export function getUserReviews() {
 export function getPendingReviews() {
     return gql`
     {
-    getPendingReviews {
+    pendingReviews {
         apartmentId
         rating
         content
@@ -88,7 +105,7 @@ export function getPendingReviews() {
     `;
 }
 
-export function getApprovedApartments() {
+export function getUserApartments() {
     return gql`
     {
     apartments {
@@ -99,7 +116,12 @@ export function getApprovedApartments() {
         price
         amenities
         groups
-        reviews
+        reviews {
+            posterId
+            rating
+            content
+            datePosted
+        }
         landlord {
             name
         }
@@ -110,7 +132,7 @@ export function getApprovedApartments() {
 export function getPendingApartments() {
     return gql`
     {
-    getPendingApartments {
+    pendingApartments {
         id
         address
         description

@@ -250,7 +250,6 @@ export const resolvers = {
     },
     getUserAccountType: async (_, args) => {
       const retievedUser = await users.getUserById(args.uid);
-      console.log("retirevedUser", retievedUser.accountType);
       return retievedUser.accountType;
     },
     reviews: async (_, args) => {
