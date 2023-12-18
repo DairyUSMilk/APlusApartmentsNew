@@ -1,71 +1,55 @@
 import { ObjectId } from "mongodb";
 import { apartments, reviews } from "./../configs/mongoCollection.js";
-import helpers from "../utils/helpers.js";
 
-export const createReview = async (
-  posterId,
-  apartmentId,
-  rating,
-  content,
-  datePosted
-) => {
-  posterId = helpers.checkId(posterId, "posterId");
-  apartmentId = helpers.checkId(apartmentId, "apartmentId");
-  rating = helpers.checkNumber(rating, "rating"); // Add range check if needed
-  content = helpers.checkString(content, "content");
-  datePosted = helpers.checkDate(datePosted, "datePosted"); // Adjust date format if needed
+import helpers from './../utils/helpers.js';
 
-  const review = {
-    posterId,
-    apartmentId,
-    rating,
-    content,
-    datePosted,
-    isApproved: false,
-    // Defaulting isApproved to false
-  };
+export const createReview = async(posterId, apartmentId, rating, content,
+    datePosted
+    ) => {
+      posterId = helpers.checkId(posterId, "posterId");
+      apartmentId = helpers.checkId(apartmentId, "apartmentId");
+      rating = helpers.checkNumber(rating, "rating"); // Add range check if needed
+      content = helpers.checkString(content, "content");
+      datePosted = helpers.checkDate(datePosted, "datePosted"); // Adjust date format if needed
+      
+      const review = {
+        posterId,
+        apartmentId,
+        rating,
+        content,
+        datePosted,
+        isApproved: false 
+        // Defaulting isApproved to false
+      };
+    
+      const reviewCollection = await reviews();
+      const output = await reviewCollection.insertOne(review);
+      if (!output.acknowledged || !output.insertedId) {
+        throw "Review was not inserted into database";
+      }
+    };
 
-  const reviewCollection = await reviews();
-  const output = await reviewCollection.insertOne(review);
-  if (!output.acknowledged || !output.insertedId) {
-    throw "Review was not inserted into database";
-  }
-};
+export async function updateReviewInfoById(id, posterId, apartmentId,
+    rating, content, datePosted, isApproved){
+    id = helpers.checkId(id, "id");
+    const updateInfo = {};
 
-export async function updateReviewInfoById(
-  id,
-  posterId,
-  apartmentId,
-  rating,
-  content,
-  datePosted,
-  isApproved
-) {
-  id = helpers.checkId(id, "id");
-  const updateInfo = {};
+    if (posterId !== undefined) updateInfo.posterId = helpers.checkId(posterId, "posterId");
+    if (apartmentId !== undefined) updateInfo.apartmentId = helpers.checkId(apartmentId, "apartmentId");
+    if (rating !== undefined) updateInfo.rating = helpers.checkNumber(rating, "rating");
+    if (content !== undefined) updateInfo.content = helpers.checkString(content, "content");
+    if (datePosted !== undefined) updateInfo.datePosted = helpers.checkDate(datePosted, "datePosted");
+    if (isApproved !== undefined) updateInfo.isApproved = typeof isApproved === 'boolean' ? isApproved : false;
 
-  if (posterId !== undefined)
-    updateInfo.posterId = helpers.checkId(posterId, "posterId");
-  if (apartmentId !== undefined)
-    updateInfo.apartmentId = helpers.checkId(apartmentId, "apartmentId");
-  if (rating !== undefined)
-    updateInfo.rating = helpers.checkNumber(rating, "rating");
-  if (content !== undefined)
-    updateInfo.content = helpers.checkString(content, "content");
-  if (datePosted !== undefined)
-    updateInfo.datePosted = helpers.checkDate(datePosted, "datePosted");
-  if (isApproved !== undefined)
-    updateInfo.isApproved =
-      typeof isApproved === "boolean" ? isApproved : false;
+    const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
+    const parameterValues = getParameterValueArrayFromArguments(arguments).slice(1);
 
-  const parameterNames = getParameterNames(updateReviewInfoById).slice(1);
-  const parameterValues =
-    getParameterValueArrayFromArguments(arguments).slice(1);
-
-  //TODO: Add parameter validation
-  for (let i = 0; i < parameterNames.length; i++) {
-    if (!parameterValues[i]) {
-      continue;
+    //TODO: Add parameter validation
+    for(let i = 0; i < parameterNames.length; i++){
+        if(!parameterValues[i]){
+            continue;
+        }
+        updateInfo[parameterNames[i]] = parameterValues[i];
     }
     updateInfo[parameterNames[i]] = parameterValues[i];
   }

@@ -1,126 +1,107 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
-import helpers from "../utils/helpers.js";
 
-export const createApartment = async (
-  name,
-  description,
-  address,
-  city,
-  state,
-  dateListed,
-  amenities,
-  images,
-  pricePerMonth,
-  landlord,
-  rating,
-  isApproved
-) => {
-  name = helpers.checkString(name, "name");
-  description = helpers.checkString(description, "description");
-  address = helpers.checkString(address, "address");
-  city = helpers.checkString(city, "city");
-  state = helpers.checkState(state, "state");
-  dateListed = helpers.checkString(dateListed, "dateListed");
-  amenities = helpers.checkStringArray(amenities, "amenities");
-  images = helpers.checkStringArray(images, "images");
-  pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
-  landlord = helpers.checkId(landlord, "landlord");
-  rating = helpers.checkNumber(rating, "rating");
-  isApproved = typeof isApproved === "boolean" ? isApproved : false;
+import helpers from './../utils/helpers.js';
 
-  const apartment = {
-    name: name,
-    description: description,
-    address: address,
-    city: city,
-    state: state,
-    dateListed: dateListed,
-    amenities: amenities,
-    images: images,
-    pricePerMonth: pricePerMonth,
-    landlord: landlord,
-    rating: rating,
-    isApproved: isApproved,
-  };
-  const apartmentCollection = await apartments();
-  const output = await apartmentCollection.insertOne(apartment);
-  if (!output.acknowledged || !output.insertedId) {
-    throw `Apartment named ${name} was not inserted into database`;
-  }
-};
+export const createApartment = async(name, description, address, city, 
+    state, dateListed, amenities, images, pricePerMonth, landlord, 
+    rating, isApproved) => {
 
-export const getApartmentById = async (id) => {
-  const apartmentCollection = await apartments();
-  const apartment = await apartmentCollection.findOne(getIdFilter(id));
-  if (!apartment) {
-    throw `No apartment exists with id ${id}`;
-  }
-  return formatApartmentObject(apartment);
-};
+        name = helpers.checkString(name, "name");
+        description = helpers.checkString(description, "description");
+        address = helpers.checkString(address, "address");
+        city = helpers.checkString(city, "city");
+        state = helpers.checkState(state, "state");
+        dateListed = helpers.checkString(dateListed, "dateListed"); 
+        amenities = helpers.checkStringArray(amenities, "amenities");
+        images = helpers.checkStringArray(images, "images");
+        pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
+        landlord = helpers.checkId(landlord, "landlord"); 
+        rating = helpers.checkNumber(rating, "rating"); 
+        isApproved = typeof isApproved === 'boolean' ? isApproved : false;
 
-export const getAllApartments = async () => {
-  const apartmentCollection = await apartments();
-  const apartmentList = await apartmentCollection.find({}).toArray();
-  for (let i = 0; i < apartmentList.length; i++) {
-    formatApartmentObject(apartmentList[i]);
-  }
-  return apartmentList;
-};
+    const apartment = {
+        name: name,
+        description: description, 
+        address: address, 
+        city: city, 
+        state: state, 
+        dateListed: dateListed,
+        amenities: amenities,
+        images: images, 
+        pricePerMonth: pricePerMonth,
+        landlord: landlord,
+        rating: rating,
+        isApproved: isApproved
+    }
+    const apartmentCollection = await apartments();
+    const output = await apartmentCollection.insertOne(apartment);
+    if(!output.acknowledged || !output.insertedId){
+        throw `Apartment named ${name} was not inserted into database`;
+    }
+}
 
-export const deleteApartmentById = async (id) => {
-  const apartmentCollection = await apartments();
-  const result = await apartmentCollection.findOneAndDelete(getIdFilter(id));
-  if (!result) {
-    throw `No apartment exists with id ${id}`;
-  }
-  return result;
-};
+export const getApartmentById = async(id) => {
+    const apartmentCollection = await apartments();
+    const apartment = await apartmentCollection.findOne(getIdFilter(id));
+    if(!apartment){
+        throw `No apartment exists with id ${id}`;
+    }
+    return formatApartmentObject(apartment);
+}
 
-export const approveApartmentById = async (id) => {
-  const apartmentCollection = await apartments();
-  const updateInfo = { $set: { isApproved: true } };
-  const result = await apartmentCollection.updateOne(
-    getIdFilter(id),
-    updateInfo
-  );
-  if (result.modifiedCount !== 1) {
-    throw `No apartment exists with id ${id}`;
-  }
-};
+export const getAllApartments = async() => {
+    const apartmentCollection = await apartments();
+    const apartmentList = await apartmentCollection.find({}).toArray();
+    for(let i = 0; i < apartmentList.length; i++){
+        formatApartmentObject(apartmentList[i]);
+    }
+    return apartmentList;
+}
 
-export const getApartmentsByLandlordId = async (id) => {
-  const apartmentCollection = await apartments();
-  const apartments = await apartmentCollection
-    .find({ landlord: new ObjectId(id) })
-    .toArray();
-  for (let i = 0; i < apartments.length; i++) {
-    formatApartmentObject(apartments[i]);
-  }
-  return apartments;
-};
+export const deleteApartmentById = async(id) => {
+    const apartmentCollection = await apartments();
+    const result = await apartmentCollection.deleteOne(getIdFilter(id));
+    if(result.deletedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+}
 
-export const getAllApartmentsPendingApproval = async () => {
-  const apartmentCollection = await apartments();
-  const apartments = await apartmentCollection
-    .find({ isApproved: false })
-    .toArray();
-  for (let i = 0; i < apartments.length; i++) {
-    formatApartmentObject(apartments[i]);
-  }
-  return apartments;
-};
+export const approveApartmentById = async(id) => {
+    const apartmentCollection = await apartments();
+    const updateInfo = {$set: {isApproved: true}};
+    const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
+    if(result.modifiedCount !== 1){
+        throw `No apartment exists with id ${id}`;
+    }
+}
 
-export const getAllApprovedApartments = async () => {
-  const apartmentCollection = await apartments();
-  const apartments = await apartmentCollection
-    .find({ isApproved: true })
-    .toArray();
-  for (let i = 0; i < apartments.length; i++) {
-    formatApartmentObject(apartments[i]);
-  }
-  return apartments;
-};
+export const getApartmentsByLandlordId = async(id) => {
+    const apartmentCollection = await apartments();
+    const apartments = await apartmentCollection.find({landlord: new ObjectId(id)}).toArray()
+    for(let i = 0; i < apartments.length; i++){
+        formatApartmentObject(apartments[i]);
+    }
+    return apartments;
+}
+
+export const getAllApartmentsPendingApproval = async() => {
+    const apartmentCollection = await apartments();
+    const apartments = await apartmentCollection.find({isApproved: false}).toArray();
+    for(let i = 0; i < apartments.length; i++){
+        formatApartmentObject(apartments[i]);
+    }
+    return apartments
+}
+
+export const getAllApprovedApartments = async() => {
+    const apartmentCollection = await apartments();
+    const apartments = await apartmentCollection.find({isApproved: true}).toArray();
+    for(let i = 0; i < apartments.length; i++){
+        formatApartmentObject(apartments[i]);
+    }
+    return apartments
+}
 
 //if a parameter is left blank it is left unchanged
 export async function updateApartmentInfoById(

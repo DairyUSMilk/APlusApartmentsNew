@@ -1,6 +1,7 @@
 import { ObjectId } from "mongodb";
 import { users } from "./../configs/mongoCollection.js";
 import bcrypt from "bcrypt";
+
 import helpers from "../utils/helpers.js";
 
 export const createUser = async (
@@ -31,6 +32,7 @@ export const createUser = async (
 
     //const hashedPassword = await bcrypt.hash(password, 16);
     //Added validation for parameters
+  
     const user = {
         uid,
         name,
@@ -61,16 +63,23 @@ export const getUserById = async(id) => {
     return formatUserObject(user);
 }
 
-export const getAllRenters = async () => {
-  const userCollection = await users();
-  const renters = await userCollection
-    .find({ accountType: "renter" })
-    .toArray();
-  for (let i = 0; i < renters.length; i++) {
-    formatUserObject(renters[i]);
-  }
-  return renters;
-};
+export const getAllUsers = async() => {
+    const userCollection = await users();
+    const allUsers = await userCollection.find({}).toArray();
+    for(let i = 0; i < allUsers.length; i++){
+        formatUserObject(allUsers[i]);
+    }
+    return allUsers;
+}
+
+export const getAllRenters = async() => {
+    const userCollection = await users();
+    const renters = await userCollection.find({accountType: "renter"}).toArray();
+    for(let i = 0; i < renters.length; i++){
+        formatUserObject(renters[i]);
+    }
+    return renters;
+}
 
 export const getAllLandlords = async () => {
   const userCollection = await users();
@@ -93,6 +102,7 @@ export const deleteUserById = async (id) => {
 };
 
 //if a field is left blank, it is left unmodified
+
 export const updateUserInfoById = async (
   id,
   name,
@@ -171,5 +181,3 @@ export const addApartmentToBookmark = async (userId, apartmentId) => {
     throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
   }
 };
-
-//need to add function to add apartment listing to either bookmarked, or listing
