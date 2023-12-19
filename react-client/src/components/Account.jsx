@@ -19,7 +19,7 @@ function Account() {
     }
 
     const { data, loading, error } = useQuery(getUserAccountType(), {
-        variables: {uid: currentUser.uid}
+        variables: {id: currentUser.uid}
     });
 
     if (loading) {
@@ -29,14 +29,13 @@ function Account() {
     }
 
     if (error) {
-        throw new Error(error.message);
+        throw new Error(error);
     }
 
     let currentAccountType = data.getUserAccountType;
     
     return (
         <div>
-            <h2>Account Page</h2>
             <AccountDetails uid={currentUser.uid} accountType={currentAccountType} />
             <Link to='/change-password' className='btn btn-primary'>
                 Change Password

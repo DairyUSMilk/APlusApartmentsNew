@@ -9,24 +9,34 @@ import '../index.css';
 
 function Home() {
   const  {currentUser} = useContext(Context);
+  const [uid] = useState(currentUser ? currentUser.uid : null);
 
   const { data, loading, error } = useQuery(getApprovedApartments());
-  const [ getAccountType, { data: accountTypeData, loading: accountTypeLoading, error: AccountTypeError }] = useLazyQuery(getUserAccountType());
+  const { data: accountTypeData, loading: accountTypeLoading, error: AccountTypeError } = useQuery(getUserAccountType(), {
+    variables: { id: uid },
+    skip: !currentUser || !currentUser.displayName
+  });
 
-  if (currentUser && currentUser.displayName) {
-    getAccountType( {variables: {id: currentUser.uid}} );
-  }
-  if (loading || accountTypeLoading) {
+  if (loading) {
       return (
-        <h2> Loading... </h2>
+        <h2> Loading apartments... </h2>
       );
   }
+  if (accountTypeLoading) {
+    return (
+      <h2> Loading user data... </h2>
+    );
+}
 
-  if (error || AccountTypeError) {
+  if (error) {
       throw new Error(error.message);
   }
 
-  let accountType = null;
+  if (AccountTypeError) {
+    throw new Error(AccountTypeError.message);
+  }
+
+  let accountType;
   if(accountTypeData) {
     accountType = accountTypeData.getUserAccountType;
   }
@@ -34,7 +44,7 @@ function Home() {
   let apartmentList =  
     data &&
     data.apartments.map((apartment) => {
-        return <ApartmentCard apartment={apartment} userId={currentUser.uid} accountType={accountType} key={apartment.id} />;
+        return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
     });
 
   return (

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from "@apollo/client";
 
 import { getRenter, getLandlord, getAdmin } from '../graphql/Queries';
@@ -6,9 +6,19 @@ import ApartmentCard from './ApartmentCard';
 import ReviewList from './ReviewList';
 import PendingReviews from './PendingReviews';
 import PendingApartments from './PendingApartments';
+import AddApartment from './AddApartment';
+
+import CardGroup from 'react-bootstrap/CardGroup';
+import { Button } from '@mui/material';
+
 
 function AccountDetails({uid, accountType}) {
-    console.log(uid, accountType)
+    const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+
+    function toggleAddForm() {
+      setIsAddFormVisible(!isAddFormVisible);    
+    }
+
     let query = null;
     if (accountType === 'renter') {
         query = getRenter();
@@ -24,7 +34,7 @@ function AccountDetails({uid, accountType}) {
     }
 
     const {data: userData, loading: userLoading, error:userError }  = useQuery(query, {
-        variables: {uid: uid}
+        variables: {id: uid}
     });
 
     if (userLoading) {
@@ -33,7 +43,7 @@ function AccountDetails({uid, accountType}) {
         );
     }
     if (userError) {
-        throw new Error(error.message);
+        throw new Error(userError);
     }
     
     let data = null;
@@ -45,10 +55,7 @@ function AccountDetails({uid, accountType}) {
         <div className="user">
               <h2>Renter Details</h2>
               <h3>{userData.getRenterById.name}</h3>
-              <p>{userData.getRenterById.email}</p>
-              <p>{userData.getRenterById.city}</p>
-              <p>{userData.getRenterById.state}</p>
-              <p>{userData.getRenterById.dateOfBirth}</p>
+              <p>Born: {userData.getRenterById.dateOfBirth}</p>
               <p>{userData.getRenterById.gender}</p>
         </div>
       );
@@ -64,16 +71,13 @@ function AccountDetails({uid, accountType}) {
         <div className="user">
               <h2>Landlord Details</h2>
               <h3>{userData.getLandlordById.name}</h3>
-              <p>{userData.getLandlordById.contactInfo}</p>
-              <p>{userData.getLandlordById.city}</p>
-              <p>{userData.getLandlordById.state}</p>
-              <p>{userData.getLandlordById.dateOfBirth}</p>
-              <p>{userData.getLandlordById.gender}</p>
+              <p>Contact email: {userData.getLandlordById.contactInfo}</p>
         </div>
       );
-      apartmentList =  
+      apartmentList =
         userData &&
-        userData.getLandlordById.savedApartments.map((apartment) => {
+        userData.getLandlordById.ownedApartments.map((apartment) => {
+          console.log(apartment);
             return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
         });
         reviewList = (<ReviewList userId={uid} accountType={accountType} />);
@@ -92,6 +96,20 @@ function AccountDetails({uid, accountType}) {
    return (
      <div className='card'>
        {data}
+
+       {accountType === 'landlord' ? (
+        <Button 
+        style={{justifyContent: 'center'}}
+        variant="contained"
+        color="primary"
+        onClick={toggleAddForm}
+        >
+        Create an Apartment
+        </Button> ):
+       null}
+
+        {isAddFormVisible ? <AddApartment userId={uid} /> : null}
+
        <CardGroup>{apartmentList}</CardGroup>
        <CardGroup>{reviewList}</CardGroup>
    </div>

@@ -32,7 +32,7 @@ function ApartmentDetails({id, userId, accountType}) {
     }
 
     function ApartmentImages(apartment) {
-        return (
+        return (apartment.images ? 
             <ImageList
             sx={{ width: 500, height: 450 }}
             variant="quilted"
@@ -48,7 +48,8 @@ function ApartmentDetails({id, userId, accountType}) {
                 />
                 </ImageListItem>
             ))}
-            </ImageList>
+            </ImageList> 
+            : null
         );
     }
 
@@ -82,7 +83,6 @@ function ApartmentDetails({id, userId, accountType}) {
         apartment.reviews.map((review) => {
             return <Review review={review} userId={userId} accountType={accountType} key={review.id} />;
         });;
-    
 
     return (
         <div>
@@ -100,7 +100,7 @@ function ApartmentDetails({id, userId, accountType}) {
                 }}
             >
                 <CardHeader
-                    title={(apartment.address || '')}
+                    title={(apartment.name || '')}
                     sx={{
                         borderBottom: '1px solid #1e8678',
                         fontWeight: 'bold'
@@ -131,7 +131,7 @@ function ApartmentDetails({id, userId, accountType}) {
                                     )}  
                                     
                                     <br /><br />
-                                    Amenities:
+                                    Amenities: <br />
                                     {amenityList.length > 0 ? (
                                         <span>
                                             <span>{amenityList}</span>
@@ -142,17 +142,18 @@ function ApartmentDetails({id, userId, accountType}) {
                                     <br /><br />
                                     <h4>Landlord:</h4> 
                                     {apartment.landlord.name}      
+                                    <br />
                                     <Button 
                                         style={{justifyContent: 'center'}}
-                                        variant="contained"
+                                        variant="outlined"
                                         color="primary"
-                                        onClick={() => {navigate(`mailto:${apartment.landlord.contactInfo}`)}}
+                                        href={`mailto:${apartment.landlord.contactInfo}`}
                                         >
                                         Contact
                                     </Button>
                         </Typography>
                     </CardContent>
-                    {userId === apartment.landlord.uid || accountType === 'admin' ? (
+                    {userId === apartment.landlord.id || accountType === 'admin' ? (
                     <DeleteApartment apartment={apartment} />):
                     null}
                 </Card>

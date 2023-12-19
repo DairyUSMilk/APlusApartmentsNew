@@ -3,6 +3,7 @@ import ReactDOM from 'react-dom/client';
 import App from './App.jsx';
 import { FirebaseConfig } from './firebase/Config';
 import Home from './components/Home';
+import Error from './components/Error';
 import SignIn from './components/SignIn';
 import SignUp from './components/SignUp';
 import Account from './components/Account';

@@ -1,11 +1,12 @@
 import { ObjectId } from "mongodb";
 import { apartments } from "./../configs/mongoCollection.js";
 import * as reviewFunctions from "./reviews.js";
+import * as users from "./users.js";
+
 import helpers from './../utils/helpers.js';
 
 export const createApartment = async(name, description, address, city, 
-    state, dateListed, amenities, images, pricePerMonth, landlord, 
-    rating, isApproved) => {
+    state, dateListed, amenities, pricePerMonth, landlord) => {
 
         name = helpers.checkString(name, "name");
         description = helpers.checkString(description, "description");
@@ -14,11 +15,9 @@ export const createApartment = async(name, description, address, city,
         state = helpers.checkState(state, "state");
         dateListed = helpers.checkString(dateListed, "dateListed"); 
         amenities = helpers.checkStringArray(amenities, "amenities");
-        images = helpers.checkStringArray(images, "images");
+        //images = helpers.checkStringArray(images, "images"); /****SKIP FOR NOW *** */
         pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
-        landlord = helpers.checkId(landlord, "landlord"); 
-        rating = helpers.checkNumber(rating, "rating"); 
-        isApproved = typeof isApproved === 'boolean' ? isApproved : false;
+        landlord = helpers.checkString(landlord, "landlord"); 
 
     const apartment = {
         name: name,
@@ -28,17 +27,18 @@ export const createApartment = async(name, description, address, city,
         state: state, 
         dateListed: dateListed,
         amenities: amenities,
-        images: images, 
+        //images: images, 
         pricePerMonth: pricePerMonth,
         landlord: landlord,
-        rating: rating,
-        isApproved: isApproved
+        rating: 0.0,
+        isApproved: false
     }
     const apartmentCollection = await apartments();
     const output = await apartmentCollection.insertOne(apartment);
     if(!output.acknowledged || !output.insertedId){
         throw `Apartment named ${name} was not inserted into database`;
     }
+    
     return await getApartmentById(output.insertedId);
 }
 
@@ -72,16 +72,15 @@ export const deleteApartmentById = async(id) => {
 
 export const updateApartmentRatingById = async(id) => {
     const apartmentCollection = await apartments();
-    const apartment = await getApartmentById(id);
     const reviews = await reviewFunctions.getAllReviewsByApartmentId(id);
-    const sum = 0.0;
+    let sum = 0.0;
     for(let i = 0; i < reviews.length; i++){
         sum += reviews[i].rating;
     }
     const average = sum/reviews.length;
     const updateInfo = {$set: {rating: average}};
     const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
-    if(result.modifiedCount !== 1){
+    if(result.matchedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
     return await getApartmentById(id);
@@ -91,6 +90,7 @@ export const approveApartmentById = async(id) => {
     const apartmentCollection = await apartments();
     const updateInfo = {$set: {isApproved: true}};
     const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
+    console.log(result);
     if(result.modifiedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }
@@ -99,29 +99,29 @@ export const approveApartmentById = async(id) => {
 
 export const getApartmentsByLandlordId = async(id) => {
     const apartmentCollection = await apartments();
-    const apartments = await apartmentCollection.find({landlord: new ObjectId(id)}).toArray()
-    for(let i = 0; i < apartments.length; i++){
-        formatApartmentObject(apartments[i]);
+    const landlordApartments = await apartmentCollection.find({landlord: id}).toArray();
+    for(let i = 0; i < landlordApartments.length; i++){
+        formatApartmentObject(landlordApartments[i]);
     }
-    return apartments;
+    return landlordApartments;
 }
 
 export const getAllApartmentsPendingApproval = async() => {
     const apartmentCollection = await apartments();
-    const apartments = await apartmentCollection.find({isApproved: false}).toArray();
-    for(let i = 0; i < apartments.length; i++){
-        formatApartmentObject(apartments[i]);
+    const pendingApartments = await apartmentCollection.find({isApproved: false}).toArray();
+    for(let i = 0; i < pendingApartments.length; i++){
+        formatApartmentObject(pendingApartments[i]);
     }
-    return apartments
+    return pendingApartments;
 }
 
 export const getAllApprovedApartments = async() => {
     const apartmentCollection = await apartments();
-    const apartments = await apartmentCollection.find({isApproved: true}).toArray();
-    for(let i = 0; i < apartments.length; i++){
-        formatApartmentObject(apartments[i]);
+    const approvedApartments = await apartmentCollection.find({isApproved: true}).toArray();
+    for(let i = 0; i < approvedApartments.length; i++){
+        formatApartmentObject(approvedApartments[i]);
     }
-    return apartments
+    return approvedApartments;
 }
 
 //if a parameter is left blank it is left unchanged
@@ -164,6 +164,25 @@ export async function updateApartmentInfoById(id,
     return await getApartmentById(id);
 }
 
+export const getUserBookmarkedApartments = async(userId) => {
+    userId = helpers.checkString(userId, "userId");
+    const user = await users.getUserById(userId);
+
+    let bookmarkedApartments = [];
+    for (const id of user.bookmarkedApartments) {
+        try {
+            const apartment = await apartments.getApartmentById(id);
+            bookmarkedApartments.push(apartment);
+        }
+        catch { // apartment not found, means it was deleted --> remove id from bookmark
+            await users.removeApartmentFromBookmark(userId, id);
+        }
+    }
+
+    return bookmarkedApartments;
+};
+
+
 const getParameterNames = (func) => {
   const str = func.toString();
   const paramName = str
@@ -172,7 +191,7 @@ const getParameterNames = (func) => {
   return paramName || [];
 };
 
-const getIdFilter = async (id) => {
+const getIdFilter = (id) => {
   return { _id: new ObjectId(id) };
 };
 

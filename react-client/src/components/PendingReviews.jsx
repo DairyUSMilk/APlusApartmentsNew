@@ -1,8 +1,9 @@
 import React from 'react';
-import CardGroup from 'react-bootstrap/CardGroup';
-
+import { useQuery } from "@apollo/client";
 import { getPendingReviews } from '../graphql/Queries';
 import PendingReview from './PendingReview';
+
+import CardGroup from 'react-bootstrap/CardGroup';
 
 function PendingReviews() {
     const {data, loading, error }  = useQuery(getPendingReviews());
@@ -18,7 +19,7 @@ function PendingReviews() {
 
     let reviewList =  
         data &&
-        data.getPendingReviews.map((review) => {
+        data.pendingReviews.map((review) => {
             return <PendingReview review={review} key={review.id} />;
         });
 

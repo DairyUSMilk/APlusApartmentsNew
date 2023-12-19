@@ -26,7 +26,7 @@ export const createReview = async(posterId, apartmentId, rating, content,
       if (!output.acknowledged || !output.insertedId) {
         throw "Review was not inserted into database";
       }
-      await apartmentFunctions.updateApartmentRatingById(id);
+      await apartmentFunctions.updateApartmentRatingById(apartmentId);
       return await getReviewById(output.insertedId);
     };
 
@@ -105,7 +105,7 @@ export const getAllReviewsByPosterId = async(posterId) => {
 
 export const getAllReviewsByApartmentId = async(apartmentId) => {
     const reviewCollection = await reviews();
-    const reviewList = await reviewCollection.find({apartmentId: apartmentId}).toArray();
+    const reviewList = await reviewCollection.find({apartmentId: apartmentId, isApproved: true}).toArray();
     for(let i = 0; i < reviewList.length; i++){
         formatReviewObject(reviewList[i]);
     }
@@ -140,12 +140,12 @@ export const getAllApprovedReviews = async() => {
 }
 
 
-const getIdFilter = async(id) => {
+const getIdFilter = (id) => {
     return {_id: new ObjectId(id)};
 }
 
 const formatReviewObject = async(reviewObject) => {
-    delete reviewObject.password;å
+    delete reviewObject.password;
     reviewObject._id = reviewObject._id.toString();
     return reviewObject;
 }

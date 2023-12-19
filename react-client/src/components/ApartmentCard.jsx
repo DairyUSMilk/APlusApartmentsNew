@@ -7,18 +7,17 @@ import DeleteApartment from './DeleteApartment';
 function ApartmentCard({apartment, userId, accountType}) {
     return (
         <Card className="text-center">
-        <Card.Img variant="top" src={apartment.images.length > 0 ? (apartment.images[0]): '/no-image.png'} />
         <Card.Body>
-            <Card.Title>${apartment.price}/mo</Card.Title>
-            <Card.Subtitle className="mb-2 text-muted">{apartment.address}</Card.Subtitle>
+            <Card.Title><Link to={`/apartment/${apartment.id}`}>{apartment.name}</Link></Card.Title>
+            <Card.Subtitle className="mb-2 text-muted">${apartment.price}/mo</Card.Subtitle>
             <Card.Text>
-            {review.content}
+            {apartment.description}
             </Card.Text>
-            {userId === apartment.landlord.uid || accountType === 'admin' ? (
+            {userId === apartment.landlord.id || accountType === 'admin' ? (
             <DeleteApartment apartment={apartment} />):
             null}
         </Card.Body>
-        <Card.Footer className="text-muted"><Link to={`/apartment/${apartment.landlord.uid}`}>Apartment</Link></Card.Footer>
+        <Card.Footer className="text-muted">{apartment.address}</Card.Footer>
         </Card>
     );
 }

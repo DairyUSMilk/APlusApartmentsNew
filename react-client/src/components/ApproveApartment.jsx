@@ -21,14 +21,14 @@ function ApproveApartment ({apartment}) {
     if (loading) { 
         return (
         <div>
-            <h2>Accepting Apartment....</h2>
+            <h2>Approving Apartment....</h2>
         </div>);
         }
     
     if (error) {
         return (
             <div>
-                <h2>Error Accepting Apartment! {error.message}</h2>
+                <h2>Error Approving Apartment! {error.message}</h2>
             </div>
         );
     }

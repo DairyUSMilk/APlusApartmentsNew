@@ -4,12 +4,14 @@ import bcrypt from "bcrypt";
 import helpers from './../utils/helpers.js';
 
 export const createUser = async(
-    name, email, city, state, dateOfBirth, accountType) => {
+    id, name, email, city, state, dateOfBirth, gender, accountType) => {
+        id = id;
         name = helpers.checkString(name, "name");
         email = helpers.checkEmail(email, "email");
         city = helpers.checkString(city, "city");
         state = helpers.checkState(state, "state");
         dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
+        gender = helpers.checkString(gender, "gender");
         accountType = helpers.checkString(accountType, "accountType").toLowerCase();
     
 
@@ -18,11 +20,13 @@ export const createUser = async(
     }
 
     const user = {
+        _id: id, 
         name,
         email,
         city,
         state,
         dateOfBirth,
+        gender,
         accountType,
         bookmarkedApartments: [] 
         // Assuming it's an array to store bookmarked apartment IDs
@@ -32,12 +36,12 @@ export const createUser = async(
     if(!output.acknowledged || !output.insertedId){
         throw `User with email ${email} was not inserted into database`;
     }
-    return await getUserById(output.insertedId.toString());
+    return await getUserById(output.insertedId);
 }
 
 export const getUserById = async(id) => {
     const userCollection = await users();
-    const user = await userCollection.findOne(getIdFilter(id));
+    const user = await userCollection.findOne({_id: id});
     if(!user){
         throw `No user exists with id ${id}`;
     }
@@ -83,7 +87,7 @@ export const deleteUserById = async(id) => {
 
 //if a field is left blank, it is left unmodified
 export const updateUserInfoById = async(id, 
-    name, email, password, city, 
+    name, email, city, 
     state, dateOfBirth, accountType) => {
     const updateInfo = {};
     name = helpers.checkString(name, "name");
@@ -134,12 +138,12 @@ export const validateLoginAttempt = async(email, password) => {
 }
 
 const getIdFilter = async(id) => {
-    return {_id: new ObjectId(id)};
+    return {_id: id};
 }
 
 const formatUserObject = async(userObject) => {
-    delete userObject.password;
-    userObject._id = userObject._id.toString();
+    //delete userObject.password;
+    //userObject._id = userObject._id.toString();
     return userObject;
 }
 
@@ -149,7 +153,7 @@ export const addApartmentToBookmark = async(userId, apartmentId) => {
 
     const userCollection = await users();
     const updateResult = await userCollection.updateOne(
-        { _id: new ObjectId(userId) },
+        { _id: userId },
         { $addToSet: { bookmarkedApartments: new ObjectId(apartmentId) } }
     );
 
@@ -158,4 +162,21 @@ export const addApartmentToBookmark = async(userId, apartmentId) => {
     }
     return await getUserById(userId);
 };
+
+export const removeApartmentFromBookmark = async(userId, apartmentId) => {
+    userId = helpers.checkString(userId, "userId");
+    apartmentId = helpers.checkId(apartmentId, "apartmentId");
+
+    const userCollection = await users();
+    const updateResult = await userCollection.updateOne(
+        { _id: userId },
+        { $pull: { bookmarkedApartments: new ObjectId(apartmentId) } }
+    );
+
+    if (updateResult.modifiedCount !== 1) {
+        throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
+    }
+    return await getUserById(userId);
+};
+
 

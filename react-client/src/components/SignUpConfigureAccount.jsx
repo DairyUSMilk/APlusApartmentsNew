@@ -9,7 +9,7 @@ import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations'
 function SignUpConfigureAccount() {
   const navigate = useNavigate();
 
-  const {currentUser, accountType} = useContext(Context);
+  const {currentUser} = useContext(Context);
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
   const [addRenter] = useMutation(createRenter());
@@ -26,12 +26,12 @@ function SignUpConfigureAccount() {
     const date = new Date(dateOfBirth.value);
     date.setDate(date.getDate() + 1);
     const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()) + '/' + date.getFullYear();
-    console.log(formattedDob);
 
+    console.log()
     try {
       if(accountType.value === 'renter') {
         addRenter({variables: {
-            uid: currentUser.uid,
+            id: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
             dateOfBirth: formattedDob,
@@ -42,7 +42,7 @@ function SignUpConfigureAccount() {
         );
       } else if (accountType.value === 'landlord') {
         addLandlord({variables: {
-            uid: currentUser.uid,
+            id: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
             dateOfBirth: formattedDob,
@@ -54,7 +54,7 @@ function SignUpConfigureAccount() {
       }
       else if (accountType.value === 'admin') {
         addAdmin({variables: {
-            uid: currentUser.uid,
+            id: currentUser.uid,
             email: currentUser.email,
             name: displayName.value,
             dateOfBirth: formattedDob,
@@ -67,20 +67,21 @@ function SignUpConfigureAccount() {
       else {
         alert("Please specify account type.");
       }
-      navigate('/account');
       await addUserDisplayName(displayName.value);
     } catch (error) {
       alert(error);
     }
   };
 
-  if (currentUser && accountType) {
-    return <Navigate to='/' />;
+  if (currentUser && currentUser.displayName) {
+    return <Navigate to='/account' />;
   }
 
   if (!currentUser) {
     return <Navigate to='sign-up' />;
   }
+
+  console.log(currentUser.uid);
 
   return (
     <div className='card'>
@@ -180,7 +181,7 @@ function SignUpConfigureAccount() {
                 Admin
               </option>
             </select>
-          </div>
+          </div> <br/>
         <button
           className='button'
           id='submitButton'

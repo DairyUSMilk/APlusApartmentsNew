@@ -1,8 +1,9 @@
 import React from 'react';
-import CardGroup from 'react-bootstrap/CardGroup';
-
+import { useQuery } from "@apollo/client";
 import { getPendingApartments } from '../graphql/Queries';
 import PendingApartment from './PendingApartment';
+
+import CardGroup from 'react-bootstrap/CardGroup';
 
 function PendingApartments() {
     const {data, loading, error } = useQuery(getPendingApartments());
@@ -18,8 +19,8 @@ function PendingApartments() {
 
     let apartmentList =  
         data &&
-        data.getPendingReviews.map((review) => {
-            return <PendingApartment review={review} key={review.id} />;
+        data.pendingApartments.map((apartment) => {
+            return <PendingApartment apartment={apartment} key={apartment.id} />;
         });
 
     return (

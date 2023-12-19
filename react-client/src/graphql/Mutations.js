@@ -3,7 +3,7 @@ import { gql } from "@apollo/client";
 export function createRenter() {
     return gql`
     mutation AddRenter(
-        $uid: String!,
+        $id: String!,
         $email: String!,
         $name: String!,
         $dateOfBirth: String!,
@@ -12,7 +12,7 @@ export function createRenter() {
         $state: String!,
     ) {
     addRenter(
-        uid: $uid
+        id: $id
         email: $email
         name: $name
         dateOfBirth: $dateOfBirth
@@ -20,7 +20,7 @@ export function createRenter() {
         city: $city
         state: $state
         ) {
-        uid
+        id
         name
         dateOfBirth
         gender
@@ -32,7 +32,7 @@ export function createRenter() {
 export function createLandlord() {
     return gql`
     mutation AddLandlord(
-        $uid: String!,
+        $id: String!,
         $email: String!,
         $name: String!,
         $dateOfBirth: String!,
@@ -41,7 +41,7 @@ export function createLandlord() {
         $state: String!,
     ) {
     addLandlord(
-        uid: $uid
+        id: $id
         email: $email
         name: $name
         dateOfBirth: $dateOfBirth
@@ -49,7 +49,7 @@ export function createLandlord() {
         city: $city
         state: $state
         ) {
-        uid
+        id
         name
         contactInfo
     }
@@ -60,7 +60,7 @@ export function createLandlord() {
 export function createAdmin() {
     return gql`
     mutation AddAdmin(
-        $uid: String!,
+        $id: String!,
         $email: String!,
         $name: String!,
         $dateOfBirth: String!,
@@ -69,7 +69,7 @@ export function createAdmin() {
         $state: String!,
     ) {
     addAdmin(
-        uid: $uid
+        id: $id
         email: $email
         name: $name
         dateOfBirth: $dateOfBirth
@@ -77,7 +77,7 @@ export function createAdmin() {
         city: $city
         state: $state
         ) {
-        uid
+        id
         name
     }
     }
@@ -87,35 +87,33 @@ export function createAdmin() {
 export function createApartment() {
     return gql`
     mutation AddApartment(
+        $name: String!,
         $address: String!, 
+        $city: String!,
+        $state: String!,
         $price: Float!, 
         $amenities: [String]!,
         $landlordId: String!,
-        $description: String,
-        $images: [String]) {
+        $description: String) {
         addApartment(
-            address: $address, 
+            name: $name
+            address: $address,
+            city: $city,
+            state: $state, 
             price: $price, 
             amenities: $amenities,
             landlordId: $landlordId, 
-            description: $description, 
-            images: $images) {
+            description: $description) {
           id
+          name
           address
           description
-          images
           price
           amenities
           landlord {
-            uid
+            id
             name
             contactInfo
-          }
-          reviews {
-            posterId
-            rating
-            content
-            datePosted
           }
         }
       }
@@ -124,8 +122,8 @@ export function createApartment() {
 
 export function deleteApartment() {
     return gql`
-    mutation RemoveApartment($uid: String!) {
-    removeApartment(uid: $uid) {
+    mutation RemoveApartment($id: String!) {
+    removeApartment(id: $id) {
         id
     }
     }
@@ -134,8 +132,8 @@ export function deleteApartment() {
 
 export function approveApartment() {
     return gql`
-    mutation ApproveApartment($uid: String!) {
-        approveApartment(iod: $uid) {
+    mutation ApproveApartment($id: String!) {
+        approveApartment(iod: $id) {
           id
         }
     }

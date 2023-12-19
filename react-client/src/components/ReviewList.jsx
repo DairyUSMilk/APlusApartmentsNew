@@ -1,4 +1,6 @@
 import React from 'react';
+import { useQuery } from "@apollo/client";
+
 import CardGroup from 'react-bootstrap/CardGroup';
 
 import { getUserReviews } from '../graphql/Queries';
@@ -6,7 +8,7 @@ import Review from './ReviewCard';
 
 function ReviewList({userId, accountType}) {
     const {data, loading, error }  = useQuery(getUserReviews(), {
-        variables: {uid: userId}
+        variables: {posterId: userId}
     });
 
     if (loading) {

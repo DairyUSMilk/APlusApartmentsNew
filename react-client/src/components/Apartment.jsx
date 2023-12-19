@@ -1,5 +1,5 @@
-import React, { useContext, useEffect, useState } from 'react';
-import { Link, Navigate, useParams, useNavigate, useRouteError } from 'react-router-dom';
+import React, { useContext, useState } from 'react';
+import { Link, useParams, useNavigate, useRouteError } from 'react-router-dom';
 import { Context } from '../firebase/Context';
 import { useQuery } from "@apollo/client";
 
@@ -11,18 +11,12 @@ import '../index.css';
 
 function Apartment() {
     let { id } = useParams();
-    const  {currentUser} = useContext(Context);
-
-    if (!currentUser) {
-        return <Navigate to='/' />;
-    }
-
-    if (currentUser && !currentUser.displayName) {
-        return <Navigate to='/sign-up-config' />;
-    }
+    const {currentUser} = useContext(Context);
+    const [uid] = useState(currentUser ? currentUser.uid : null);
 
     const { data, loading, error } = useQuery(getUserAccountType(), {
-        variables: {uid: currentUser.uid}
+      variables: { id: uid },
+      skip: !currentUser || !currentUser.displayName
     });
 
     if (loading) {
@@ -35,15 +29,15 @@ function Apartment() {
         throw new Error(error.message);
     }
 
-    let currentAccountType = data.getUserAccountType;
-
+    let accountType;
+    if(data) {
+      accountType = data.getUserAccountType;
+    }
+  
     return (
         <div>
             <h2>Apartment</h2>
-            <ApartmentDetails id={id} userId={currentUser.uid} accountType={currentAccountType} />
-            <Link to='/change-password' className='btn btn-primary'>
-                Change Password
-            </Link>
+            <ApartmentDetails id={id} userId={uid} accountType={accountType} />
         </div>
     );
 }
