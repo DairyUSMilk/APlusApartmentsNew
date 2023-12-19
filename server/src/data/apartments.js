@@ -90,7 +90,6 @@ export const approveApartmentById = async(id) => {
     const apartmentCollection = await apartments();
     const updateInfo = {$set: {isApproved: true}};
     const result = await apartmentCollection.updateOne(getIdFilter(id), updateInfo);
-    console.log(result);
     if(result.modifiedCount !== 1){
         throw `No apartment exists with id ${id}`;
     }

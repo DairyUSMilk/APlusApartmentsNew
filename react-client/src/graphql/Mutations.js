@@ -133,7 +133,7 @@ export function deleteApartment() {
 export function approveApartment() {
     return gql`
     mutation ApproveApartment($id: String!) {
-        approveApartment(iod: $id) {
+        approveApartment(id: $id) {
           id
         }
     }

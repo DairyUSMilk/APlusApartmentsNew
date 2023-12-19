@@ -582,8 +582,53 @@ export const resolvers = {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
-
     },
+    approveApartment: async (_, args) => {
+      let id = validation.checkId(args.id, "apartment id");
+      let approvedAppartment;
+      try {
+        approvedAppartment = await apartments.approveApartmentById(id);
+      } catch (e) {
+        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`apartment.${approvedAppartment.id}`);
+        await client.del(`apartments`);
+        await client.del(`pendingApartments`);
+
+        return apartmentFormat(approvedAppartment);
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
+    approveReview: async (_, args) => {
+      let id = validation.checkId(args.id, "review id");
+      let approvedReview;
+      try {
+        approvedReview = await reviews.approveReviewById(id);
+      } catch (e) {
+        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`review.${approvedReview.id}`);
+        await client.del(`reviews`);
+        await client.del(`pendingReviews`);
+
+        return reviewFormat(approvedReview);
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    }
   },
 };
 
