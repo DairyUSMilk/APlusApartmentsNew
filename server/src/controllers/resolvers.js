@@ -721,6 +721,21 @@ export const resolvers = {
         });
       }
     },
+    createReview: async (_, args) => {
+        try{
+            const newReview = await reviews.createReview(
+                args.posterId,
+                args.apartmentId,
+                args.rating,
+                args.content,
+                args.datePosted
+            );
+            return reviewFormat(newReview);
+        } catch(e) {
+            console.log(e);
+            throw new GraphQLError(`Internal Server Error`);
+        }
+    },
     addBookmark: async (_, args) => {
       let userId = validation.checkString(args.userId, "user id");
       let apartmentId = validation.checkId(args.apartmentId, "apartment id");
