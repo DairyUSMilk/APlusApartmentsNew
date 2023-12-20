@@ -98,7 +98,7 @@ export const approveApartmentById = async(id) => {
 
 export const getApartmentsByLandlordId = async(id) => {
     const apartmentCollection = await apartments();
-    const landlordApartments = await apartmentCollection.find({landlord: id}).toArray();
+    const landlordApartments = await apartmentCollection.find({landlord: id, isApproved: true}).toArray();
     for(let i = 0; i < landlordApartments.length; i++){
         formatApartmentObject(landlordApartments[i]);
     }
@@ -122,6 +122,47 @@ export const getAllApprovedApartments = async() => {
     }
     return approvedApartments;
 }
+
+export const getApprovedApartmentsByFilter = async(city, state, minPrice, maxPrice, rating) => {
+    const searchQuery = { isApproved: true };
+    if (city) {
+        city = helpers.checkString(city, "city");
+        searchQuery.city = { $regex: new RegExp("^" + city + '$', "i") } ;
+    }
+    if (state) {
+        state = helpers.checkState(state, "state");
+        searchQuery.state = { $regex: new RegExp("^" + state + '$') } ;
+    }
+
+    if (minPrice) {
+        minPrice = helpers.checkNumber(minPrice, "min price");
+        searchQuery.pricePerMonth = { $gte: minPrice }
+    }
+
+    if (maxPrice) {
+        maxPrice = helpers.checkNumber(maxPrice, "max price");
+        if (minPrice) {
+            if (maxPrice <= minPrice) throw `Max price must be greater than min.`;
+            searchQuery.pricePerMonth.$lte = maxPrice;
+        }
+        else {
+            searchQuery.pricePerMonth = { $lte: maxPrice };
+        }
+    }
+
+    if (rating) {
+        rating = helpers.checkNumber(rating, "rating"); 
+        searchQuery.rating = { $gte: rating }
+    }
+
+    const apartmentCollection = await apartments();
+    const apartmentList = await apartmentCollection.find(searchQuery).toArray();
+    for(let i = 0; i < apartmentList.length; i++){
+        formatApartmentObject(apartmentList[i]);
+    }
+    return apartmentList;
+}
+
 
 //if a parameter is left blank it is left unchanged
 export async function updateApartmentInfoById(id, 
@@ -173,8 +214,8 @@ export const getUserBookmarkedApartments = async(userId) => {
             const apartment = await getApartmentById(id);
             bookmarkedApartments.push(apartment);
         }
-        catch { // apartment not found, means it was deleted --> remove id from bookmark
-            await users.removeApartmentFromBookmark(userId, id);
+        catch (e) { // apartment not found, means it was deleted --> remove id from bookmark
+            await users.removeApartmentFromBookmark(userId, id.toString());
         }
     }
 

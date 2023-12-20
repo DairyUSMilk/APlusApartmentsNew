@@ -12,6 +12,7 @@ export function getRenter() {
     return gql`
     query ($id: String!) {
     getRenterById(id: $id) {
+        id
         name
         dateOfBirth
         gender
@@ -33,6 +34,7 @@ export function getLandlord() {
     return gql`
     query ($id: String!) {
     getLandlordById(id: $id) {
+        id
         name
         contactInfo
         savedApartments {
@@ -63,6 +65,7 @@ export function getAdmin() {
     return gql`
     query ($id: String!) {
     getAdminById(id: $id) {
+        id
         name
         savedApartments {
             id
@@ -133,13 +136,23 @@ export function getPendingReviews() {
 
 export function getApprovedApartments() {
     return gql`
-    {
-    apartments {
+    query (
+        $city: String,
+        $state: String,
+        $minPrice: Float,
+        $maxPrice: Float,
+        $rating: Float) {
+    apartments (
+        city: $city,
+        state: $state,
+        minPrice: $minPrice,
+        maxPrice: $maxPrice,
+        rating: $rating
+    ) {
         id
         name
         address
         description
-        images
         price
         amenities
         reviews {

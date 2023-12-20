@@ -1,11 +1,11 @@
 import React, {useContext, useState} from 'react';
 import {Navigate} from 'react-router-dom';
-import {Context} from '../firebase/Context';
+import {UserContext} from '../context/UserContext';
 import {changePassword} from '../firebase/AuthFunctions';
 import '../index.css';
 
 function ChangePassword() {
-  const {currentUser} = useContext(Context);
+  const {currentUser} = useContext(UserContext);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   const submitForm = async (event) => {

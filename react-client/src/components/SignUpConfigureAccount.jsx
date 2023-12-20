@@ -1,15 +1,13 @@
 import React, {useContext, useState} from 'react';
 import { Navigate, useNavigate } from "react-router-dom";
 import { addUserDisplayName } from '../firebase/AuthFunctions';
-import { Context } from '../firebase/Context';
+import { UserContext } from '../context/UserContext';
 
 import { useMutation } from "@apollo/client";
 import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations';
 
 function SignUpConfigureAccount() {
-  const navigate = useNavigate();
-
-  const {currentUser} = useContext(Context);
+  const {currentUser} = useContext(UserContext);
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
   const [addRenter] = useMutation(createRenter());
@@ -26,14 +24,6 @@ function SignUpConfigureAccount() {
     const date = new Date(dateOfBirth.value);
     date.setDate(date.getDate() + 1);
     const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()) + '/' + date.getFullYear();
-
-    console.log(currentUser.uid,
-      currentUser.email,
-      displayName.value,
-      formattedDob,
-      gender.value,
-      city.value,
-      state.value);
 
     try {
       if(accountType.value === 'renter') {

@@ -15,7 +15,7 @@ function DeleteApartment ({apartment}) {
 
     function handleDelete() {
         removeApartment();
-        navigate('/'); // todo - figure out refetchQuery after mutation; this is hacky
+        navigate(0); // todo - figure out refetchQuery after mutation; this is hacky
     }
     
     if (loading) { 

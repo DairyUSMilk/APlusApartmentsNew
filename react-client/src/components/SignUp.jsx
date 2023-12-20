@@ -1,11 +1,11 @@
 import React, { useContext, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import { createUser } from "../firebase/AuthFunctions";
-import { Context } from "../firebase/Context";
+import {UserContext} from '../context/UserContext';
 import { googleLogIn } from "../firebase/AuthFunctions";
 
 function SignUp() {
-  const { currentUser } = useContext(Context);
+  const { currentUser } = useContext(UserContext);
   const [passwordsMatch, setPasswordsMatch] = useState(true);
 
   const navigate = useNavigate();
