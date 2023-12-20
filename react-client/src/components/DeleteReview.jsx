@@ -29,7 +29,7 @@ function DeleteReview ({review}) {
     if (error) {
         return (
             <div>
-                <h2>Error Deleting Review! {error.message}</h2>
+                <h2>Error Deleting Review! {error}</h2>
             </div>
         );
     }

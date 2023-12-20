@@ -1,11 +1,11 @@
 import React, {useContext} from 'react';
 import {Navigate, useNavigate} from 'react-router-dom';
-import {Context} from '../firebase/Context';
+import {UserContext} from '../context/UserContext';
 import {resetPassword} from '../firebase/AuthFunctions';
 import { googleSignIn } from './SignIn';
 
 function ForgotPassword() {
-    const {currentUser} = useContext(Context);
+    const {currentUser} = useContext(UserContext);
     
     const passwordReset = (event) => {
         event.preventDefault();

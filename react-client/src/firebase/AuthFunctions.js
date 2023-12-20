@@ -11,16 +11,9 @@ import {
     EmailAuthProvider,
     reauthenticateWithCredential
   } from 'firebase/auth';
-
-//import {ObjectId} from 'mongodb';
   
   async function createUser(email, password) {
     const auth = getAuth();
-    /*await auth.createUser({
-      uid: new ObjectId(),
-      email: email,
-      password: password
-    })*/
     await createUserWithEmailAndPassword(auth, email, password);
   }
   

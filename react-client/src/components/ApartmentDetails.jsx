@@ -1,4 +1,5 @@
-import React, {useState} from 'react';
+import React, {useState, useContext} from 'react';
+import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { ImageList, ImageListItem } from '@mui/material';
 import { useQuery } from "@apollo/client";
@@ -20,12 +21,14 @@ import {
 } from '@mui/material';
 import '../index.css';
 
-function ApartmentDetails({id, userId, accountType}) {
-    const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+function ApartmentDetails({id}) {
+    const {userData, accountType} = useContext(UserContext);
+    
+    const [isReviewFormVisible, setIsReviewFormVisible] = useState(false);
     const navigate = useNavigate();
 
-    function toggleAddForm() {
-        setIsAddFormVisible(!isAddFormVisible);    
+    function toggleReviewForm() {
+        setIsReviewFormVisible(!isReviewFormVisible);    
     }
 
     function ApartmentImages(apartment) {
@@ -54,18 +57,6 @@ function ApartmentDetails({id, userId, accountType}) {
         variables: {id: id}
     });
 
-    let query = getRenter();
-    if (accountType === 'landlord') {
-       query = getLandlord();
-    }
-    else if (accountType === 'admin') {
-        query = getAdmin();
-    }
-
-    const {data: userData, loading: userLoading, error: userError }  = useQuery(query, {
-      variables: {id: userId},
-      skip: !accountType
-    });
 
     if (loading) {
         return (
@@ -75,27 +66,6 @@ function ApartmentDetails({id, userId, accountType}) {
 
     if (error) {
         throw new Error(error.message);
-    }
-
-    if (userLoading) {
-        return (
-          <h2> Loading user data... </h2>
-        );
-    }
-  
-    if (userError) {
-        throw new Error(userError);
-    }
-
-    let user;
-    if (accountType === 'renter') {
-      user = userData.getRenterById;
-    }
-    else if (accountType === 'landlord') {
-      user = userData.getLandlordById;
-    }
-    else if (accountType === 'admin') {
-      user = userData.getAdminById;
     }
 
     let apartment = data.getApartmentById;
@@ -146,11 +116,10 @@ function ApartmentDetails({id, userId, accountType}) {
                    component={'div'} 
                 />
                 {ApartmentImages(apartment)}
-                {accountType && userId !== apartment.landlord.id ? (
+                {accountType && userData.id !== apartment.landlord.id ? (
                     <AddOrRemoveBookmark 
-                    userId={userId} 
                     apartment={apartment} 
-                    inBookmark={user && user.savedApartments.some(item => item.id === apartment.id)} />): null}
+                    inBookmark={userData && userData.savedApartments.some(item => item.id === apartment.id)} />): null}
 
                 <CardContent>
                     <Typography
@@ -195,7 +164,7 @@ function ApartmentDetails({id, userId, accountType}) {
                                     </Button>
                         </Typography>
                     </CardContent>
-                    {userId === apartment.landlord.id || accountType === 'admin' ? (
+                    {(userData && userData.id === apartment.landlord.id) || accountType === 'admin' ? (
                     <DeleteApartment apartment={apartment} />):
                     null}
                 </Card>
@@ -206,12 +175,12 @@ function ApartmentDetails({id, userId, accountType}) {
                     style={{justifyContent: 'center'}}
                     variant="contained"
                     color="primary"
-                    onClick={toggleAddForm}
+                    onClick={toggleReviewForm}
                     >
                     Add a Review
                 </Button> ):
                 null}
-                {isAddFormVisible ? <AddReview posterId={userId} apartmentId={apartment.id} /> : null}
+                {isReviewFormVisible ? <AddReview posterId={userId} apartmentId={apartment.id} /> : null}
                 <br/><br/>
                 <Button 
                     style={{justifyContent: 'center'}}

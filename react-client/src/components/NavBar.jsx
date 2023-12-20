@@ -1,6 +1,5 @@
 import React, {useContext} from 'react';
-import {NavLink} from 'react-router-dom';
-import {Context} from '../firebase/Context';
+import {UserContext} from '../context/UserContext';
 import {logOut} from '../firebase/AuthFunctions';
 import Container from 'react-bootstrap/Container';
 import Nav from 'react-bootstrap/Nav';
@@ -8,7 +7,7 @@ import Navbar from 'react-bootstrap/Navbar';
 import '../index.css';
 
 function NavBar() {
-  const {currentUser} = useContext(Context);
+  const {currentUser} = useContext(UserContext);
   return <div>{currentUser ? <NavBarSignedIn /> : <NavBarSignedOut />}</div>;
 }
 

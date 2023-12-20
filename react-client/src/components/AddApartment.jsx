@@ -40,7 +40,6 @@ function AddApartment({userId}) {
         newApartment.amenities=helpers.checkStringArray(allAmenities, 'ameneties');
         try {
             addApartment({ variables: newApartment });
-            navigate(0);
         }
         catch (e) {
             alert(e);

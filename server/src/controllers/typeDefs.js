@@ -2,7 +2,13 @@ export const typeDefs = `#graphql
     type Query {
         renters: [Renter]
         landlords: [Landlord]
-        apartments: [Apartment]
+        apartments(
+            city: String,
+            state: String,
+            minPrice: Float,
+            maxPrice: Float,
+            rating: Float
+        ): [Apartment]
         pendingApartments: [Apartment]
         reviews(posterId: String!): [Review]
         pendingReviews: [Review]

@@ -1,4 +1,5 @@
-import React from 'react';
+import React, {useContext} from 'react';
+import { UserContext } from '../context/UserContext';
 import { useQuery } from "@apollo/client";
 
 import CardGroup from 'react-bootstrap/CardGroup';
@@ -6,9 +7,10 @@ import CardGroup from 'react-bootstrap/CardGroup';
 import { getUserReviews } from '../graphql/Queries';
 import Review from './ReviewCard';
 
-function ReviewList({userId, accountType}) {
+function ReviewList() {
+    const {userData} = useContext(UserContext);
     const {data, loading, error }  = useQuery(getUserReviews(), {
-        variables: {posterId: userId}
+        variables: {posterId: userData.id}
     });
 
     if (loading) {
@@ -24,7 +26,7 @@ function ReviewList({userId, accountType}) {
     let reviewList =  
         data &&
         data.reviews.map((review) => {
-            return <Review review={review} userId={uid} accountType={accountType} key={review.id} />;
+            return <Review review={review} key={review.id} />;
         });
 
     return (

@@ -86,7 +86,7 @@ const exportedMethods = {
     if (!unitedStates.includes(state.toUpperCase()))
     //check if state is not listed above
       throw new Error(`${state} is not a valid state abbreviation`);
-    return state;
+    return state.toUpperCase();
   },
 
   checkDate(dob, varName) {

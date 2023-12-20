@@ -1,6 +1,6 @@
 import React, {useContext} from 'react';
 import {Navigate} from 'react-router-dom';
-import {Context} from '../firebase/Context';
+import {UserContext} from '../context/UserContext';
 import {logIn, googleLogIn} from '../firebase/AuthFunctions';
 
 export const googleSignIn = async () => {
@@ -12,7 +12,7 @@ export const googleSignIn = async () => {
 };
 
 function SignIn() {
-  const {currentUser} = useContext(Context);
+  const {currentUser} = useContext(UserContext);
   
   const handleLogin = async (event) => {
     event.preventDefault();

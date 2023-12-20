@@ -186,39 +186,99 @@ export const resolvers = {
         }
       }
     },
-    apartments: async () => {
-      let exists = await client.exists("apartments");
-      if (exists) {
-        console.log("apartments in cache");
-        try {
-          let allApartments = await client.get("apartments");
-          return JSON.parse(allApartments);
-        } catch (e) {
-          throw new GraphQLError(`Internal Server Error`, {
-            extensions: { code: "INTERNAL_SERVER_ERROR" },
-          });
-        }
-      } else {
-        try {
-          const allApartments = await apartments.getAllApprovedApartments();
-          if (!allApartments) {
+    apartments: async (_, args) => {
+      let hasFilter = false;
+
+      if (args.city) {
+          args.city = validation.checkString(args.city, "city");
+          hasFilter = true;
+      }
+
+      if (args.state) {
+          args.state = validation.checkState(args.state, "state");
+          hasFilter = true;
+      }
+  
+      if (args.minPrice) {
+          args.minPrice = validation.checkNumber(args.minPrice, "min price");
+          hasFilter = true;
+      }
+  
+      if (args.maxPrice) {
+          if (args.minPrice && args.maxPrice <= args.minPrice) {
+            throw new GraphQLError(`Max filter price must be greater than min`, {
+              extensions: { code: "INTERNAL_SERVER_ERROR" },
+            });
+          }
+          args.maxPrice = validation.checkNumber(args.maxPrice, "max price");
+          hasFilter = true;
+      }
+  
+      if (args.rating) {
+          args.rating = validation.checkNumber(args.rating, "rating"); 
+          hasFilter = true;
+      }
+
+      if (!hasFilter) { // get all approved apartments without filering
+        let exists = await client.exists("apartments");
+        if (exists) {
+          console.log("apartments in cache");
+          try {
+            let allApartments = await client.get("apartments");
+            return JSON.parse(allApartments);
+          } catch (e) {
             throw new GraphQLError(`Internal Server Error`, {
               extensions: { code: "INTERNAL_SERVER_ERROR" },
             });
           }
+        } else {
+          try {
+            const allApartments = await apartments.getAllApprovedApartments();
+            if (!allApartments) {
+              throw new GraphQLError(`Internal Server Error`, {
+                extensions: { code: "INTERNAL_SERVER_ERROR" },
+              });
+            }
 
-          const formattedApartments = allApartments.map((apartment) => {
-            return apartmentFormat(apartment);
-          });
+            const formattedApartments = allApartments.map((apartment) => {
+              return apartmentFormat(apartment);
+            });
 
-          await client.set("apartments", JSON.stringify(formattedApartments));
-          await client.expire("apartments", 3600);
-          return formattedApartments;
-        } catch (e) {
-          throw new GraphQLError(e, {
+            await client.set("apartments", JSON.stringify(formattedApartments));
+            await client.expire("apartments", 3600);
+            return formattedApartments;
+          } catch (e) {
+            throw new GraphQLError(e, {
+              extensions: { code: "INTERNAL_SERVER_ERROR" },
+            });
+          }
+        }
+      }
+      try { // use some combination of filters to query Apartments collection in db
+        const allApartments = await apartments.getApprovedApartmentsByFilter(
+          args.city,
+          args.state,
+          args.minPrice,
+          args.maxPrice,
+          args.rating
+        );
+        if (!allApartments) {
+          throw new GraphQLError(`Internal Server Error`, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
           });
         }
+
+        const formattedApartments = allApartments.map((apartment) => {
+          return apartmentFormat(apartment);
+        });
+
+        // do not cache in redis here since there are too many combinations of filters
+        // when you edit or add a new apartment you would need to reset all stored combos of filters in cache
+        return formattedApartments;
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
       }
     },
     pendingApartments: async () => {

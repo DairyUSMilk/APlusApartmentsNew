@@ -1,19 +1,22 @@
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
+import { UserContext } from '../context/UserContext';
 import { useMutation } from "@apollo/client";
 import { addApartmentToBookmark, removeApartmentFromBookmark } from '../graphql/Mutations';
 
 import Button from 'react-bootstrap/Button';
 import '../index.css';
 
-function AddOrRemoveBookmark ({userId, apartment, inBookmark}) {
+function AddOrRemoveBookmark ({apartment, inBookmark}) {
+    const { userData } = useContext(UserContext);
+
     const [isInBookmark, setInBookmark] = useState(inBookmark);
 
     const [addBookmark] = useMutation(addApartmentToBookmark(), {
-        variables: {userId: userId, apartmentId: apartment.id}
+        variables: {userId: userData.id, apartmentId: apartment.id}
     });
 
     const [removeBookmark] = useMutation(removeApartmentFromBookmark(), {
-        variables: {userId: userId, apartmentId: apartment.id}
+        variables: {userId: userData.id, apartmentId: apartment.id}
     });
 
     function handleAddBookmark() {
@@ -27,7 +30,7 @@ function AddOrRemoveBookmark ({userId, apartment, inBookmark}) {
     }
      
     return (
-        userId !== apartment.landlord.id ? (
+        userData.id !== apartment.landlord.id ? (
             isInBookmark ? 
             <Button 
                 className='addBookmark'
