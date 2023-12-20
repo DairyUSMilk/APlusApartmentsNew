@@ -2,33 +2,38 @@ export const typeDefs = `#graphql
     type Query {
         renters: [Renter]
         landlords: [Landlord]
-        reviews: [Review]
         apartments: [Apartment]
-        getRenterById(uid: String!): Renter
-        getLandlordById(uid: String!): Landlord
-        getAdminById(uid: String!): Admin
-        getUserAccountType(uid: String!): String
-        getApartmentById(_id: String!): Apartment
+        pendingApartments: [Apartment]
+        reviews(posterId: String!): [Review]
+        pendingReviews: [Review]
+        getRenterById(id: String!): Renter
+        getLandlordById(id: String!): Landlord
+        getAdminById(id: String!): Admin
+        getUserAccountType(id: String!): String
+        getApartmentById(id: String!): Apartment
     }
     type Renter{
-        uid: String!
+        id: String!
         name: String!
         dateOfBirth: String!
         gender: String!
         savedApartments: [Apartment]
     }
     type Landlord {
-        uid: String!,
+        id: String!
         name: String!
         contactInfo: String!
+        savedApartments: [Apartment]
         ownedApartments: [Apartment]
     }
     type Admin {
-        uid: String!,
+        id: String!
         name: String!
+        savedApartments: [Apartment]
     }
     type Apartment {
         id: String!
+        name: String!
         address: String!
         description: String
         images: [String]
@@ -38,6 +43,7 @@ export const typeDefs = `#graphql
         reviews: [Review]
     }
     type Review{
+        id: String!
         posterId: String!
         apartmentId: String!
         rating: Int!
@@ -46,7 +52,7 @@ export const typeDefs = `#graphql
     }
     type Mutation{
         addRenter(
-            uid: String!
+            id: String!
             email: String!
             name: String!
             city: String!
@@ -56,14 +62,17 @@ export const typeDefs = `#graphql
             savedApartments: [String]
         ): Renter
         editRenter(
-            uid: String!
+            id: String!
             name: String
             dateOfBirth: String
             gender: String
             savedApartments: [String]
         ):Renter
         addApartment(
+            name: String!
             address: String!
+            city: String!
+            state: String!
             description: String
             images: [String]
             price: Float!
@@ -71,13 +80,13 @@ export const typeDefs = `#graphql
             landlordId: String!
         ): Apartment
         removeApartment(
-            uid: String!
+            id: String!
         ): Apartment
         removeRenter(
-            uid: String!
+            id: String!
         ): Renter
         addLandlord(
-            uid: String!
+            id: String!
             email: String!
             name: String!
             dateOfBirth: String!
@@ -87,16 +96,16 @@ export const typeDefs = `#graphql
             ownedApartments: [String]
         ): Landlord
         editLandlord(
-            uid: String!
+            id: String!
             name: String
             contactInfo: String
             ownedApartments: [String]
         ): Landlord
         removeLandlord(
-            uid: String!
+            id: String!
         ): Landlord
         addAdmin(
-            uid: String!
+            id: String!
             email: String!
             name: String!
             dateOfBirth: String!
@@ -105,32 +114,43 @@ export const typeDefs = `#graphql
             state: String!
         ): Admin
         editAdmin(
-            uid: String!
+            id: String!
             name: String
         ): Admin
         removeAdmin(
-            uid: String!
+            id: String!
         ): Admin
         createReview(
             posterId: String!
             apartmentId: String!
-            rating: String!
+            rating: Int!
             content: String
             datePosted: String
         ): Review
         updateReview(
+            id: String!
             posterId: String!
             apartmentId: String
-            rating: String
+            rating: Int
             content: String
             datePosted: String
         ): Review
         deleteReview(
-            posterId: String!
+            id: String!
         ): Review
         approveReview(
-            posterId: String!
+            id: String!
         ): Review
-
+        approveApartment(
+            id: String!
+        ): Apartment
+        addBookmark(
+            userId: String!
+            apartmentId: String!
+        ): String
+        removeBookmark(
+            userId: String!
+            apartmentId: String!
+        ): String
     }
 `;

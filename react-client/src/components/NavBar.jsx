@@ -2,6 +2,9 @@ import React, {useContext} from 'react';
 import {NavLink} from 'react-router-dom';
 import {Context} from '../firebase/Context';
 import {logOut} from '../firebase/AuthFunctions';
+import Container from 'react-bootstrap/Container';
+import Nav from 'react-bootstrap/Nav';
+import Navbar from 'react-bootstrap/Navbar';
 import '../index.css';
 
 function NavBar() {
@@ -11,46 +14,35 @@ function NavBar() {
 
 const NavBarSignedIn = () => {
     return (
-      <nav className='navigation'>
-        <ul>
-          <li>
-            <NavLink to='/'>Home</NavLink>
-          </li>
-          <li>
-            <NavLink to='account'>Account</NavLink>
-          </li>
-          <li>
-            <SignOutButton />
-          </li>
-        </ul>
-      </nav>
+      <Navbar bg="light" data-bs-theme="light">
+      <Container>
+        <Nav className="me-auto">
+          <Nav.Link href="/">Home</Nav.Link>
+          <Nav.Link href="/account">Account</Nav.Link>
+          <SignOutButton />
+        </Nav>
+      </Container>
+    </Navbar>
     );
   };
   
   const NavBarSignedOut = () => {
     return (
-      <nav className='navigation'>
-        <ul>
-          <li>
-            <NavLink to='/'>Home</NavLink>
-          </li>
-          <li>
-            <NavLink to='sign-up'>Sign up</NavLink>
-          </li>
-  
-          <li>
-            <NavLink to='sign-in'>Sign In</NavLink>
-          </li>
-        </ul>
-      </nav>
+      <Navbar bg="light" data-bs-theme="light">
+      <Container>
+        <Nav className="me-auto">
+          <Nav.Link href="/">Home</Nav.Link>
+          <Nav.Link href="/sign-in">Sign In</Nav.Link>
+          <Nav.Link href="/sign-up">Sign Up</Nav.Link>
+        </Nav>
+      </Container>
+    </Navbar>
     );
   };
   
   const SignOutButton = () => {
     return (
-      <NavLink to='/' onClick={logOut}>
-        Sign Out
-      </NavLink>
+      <Nav.Link href="/" onClick={logOut}>Sign Out</Nav.Link>
     );
   };
 

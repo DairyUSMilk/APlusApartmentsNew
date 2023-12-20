@@ -105,7 +105,7 @@ export const getAllReviewsByPosterId = async(posterId) => {
 
 export const getAllReviewsByApartmentId = async(apartmentId) => {
     const reviewCollection = await reviews();
-    const reviewList = await reviewCollection.find({apartmentId: apartmentId}).toArray();
+    const reviewList = await reviewCollection.find({apartmentId: apartmentId, isApproved: true}).toArray();
     for(let i = 0; i < reviewList.length; i++){
         formatReviewObject(reviewList[i]);
     }
@@ -140,7 +140,7 @@ export const getAllApprovedReviews = async() => {
 }
 
 
-const getIdFilter = async(id) => {
+const getIdFilter = (id) => {
     return {_id: new ObjectId(id)};
 }
 

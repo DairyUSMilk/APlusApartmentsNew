@@ -2,23 +2,27 @@ import { gql } from "@apollo/client";
 
 export function getUserAccountType() {
     return gql`
-    query ($uid: String!) {
-    getUserAccountType(uid: $uid)
+    query ($id: String!) {
+    getUserAccountType(id: $id)
     }
     `;
 }
 
 export function getRenter() {
     return gql`
-    query ($uid: String!) {
-    getRenterById(uid: $uid) {
+    query ($id: String!) {
+    getRenterById(id: $id) {
         name
         dateOfBirth
         gender
         savedApartments {
             id
+            name
             address
             price
+            landlord {
+                id
+            }
         }
     }
     }
@@ -27,14 +31,28 @@ export function getRenter() {
 
 export function getLandlord() {
     return gql`
-    query ($uid: String!) {
-    getLandlordById(uid: $uid) {
+    query ($id: String!) {
+    getLandlordById(id: $id) {
         name
         contactInfo
-        ownedApartments {
+        savedApartments {
             id
+            name
             address
             price
+            landlord {
+                id
+            }
+        }
+        ownedApartments {
+            id
+            name
+            address
+            description
+            price
+            landlord {
+                id
+            }
         }
     }
     }
@@ -43,35 +61,59 @@ export function getLandlord() {
 
 export function getAdmin() {
     return gql`
-    query ($uid: String!) {
-    getAdminById(uid: $uid) {
+    query ($id: String!) {
+    getAdminById(id: $id) {
         name
+        savedApartments {
+            id
+            name
+            address
+            price
+            landlord {
+                id
+            }
+        }
     }
     }
     `;
 }
 
-export function getApartmentReviews() {
+export function getApartment() {
     return gql`
-    query ($uid: String!) {
-    getReviewsByApartmentId(_id: $uid) {
-        posterId
-        rating
-        content
-        datePosted
+    query ($id: String!) {
+    getApartmentById(id: $id) {
+        id
+        name
+        address
+        description
+        price
+        amenities
+        landlord {
+            id
+            name
+            contactInfo
+        }
+        reviews {
+            posterId
+            rating
+            content
+            datePosted
+        }
+    }
     }
     `;
 }
 
 export function getUserReviews() {
     return gql`
-    {
-    query ($uid: String!) {
-    getReviewsByUserId(_id: $uid) {
+    query ($posterId: String!) {
+    reviews(posterId: $posterId) {
+        id
         apartmentId
         rating
         content
         datePosted
+    }
     }
     `;
 }
@@ -79,11 +121,12 @@ export function getUserReviews() {
 export function getPendingReviews() {
     return gql`
     {
-    getPendingReviews {
+    pendingReviews {
         apartmentId
         rating
         content
         datePosted
+    }
     }
     `;
 }
@@ -93,16 +136,24 @@ export function getApprovedApartments() {
     {
     apartments {
         id
+        name
         address
         description
         images
         price
         amenities
-        groups
-        reviews
-        landlord {
-            name
+        reviews {
+            posterId
+            rating
+            content
+            datePosted
         }
+        landlord {
+            id
+            name
+            contactInfo
+        }
+    }
     }
     `;
 }
@@ -110,18 +161,17 @@ export function getApprovedApartments() {
 export function getPendingApartments() {
     return gql`
     {
-    getPendingApartments {
+    pendingApartments {
         id
         address
         description
         images
         price
         amenities
-        groups
-        reviews
         landlord {
             name
         }
+    }
     }
     `;
 }

@@ -6,7 +6,6 @@ import * as apartments from "../data/apartments.js";
 import redis from "redis";
 import flat from "flat";
 import validation from "../utils/helpers.js";
-import { v4 as uuid } from "uuid";
 
 const unflatten = flat.unflatten;
 const client = redis.createClient();
@@ -34,9 +33,14 @@ export const resolvers = {
               extensions: { code: "INTERNAL_SERVER_ERROR" },
             });
           }
-          await client.set("renters", JSON.stringify(renters));
+
+          const renterFields =  renters.map((renter) => {
+            return reviewFormat(renter);
+          });
+
+          await client.set("renters", JSON.stringify(renterFields));
           await client.expire("renters", 3600);
-          return renters;
+          return renterFields;
         } catch (e) {
           throw new GraphQLError(`Internal Server Error`, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -65,9 +69,14 @@ export const resolvers = {
               extensions: { code: "INTERNAL_SERVER_ERROR" },
             });
           }
-          await client.set("landlords", JSON.stringify(landlords));
+
+          const landlordFields =  landlords.map((landlord) => {
+            return reviewFormat(landlord);
+          });
+          
+          await client.set("landlords", JSON.stringify(landlordFields));
           await client.expire("renters", 3600);
-          return landlords;
+          return landlordFields;
         } catch (e) {
           throw new GraphQLError(`Internal Server Error`, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -77,7 +86,7 @@ export const resolvers = {
     },
     // Fetch a single renter by ID
     getRenterById: async (_, args) => {
-      let id = args.uid.trim();
+      let id = args.id.trim();
       let exists = await client.exists(`renter.${id}`);
       if (exists) {
         console.log("renter in cache");
@@ -98,13 +107,8 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          const renterFields = {
-            uid: renter.uid,
-            name: renter.name, 
-            dateOfBirth: renter.dateOfBirth,
-            gender: renter.gender,
-            savedApartments: renter.bookmarkedApartments
-          }
+          const renterFields = renterFormat(renter);
+
           await client.set(`renter.${id}`, JSON.stringify(renterFields));
           return renterFields;
         } catch (e) {
@@ -116,7 +120,7 @@ export const resolvers = {
     },
     // Fetch a single landlord by ID
     getLandlordById: async (_, args) => {
-      let id = args.uid.trim();
+      let id = args.id.trim();
       let exists = await client.exists(`landlord.${id}`);
       if (exists) {
         console.log("landlord in cache");
@@ -137,12 +141,9 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          const landlordFields = {
-            uid: landlord.uid,
-            name: landlord.name,
-            contactInfo: landlord.email,
-            ownedApartments: landlord.bookmarkedApartments
-          };
+
+          const landlordFields = landlordFormat(landlord);
+
           await client.set(`landlord.${id}`, JSON.stringify(landlordFields));
           return landlordFields;
         } catch (e) {
@@ -153,7 +154,7 @@ export const resolvers = {
       }
     },
     getAdminById: async (_, args) => {
-      let id = args.uid.trim();
+      let id = args.id.trim();
       let exists = await client.exists(`admin.${id}`);
       if (exists) {
         console.log("admin in cache");
@@ -174,10 +175,8 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          const adminFields = {
-            uid: admin.uid,
-            name: admin.name
-          };
+          const adminFields = adminFormat(admin);
+
           await client.set(`admin.${id}`, JSON.stringify(adminFields));
           return adminFields;
         } catch (e) {
@@ -187,7 +186,7 @@ export const resolvers = {
         }
       }
     },
-    apartments: async (_, args) => {
+    apartments: async () => {
       let exists = await client.exists("apartments");
       if (exists) {
         console.log("apartments in cache");
@@ -201,24 +200,62 @@ export const resolvers = {
         }
       } else {
         try {
-          const allApartments = await apartments.getAllApartments();
+          const allApartments = await apartments.getAllApprovedApartments();
           if (!allApartments) {
             throw new GraphQLError(`Internal Server Error`, {
               extensions: { code: "INTERNAL_SERVER_ERROR" },
             });
           }
-          await client.set("apartments", JSON.stringify(apartments));
+
+          const formattedApartments = allApartments.map((apartment) => {
+            return apartmentFormat(apartment);
+          });
+
+          await client.set("apartments", JSON.stringify(formattedApartments));
           await client.expire("apartments", 3600);
-          return apartments;
+          return formattedApartments;
+        } catch (e) {
+          throw new GraphQLError(e, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      }
+    },
+    pendingApartments: async () => {
+      let exists = await client.exists("pendingApartments");
+      if (exists) {
+        console.log("pending apartments in cache");
+        try {
+          let pendingApartments = await client.get("pendingApartments");
+          return JSON.parse(pendingApartments);
         } catch (e) {
           throw new GraphQLError(`Internal Server Error`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      } else {
+        try {
+          const pendingApartments = await apartments.getAllApartmentsPendingApproval();
+          if (!pendingApartments) {
+            return [];
+          }
+
+          const formattedApartments = pendingApartments.map((apartment) => {
+            return apartmentFormat(apartment);
+          });
+
+          await client.set("pendingApartments", JSON.stringify(formattedApartments));
+          await client.expire("pendingApartments", 3600);
+          return formattedApartments;
+        } catch (e) {
+          throw new GraphQLError(e, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
           });
         }
       }
     },
     getApartmentById: async (_, args) => {
-      let id = args.uid.trim();
+      let id = args.id.trim();
       let exists = await client.exists(`apartment.${id}`);
       if (exists) {
         console.log("apartment in cache");
@@ -239,8 +276,10 @@ export const resolvers = {
               extensions: { code: "NOT_FOUND" },
             });
           }
-          await client.set(`apartment.${id}`, JSON.stringify(apartment));
-          return apartment;
+          const formattedApartment = apartmentFormat(apartment);
+
+          await client.set(`apartment.${id}`, JSON.stringify(formattedApartment));
+          return formattedApartment;
         } catch (e) {
           throw new GraphQLError(e, {
             extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -249,29 +288,117 @@ export const resolvers = {
       }
     },
     getUserAccountType: async (_, args) => {
-      const retievedUser = await users.getUserById(args.uid);
-      console.log("retirevedUser", retievedUser.accountType);
+      const retievedUser = await users.getUserById(args.id);
       return retievedUser.accountType;
     },
     reviews: async (_, args) => {
+      let posterId = validation.checkString(args.posterId);
+      let exists = await client.exists(`reviews.${posterId}`);
+      if (exists) {
+        console.log(`reviews for user ${posterId} in cache`);
+        try {
+          let reviews = await client.get(`reviews.${posterId}`);
+          return JSON.parse(reviews);
+        } catch (e) {
+          throw new GraphQLError(`Internal Server Error`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      }
       let allReviews;
       try {
-        allReviews = await reviews.getAllReviewsByPosterId(args.posterId);
-        if (!allReviews)
-          throw new GraphQLError("Review Not Found", {
-            extensions: { code: "NOT_FOUND" },
-          });
+        allReviews = await reviews.getAllReviewsByPosterId(posterId);
+        if (!allReviews) {
+          return [];
+        }
+        const reviewFields =  allReviews.map((review) => {
+            return reviewFormat(review);
+        });
+        await client.set(`reviews.${posterId}`, JSON.stringify(reviewFields));
+        return reviewFields;
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
-      return allReviews;
     },
+    pendingReviews: async () => {
+      let exists = await client.exists("pendingReviews");
+      if (exists) {
+        console.log(`pending reviews in cache`);
+        try {
+          let reviews = await client.get("pendingReviews");
+          return JSON.parse(reviews);
+        } catch (e) {
+          throw new GraphQLError(`Internal Server Error`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+      }
+      let pendingReviews;
+      try {
+        pendingReviews = await reviews.getAllReviewsPendingApproval();
+        if (!pendingReviews) {
+          return [];
+        }
+        const reviewFields =  pendingReviews.map((review) => {
+          return reviewFormat(review);
+        });
+
+        await client.set(`pendingReviews`, JSON.stringify(reviewFields));
+  
+        return reviewFields;
+      } catch (e) {
+        throw new GraphQLError(`Internal Server Error`);
+      }
+    }
+  },
+  Renter: {
+    savedApartments: async (parentValue) => {
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      return bookmarkedApartments.map((apartment) => {
+        return apartmentFormat(apartment);
+      });
+    }
+  },
+  Landlord: {
+    savedApartments: async (parentValue) => {
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      return bookmarkedApartments.map((apartment) => {
+        return apartmentFormat(apartment);
+      });
+    },
+    ownedApartments: async (parentValue) => {
+      const ownedApartments = await apartments.getApartmentsByLandlordId(parentValue.id);
+      return ownedApartments.map((apartment) => {
+        return apartmentFormat(apartment);
+      });
+    }
+  },
+  Admin: {
+    savedApartments: async (parentValue) => {
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      return bookmarkedApartments.map((apartment) => {
+        return apartmentFormat(apartment);
+      });
+    }
+  },
+  Apartment: {
+    landlord: async (parentValue) => {
+      const apartment = await apartments.getApartmentById(parentValue.id);
+      const landlord = await users.getUserById(apartment.landlord);
+      return landlordFormat(landlord);
+    },
+    reviews: async (parentValue) => {
+      const apartmentReviews = await reviews.getAllReviewsByApartmentId(parentValue.id);
+      return apartmentReviews.map((review) => {
+        return reviewFormat(review);
+      });
+    }
   },
   Mutation: {
     addRenter: async (_, args) => {
       try {
         const newUser = await users.createUser(
-          args.uid,
+          args.id,
           args.name,
           args.email,
           args.city,
@@ -280,13 +407,7 @@ export const resolvers = {
           args.gender,
           "renter"
         );
-        return {
-          uid: newUser.uid,
-          name: newUser.name,
-          dateOfBirth: newUser.dateOfBirth,
-          gender: newUser.gender,
-          savedApartments: newUser.bookmarkedApartments,
-        };
+        return renterFormat(newUser);
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
@@ -294,7 +415,7 @@ export const resolvers = {
     addLandlord: async (_, args) => {
       try {
         const newUser = await users.createUser(
-          args.uid,
+          args.id,
           args.name,
           args.email,
           args.city,
@@ -303,12 +424,8 @@ export const resolvers = {
           args.gender,
           "landlord"
         );
-        return {
-          uid: newUser.uid,
-          name: newUser.name,
-          contactInfo: newUser.email,
-          ownedApartments: newUser.bookmarkedApartments,
-        };
+        return landlordFormat(newUser);
+
       } catch (e) {
         throw new GraphQLError(e.message);
       }
@@ -316,7 +433,7 @@ export const resolvers = {
     addAdmin: async(_, args) => {
       try {
         const newUser = await users.createUser(
-          args.uid,
+          args.id,
           args.name,
           args.email,
           args.city,
@@ -325,10 +442,8 @@ export const resolvers = {
           args.gender,
           "admin"
         );
-        return {
-          uid: newUser.uid,
-          name: newUser.name,
-        };
+        return adminFormat(newUser);
+
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
@@ -336,7 +451,7 @@ export const resolvers = {
     editRenter: async (_, args) => {
       let editedRenter;
       try {
-        let renterId = validation.checkString(args.uid);
+        let renterId = validation.checkString(args.id);
         const renter = await users.getUserById(renterId);
         if (renter) {
           if (args.name) {
@@ -368,7 +483,7 @@ export const resolvers = {
           );
         } else
           throw new GraphQLError(
-            `Can't find renter with an Id of ${args.uid}`,
+            `Can't find renter with an Id of ${renterId}`,
             {
               extensions: { code: "NOT_FOUND" },
             }
@@ -378,30 +493,37 @@ export const resolvers = {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
-      return editedRenter;
+      try {
+        await client.del(`renter.${renterId}`);
+        await client.del("renters"); 
+        return renterFormat(editedRenter);
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      };
     },
     removeRenter: async (_, args) => {
       let renterId;
       try {
-        renterId = validation.checkString(args.uid, "remove renterId");
+        renterId = validation.checkString(args.id, "remove renterId");
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "BAD_USER_INPUT" },
         });
       }
+      let removedRenter;
       try {
-        if (await client.exists(`renters`)) {
-          client.del(`renter.${renterId}`);
-          client.del("renters");
-        }
+        removedRenter = await users.deleteUserById(renterId);
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
       try {
-        removedRenter = await users.deleteUserById(renterId);
-        return removedRenter;
+        await client.del(`renter.${renterId}`);
+        await client.del("renters");
+        return renterFormat(removedRenter);
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -421,10 +543,11 @@ export const resolvers = {
           "apartment address"
         );
         apartment.city = validation.checkString(args.city, "apartment city");
+        apartment.state = validation.checkState(args.state, "apartment state");
         apartment.dateListed = new Date().toLocaleDateString();
         apartment.amenities = args.amenities;
-        apartment.images = args.images;
-        apartment.pricePerMonth = args.pricePerMonth;
+        // apartment.images = args.images; /*** SKIP FOR NOW ***/
+        apartment.price = args.price;
         apartment.landlordId = args.landlordId;
         apartment.rating = args.rating;
         apartment.isApproved = false;
@@ -453,17 +576,17 @@ export const resolvers = {
           apartment.state,
           apartment.dateListed,
           apartment.amenities,
-          apartment.images,
-          apartment.pricePerMonth,
-          apartment.landlordId,
-          apartment.rating,
-          apartment.isApproved
+        // apartment.images /*** SKIP FOR NOW ***/
+          apartment.price,
+          apartment.landlordId
         );
+        const formatApartment = apartmentFormat(newApartment);
+
         await client.set(
-          `apartment.${newApartment.uid}`,
-          JSON.stringify(newApartment)
+          `apartment.${newApartment._id}`,
+          JSON.stringify(formatApartment)
         );
-        return newApartment;
+        return formatApartment;
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -476,19 +599,163 @@ export const resolvers = {
       try {
         removedApartment = await apartments.deleteApartmentById(id);
       } catch (e) {
-        new GraphQLError(`Could not delete apartment with uid of ${args.uid}`, {
+        new GraphQLError(`Could not delete apartment with id of ${args.id}`, {
           extensions: { code: "NOT_FOUND" },
         });
       }
       try {
-        let landlord = await users.getUserById(removedApartment.landlordId);
-        await client.del(`apartment.${removedApartment.uid}`);
+        await client.del(`apartment.${id}`);
         await client.del(`apartments`);
+
+        return apartmentFormat(removedApartment);
+
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
     },
-  },
+    approveApartment: async (_, args) => {
+      let id = validation.checkId(args.id, "apartment id");
+      let approvedApartment;
+      try {
+        approvedApartment = await apartments.approveApartmentById(id);
+      } catch (e) {
+        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`apartment.${id}`);
+        await client.del(`apartments`);
+        await client.del(`pendingApartments`);
+
+        return apartmentFormat(approvedApartment);
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
+    approveReview: async (_, args) => {
+      let id = validation.checkId(args.id, "review id");
+      let approvedReview;
+      try {
+        approvedReview = await reviews.approveReviewById(id);
+      } catch (e) {
+        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`review.${id}`);
+        await client.del(`reviews`);
+        await client.del(`pendingReviews`);
+
+        return reviewFormat(approvedReview);
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
+    addBookmark: async (_, args) => {
+      let userId = validation.checkString(args.userId, "user id");
+      let apartmentId = validation.checkId(args.apartmentId, "apartment id");
+      let userWithNewBookmark;
+      try {
+        userWithNewBookmark = await users.addApartmentToBookmark(userId, apartmentId);
+      } catch (e) {
+        new GraphQLError(`Could not bookmark apartment with id of ${apartmentId} for user ${userId}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`${userWithNewBookmark.accountType}.${userWithNewBookmark}`);
+        await client.del(`apartments`);
+        await client.del(`pendingApartments`);
+
+        return userId;
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
+    removeBookmark: async (_, args) => {
+      let userId = validation.checkString(args.userId, "user id");
+      let apartmentId = validation.checkId(args.apartmentId, "apartment id");
+      let userWithRemovedBookmark;
+      try {
+        userWithRemovedBookmark = await users.removeApartmentFromBookmark(userId, apartmentId);
+      } catch (e) {
+        new GraphQLError(`Could not remove bookmark for apartment with id of ${apartmentId} for user ${userId}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        await client.del(`${userWithRemovedBookmark.accountType}.${userWithRemovedBookmark}`);
+        await client.del(`apartments`);
+        await client.del(`pendingApartments`);
+
+        return userId;
+
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
+  }
 };
+
+
+function renterFormat(renter) {
+  return {
+    id: renter._id,
+    name: renter.name, 
+    dateOfBirth: renter.dateOfBirth,
+    gender: renter.gender
+  }
+}
+
+function landlordFormat(landlord) {
+  return {
+    id: landlord._id,
+    name: landlord.name,
+    contactInfo: landlord.email
+  };
+}
+
+function adminFormat(admin) {
+  return {
+    id: admin._id,
+    name: admin.name
+  };
+}
+
+function apartmentFormat(apartment) {
+  return {
+    id: apartment._id,
+    name: apartment.name,
+    address: `${apartment.address}, ${apartment.city}, ${apartment.state}`,
+    description: apartment.description,
+    // images: apartment.images, /*** SKIP FOR NOW ***/
+    price: apartment.pricePerMonth,
+    amenities: apartment.amenities
+  };
+}
+
+function reviewFormat(review) {
+  return {
+    id: review._id,
+    posterId: review.posterId,
+    apartmentId: review.apartmentId,
+    datePosted: review.datePosted,
+    content: review.content,
+    rating: review.rating
+  };
+}
