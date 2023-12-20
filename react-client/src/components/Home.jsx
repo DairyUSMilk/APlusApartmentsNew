@@ -75,7 +75,7 @@ function Home() {
           <Form.Control type="text" placeholder="State" onChange={e => setState(e.target.value)} />
         </Form.Group>
         <Form.Group className="mb-3" controlId="apartment.minPrice">
-          <Form.Label>Minimum Montly Price:</Form.Label>
+          <Form.Label>Minimum Monthly Price:</Form.Label>
           <Form.Control type="number" min="0.00" step="0.01" placeholder="Min Price" onChange={e => setMinPrice(e.target.value)} />
         </Form.Group>
         <Form.Group className="mb-3" controlId="apartment.maxPrice">
