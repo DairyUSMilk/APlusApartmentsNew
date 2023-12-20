@@ -92,9 +92,6 @@ function Home() {
       </Form>
     );
 
-
-  console.log(data);
-
   let apartmentList =  
     data &&
     data.apartments.map((apartment) => {
@@ -110,7 +107,6 @@ function Home() {
   return (
     <div className='card'>
       <h2>Apartments for Rent</h2>
-      <h4>Search by:</h4>
       
       <Button 
         style={{justifyContent: 'center'}}
