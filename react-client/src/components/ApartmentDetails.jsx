@@ -1,12 +1,13 @@
 import React, {useState} from 'react';
-import { Link, Navigate, useParams, useNavigate, useRouteError } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ImageList, ImageListItem } from '@mui/material';
 import { useQuery } from "@apollo/client";
 
-import { getApartment } from '../graphql/Queries';
+import { getApartment, getRenter, getLandlord, getAdmin } from '../graphql/Queries';
 import Review from './ReviewCard';
 import AddReview from './AddReview';
 import DeleteApartment from './DeleteApartment';
+import AddOrRemoveBookmark from './AddOrRemoveBookmark';
 
 import CardGroup from 'react-bootstrap/CardGroup';
 import {
@@ -22,10 +23,6 @@ import '../index.css';
 function ApartmentDetails({id, userId, accountType}) {
     const [isAddFormVisible, setIsAddFormVisible] = useState(false);
     const navigate = useNavigate();
-
-    const {data, loading, error }  = useQuery(getApartment(), {
-        variables: {id: id}
-    });
 
     function toggleAddForm() {
         setIsAddFormVisible(!isAddFormVisible);    
@@ -53,6 +50,23 @@ function ApartmentDetails({id, userId, accountType}) {
         );
     }
 
+    const {data, loading, error }  = useQuery(getApartment(), {
+        variables: {id: id}
+    });
+
+    let query = getRenter();
+    if (accountType === 'landlord') {
+       query = getLandlord();
+    }
+    else if (accountType === 'admin') {
+        query = getAdmin();
+    }
+
+    const {data: userData, loading: userLoading, error: userError }  = useQuery(query, {
+      variables: {id: userId},
+      skip: !accountType
+    });
+
     if (loading) {
         return (
           <h2> Loading... </h2>
@@ -63,13 +77,35 @@ function ApartmentDetails({id, userId, accountType}) {
         throw new Error(error.message);
     }
 
+    if (userLoading) {
+        return (
+          <h2> Loading user data... </h2>
+        );
+    }
+  
+    if (userError) {
+        throw new Error(userError);
+    }
+
+    let user;
+    if (accountType === 'renter') {
+      user = userData.getRenterById;
+    }
+    else if (accountType === 'landlord') {
+      user = userData.getLandlordById;
+    }
+    else if (accountType === 'admin') {
+      user = userData.getAdminById;
+    }
+
     let apartment = data.getApartmentById;
 
     let amenityList = [];
     if(apartment.amenities) {
+        let key = 0;
         for (const amenity of apartment.amenities) {
             const amenityCard = (
-            <span>
+            <span key={key++}>
                 <span>{amenity}</span>
                 <br/>
             </span>
@@ -110,6 +146,12 @@ function ApartmentDetails({id, userId, accountType}) {
                    component={'div'} 
                 />
                 {ApartmentImages(apartment)}
+                {accountType && userId !== apartment.landlord.id ? (
+                    <AddOrRemoveBookmark 
+                    userId={userId} 
+                    apartment={apartment} 
+                    inBookmark={user && user.savedApartments.some(item => item.id === apartment.id)} />): null}
+
                 <CardContent>
                     <Typography
                         variant='body2'
@@ -158,6 +200,7 @@ function ApartmentDetails({id, userId, accountType}) {
                     null}
                 </Card>
                 <CardGroup>{reviewList}</CardGroup>
+                <br/><br/>
                 {accountType === 'renter' ? (
                 <Button 
                     style={{justifyContent: 'center'}}
@@ -168,8 +211,8 @@ function ApartmentDetails({id, userId, accountType}) {
                     Add a Review
                 </Button> ):
                 null}
-                {isAddFormVisible ? <AddReview /> : null}
-        
+                {isAddFormVisible ? <AddReview posterId={userId} apartmentId={apartment.id} /> : null}
+                <br/><br/>
                 <Button 
                     style={{justifyContent: 'center'}}
                     variant="contained"

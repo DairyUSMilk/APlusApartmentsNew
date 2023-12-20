@@ -27,7 +27,14 @@ function SignUpConfigureAccount() {
     date.setDate(date.getDate() + 1);
     const formattedDob = (date.getMonth()+1) + '/' + (date.getDate()) + '/' + date.getFullYear();
 
-    console.log()
+    console.log(currentUser.uid,
+      currentUser.email,
+      displayName.value,
+      formattedDob,
+      gender.value,
+      city.value,
+      state.value);
+
     try {
       if(accountType.value === 'renter') {
         addRenter({variables: {

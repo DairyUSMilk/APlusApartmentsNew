@@ -145,10 +145,12 @@ export const typeDefs = `#graphql
             id: String!
         ): Apartment
         addBookmark(
-            id: String!
-        ): Apartment
+            userId: String!
+            apartmentId: String!
+        ): String
         removeBookmark(
-            id: String!
-        ): Apartment
+            userId: String!
+            apartmentId: String!
+        ): String
     }
 `;

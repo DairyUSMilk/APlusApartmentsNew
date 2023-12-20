@@ -13,11 +13,16 @@ function Apartment() {
     let { id } = useParams();
     const {currentUser} = useContext(Context);
     const [uid] = useState(currentUser ? currentUser.uid : null);
-
+  
     const { data, loading, error } = useQuery(getUserAccountType(), {
       variables: { id: uid },
       skip: !currentUser || !currentUser.displayName
     });
+
+    let accountType;
+    if(data) {
+      accountType = data.getUserAccountType;
+    }
 
     if (loading) {
         return (
@@ -29,11 +34,6 @@ function Apartment() {
         throw new Error(error.message);
     }
 
-    let accountType;
-    if(data) {
-      accountType = data.getUserAccountType;
-    }
-  
     return (
         <div>
             <h2>Apartment</h2>

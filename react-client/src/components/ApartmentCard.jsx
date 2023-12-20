@@ -3,11 +3,14 @@ import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 
 import DeleteApartment from './DeleteApartment';
+import AddOrRemoveBookmark from './AddOrRemoveBookmark';
 
-function ApartmentCard({apartment, userId, accountType}) {
+function ApartmentCard({apartment, userId, accountType, inBookmark}) {
+    console.log(apartment)
     return (
         <Card className="text-center">
         <Card.Body>
+            {accountType && userId !== apartment.landlord.id ? (<AddOrRemoveBookmark userId={userId} apartment={apartment} inBookmark={inBookmark} />): null}
             <Card.Title><Link to={`/apartment/${apartment.id}`}>{apartment.name}</Link></Card.Title>
             <Card.Subtitle className="mb-2 text-muted">${apartment.price}/mo</Card.Subtitle>
             <Card.Text>

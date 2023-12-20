@@ -17,6 +17,7 @@ export function getRenter() {
         gender
         savedApartments {
             id
+            name
             address
             price
             landlord {
@@ -34,6 +35,15 @@ export function getLandlord() {
     getLandlordById(id: $id) {
         name
         contactInfo
+        savedApartments {
+            id
+            name
+            address
+            price
+            landlord {
+                id
+            }
+        }
         ownedApartments {
             id
             name
@@ -54,6 +64,15 @@ export function getAdmin() {
     query ($id: String!) {
     getAdminById(id: $id) {
         name
+        savedApartments {
+            id
+            name
+            address
+            price
+            landlord {
+                id
+            }
+        }
     }
     }
     `;
@@ -117,6 +136,7 @@ export function getApprovedApartments() {
     {
     apartments {
         id
+        name
         address
         description
         images

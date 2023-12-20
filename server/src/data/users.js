@@ -90,6 +90,7 @@ export const updateUserInfoById = async(id,
     name, email, city, 
     state, dateOfBirth, accountType) => {
     const updateInfo = {};
+    id = helpers.checkString(id, "id");
     name = helpers.checkString(name, "name");
     email = helpers.checkEmail(email, "email");
     city = helpers.checkString(city, "city");
@@ -148,7 +149,7 @@ const formatUserObject = async(userObject) => {
 }
 
 export const addApartmentToBookmark = async(userId, apartmentId) => {
-    userId = helpers.checkId(userId, "userId");
+    userId = helpers.checkString(userId, "userId");
     apartmentId = helpers.checkId(apartmentId, "apartmentId");
 
     const userCollection = await users();
@@ -174,7 +175,7 @@ export const removeApartmentFromBookmark = async(userId, apartmentId) => {
     );
 
     if (updateResult.modifiedCount !== 1) {
-        throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
+        throw `Apartment ${apartmentId} could remove bookmark by user ${userId}`;
     }
     return await getUserById(userId);
 };

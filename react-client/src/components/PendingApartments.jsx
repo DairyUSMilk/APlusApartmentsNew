@@ -24,7 +24,9 @@ function PendingApartments() {
         });
 
     return (
-        <CardGroup>{apartmentList}</CardGroup>
+        <CardGroup>
+        {apartmentList}
+        </CardGroup>
     );
 }
 

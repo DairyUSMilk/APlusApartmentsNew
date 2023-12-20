@@ -18,18 +18,19 @@ function AddReview({posterId, apartmentId}) {
 
     const handleAdd = (event) => {
         event.preventDefault();
-        date = new Date();
+        let date = new Date();
         let newReview = {
             posterId: posterId,
             apartmentId: apartmentId,
             datePosted: ((date.getMonth() > 8) ? (date.getMonth() + 1) : ('0' + (date.getMonth() + 1))) + '/' + ((date.getDate() > 9) ? date.getDate() : ('0' + date.getDate())) + '/' + date.getFullYear()
         };
-        if(rating) newReview.rating=helpers.checkWholeNumber(rating);
+        if(rating) newReview.rating=helpers.checkWholeNumber(Number(rating));
         else throw new Error("Please add a rating.");
         if(content) newReview.content=helpers.checkString(content);
+
+        console.log(newReview);
         try {
             addReview({ variables: newReview });
-            alert("Review added and pending admin approval.");
         }
         catch (e) {
             alert(e);
@@ -55,7 +56,7 @@ function AddReview({posterId, apartmentId}) {
         <Form onSubmit={handleAdd}>
         <Form.Group className="mb-3" controlId="review.rating">
           <Form.Label>Rating</Form.Label>
-          <Form.Control type="number"  min="0" step="1" placeholder="Rating" onChange={e => setRating(e.target.value)} required="required" />
+          <Form.Control type="number" min="1" max="5" step="1" placeholder="Rating" onChange={e => setRating(e.target.value)} required="required" />
         </Form.Group>
         <Form.Group className="mb-3" controlId="review.textarea">
           <Form.Label>Content</Form.Label>

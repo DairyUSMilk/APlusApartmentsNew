@@ -145,7 +145,7 @@ export function createReview() {
     mutation CreateReview(
         $posterId: String!, 
         $apartmentId: String!, 
-        $rating: String!,
+        $rating: Int!,
         $content: String, 
         $datePosted: String) {
         createReview(
@@ -183,3 +183,21 @@ export function approveReview() {
     }
     `;
 }
+
+export function addApartmentToBookmark() {
+    return gql`
+    mutation AddBookmark($userId: String!, $apartmentId: String!) {
+        addBookmark(userId: $userId, apartmentId: $apartmentId)
+    }
+    `;
+}
+
+export function removeApartmentFromBookmark() {
+    return gql`
+    mutation RemoveBookmark($userId: String!, $apartmentId: String!) {
+        removeBookmark(userId: $userId, apartmentId: $apartmentId)
+    }
+    `;
+}
+
+

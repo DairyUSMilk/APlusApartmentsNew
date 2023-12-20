@@ -47,7 +47,8 @@ function AccountDetails({uid, accountType}) {
     }
     
     let data = null;
-    let apartmentList = null;
+    let savedApartments = null;
+    let ownedApartments = null;
     let reviewList = null;
     
     if (accountType === 'renter') {
@@ -59,10 +60,10 @@ function AccountDetails({uid, accountType}) {
               <p>{userData.getRenterById.gender}</p>
         </div>
       );
-      apartmentList =  
+      savedApartments =  
         userData &&
         userData.getRenterById.savedApartments.map((apartment) => {
-            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
+            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} inBookmark={true} key={apartment.id} />;
         });
       reviewList = (<ReviewList userId={uid} accountType={accountType} />);
     }
@@ -74,11 +75,15 @@ function AccountDetails({uid, accountType}) {
               <p>Contact email: {userData.getLandlordById.contactInfo}</p>
         </div>
       );
-      apartmentList =
+      savedApartments =  
+        userData &&
+        userData.getLandlordById.savedApartments.map((apartment) => {
+            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} inBookmark={true} key={apartment.id} />;
+        });
+      ownedApartments =
         userData &&
         userData.getLandlordById.ownedApartments.map((apartment) => {
-          console.log(apartment);
-            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} key={apartment.id} />;
+            return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} inBookmark={false} key={apartment.id} />;
         });
         reviewList = (<ReviewList userId={uid} accountType={accountType} />);
     }
@@ -89,7 +94,12 @@ function AccountDetails({uid, accountType}) {
               <h3>{userData.getAdminById.name}</h3>
         </div>
       );
-      apartmentList = (<PendingApartments />);
+      savedApartments =  
+      userData &&
+      userData.getAdminById.savedApartments.map((apartment) => {
+          return <ApartmentCard apartment={apartment} userId={uid} accountType={accountType} inBookmark={true} key={apartment.id} />;
+      });
+      ownedApartments = (<PendingApartments />);
       reviewList = (<PendingReviews />);
     }
 
@@ -108,9 +118,28 @@ function AccountDetails({uid, accountType}) {
         </Button> ):
        null}
 
-        {isAddFormVisible ? <AddApartment userId={uid} /> : null}
+       {isAddFormVisible ? <AddApartment userId={uid} /> : null}
 
-       <CardGroup>{apartmentList}</CardGroup>
+       <CardGroup>
+       <h4> Saved Apartments: </h4> <br />
+       {savedApartments}
+       </CardGroup>
+
+       {ownedApartments ? (
+          accountType === "landlord" ? ( 
+          <h4>Owned Apartments:</h4>
+          ): 
+          <h4>Pending Apartments: </h4> 
+          ): 
+          null 
+       }
+       <CardGroup>{ownedApartments}</CardGroup>
+
+       {reviewList !== 'admin' ? (
+          <h4>Review History: </h4>
+          ): 
+          <h4>Pending Reviews: </h4> 
+       }
        <CardGroup>{reviewList}</CardGroup>
    </div>
     );

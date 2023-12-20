@@ -24,7 +24,9 @@ function PendingReviews() {
         });
 
     return (
-        <CardGroup>{reviewList}</CardGroup>
+        <CardGroup>
+        {reviewList}
+        </CardGroup>
     );
 }
 
