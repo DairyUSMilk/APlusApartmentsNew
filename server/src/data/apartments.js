@@ -7,7 +7,6 @@ import helpers from './../utils/helpers.js';
 
 export const createApartment = async(name, description, address, city, 
     state, dateListed, amenities, pricePerMonth, landlord) => {
-
         name = helpers.checkString(name, "name");
         description = helpers.checkString(description, "description");
         address = helpers.checkString(address, "address");
