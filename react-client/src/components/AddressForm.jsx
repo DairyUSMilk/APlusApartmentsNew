@@ -9,7 +9,12 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         city: '',
         state: '',
         postcode: '',
+        subpremise: '',
     });
+
+    // useEffect(() => {
+    //     console.log(userAddress)
+    // }, [userAddress]) //debugging
 
     // Refs for Autocomplete components
     const autocompleteRefStreet = useRef(null);
@@ -51,7 +56,6 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         let city = '';
         let state = '';
         let postcode = '';
-        console.log(place.address_components)
         for (const component of place.address_components) {
 
             const componentType = component.types[0];
@@ -96,7 +100,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
 
     // Function to handle address validation with Google API
     const handlePlaceValidation = async (inputAddress) => {
-        const { street_address, city, state, postcode } = inputAddress;
+        const { street_address, city, state, postcode, subpremise } = inputAddress;
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
         
         try {
@@ -106,7 +110,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                 {
                     address: {
                         regionCode: 'US',
-                        addressLines: [street_address, `${city}, ${state}, ${postcode}`],
+                        addressLines: [street_address, `${subpremise} ${city}, ${state}, ${postcode}`],
                     },
                     previousResponseId: '', // Need to update this if follow-up request?
                     enableUspsCass: false,
@@ -115,9 +119,13 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
 
             // Extract relevant information from the API response
             const { verdict, address, geocode } = response.data.result;
-
+            console.log(response.data.result)
             // Handle different cases based on the validation result
             if (!verdict.addressComplete) {
+                if(address.missingComponentTypes.length === 1 && address.missingComponentTypes[0] !== 'subpremise'){
+                    // Tell user to enter apartment number
+                    alert('Please enter an apartment number');
+                }
                 // Address is incomplete or unconfirmed
                 const unconfirmedComponentsArray = address.unconfirmedComponentTypes || [];
                 const missingComponentsArray = address.missingComponentTypes || [];
@@ -138,8 +146,9 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
     // Function to handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-
+        console.log(userAddress)
         const validationResult = await handlePlaceValidation(userAddress);
+        console.log(validationResult)
         // Handle different cases based on the validation result
         if (validationResult.status === 'success' || validationResult.status === 'inferred') {
             // Update coordinates if validation is successful
@@ -148,7 +157,20 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
             document.getElementById('addressForm').reset();
         } else if (validationResult.status === 'unconfirmed') {
             // Alert the user about unconfirmed components
-            alert('Please confirm the following components: ' + validationResult.data.unconfirmedComponentsArray.join(', '));
+            let alertMessage = ''
+            if (validationResult.data.unconfirmedComponentsArray.length > 0){
+                alertMessage += 'Please confirm the following components: ';
+                for (const component of validationResult.data.unconfirmedComponentsArray) {
+                    alertMessage += `${component}, `;
+                }
+            }
+            if (validationResult.data.missingComponentsArray.length > 0){
+                alertMessage += '\nPlease enter the following components: ';
+                for (const component of validationResult.data.missingComponentsArray) {
+                    alertMessage += `${component}, `;
+                }
+            }
+            alert(alertMessage);
             // Need to add logic to highlight the unconfirmed components in the form
         }
         else{
@@ -188,8 +210,18 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                         placeholder="Enter your street address"
                         onChange={handleChange}
                         onKeyDown={handleEnterKey}
+                        style={{ width: '50%', padding: '8px', boxSizing: 'border-box' }}
                     />
                 </Autocomplete>
+
+                <input
+                    id="subpremise"
+                    name="subpremise"
+                    placeholder="Apartment Number / Unit Number (optional)"
+                    onChange={handleChange}
+                    onKeyDown={handleEnterKey}
+                    style={{ width: '50%', padding: '8px', boxSizing: 'border-box' }}
+                />
 
                 <Autocomplete
                     ref={autocompleteRefCity}
