@@ -33,7 +33,7 @@ function Review({review}) {
             <Card.Text>
             {review.content}
             </Card.Text>
-            {userData.id === review.posterId || accountType === 'admin' ? (
+            {(userData && userData.id === review.posterId) || accountType === 'admin' ? (
             <DeleteReview review={review} />):
             null}
         </Card.Body>
