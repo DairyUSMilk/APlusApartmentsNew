@@ -171,30 +171,54 @@
     margin: 0 5px; 
   }
   
-  .passwordTooltip {
-    display: inline-block;
-    border-bottom: 1px dotted black;
-    font-size: 10px;
+
+
+/* Home-card*/
+  .card-home {
+    width: 190px;
+    height: 400px;
+    background: #F4F6FB;
+    border: 1px solid white;
+    box-shadow: 10px 10px 64px 0px rgba(180, 180, 207, 0.75);
+    -webkit-box-shadow: 10px 10px 64px 0px rgba(186, 186, 202, 0.75);
+    -moz-box-shadow: 10px 10px 64px 0px rgba(208, 208, 231, 0.75);
   }
 
-  .passwordTooltip .passwordTooltipText {
-    visibility: hidden;
-    width: 50%;
-    background-color: black;
-    color: #fff;
+
+  .card-home_header {
     text-align: center;
-    border-radius: 6px;
-    padding: 5px 0;
-    font-size: 14px;
-  
-    /* Position the tooltip */
-    position: absolute;
-    z-index: 1;
+    background-color: #f7f8fa; /* Light background color */
+    padding: 20px 0; /* Add some padding */
+    border-radius: 10px; /* Rounded corners for the header */
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1); /* Subtle shadow for depth */
+    margin-bottom: 20px; /* Space below the header */
   }
   
-  .passwordTooltip:hover .passwordTooltipText {
-    visibility: visible;
+  .card-home_header h1 {
+    font-size: 2.5em; /* Larger font size for main heading */
+    color: #0074e4; /* Zillow-like blue color */
+    font-weight: bold; /* Make it bold */
+    margin-bottom: 10px; /* Space after the heading */
   }
+  
+  .card-home_header h2 {
+    font-size: 1.8em;
+    color: #333; /* Darker color for contrast */
+    margin-bottom: 5px; /* Space after the subheading */
+  }
+  
+  .card-home_header h4 {
+    font-size: 1.2em;
+    color: #666; /* Lighter color for less emphasis */
+    font-weight: normal;
+  }
+  
+  .card-home svg {
+    color: #79bfe4;
+    margin-bottom: 20px;
+    margin-right: 5px;
+  }
+
 
 
   
