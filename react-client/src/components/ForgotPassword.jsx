@@ -26,34 +26,33 @@ function ForgotPassword() {
 
     return (
       <div>
-        <div className='card'>
+        <div className='form card'>
           <form className='form' onSubmit={passwordReset}>
             <div className='form-group'>
               <label>
                 Email Address:
-                <br />
-                <input
-                  name='email'
-                  id='email'
-                  type='email'
-                  placeholder='Email'
-                  required
-                  autoFocus={true}
-                />
+                <br/>
+                <br/>
+                <input className="input" required name="email" type="email" placeholder="Email" id="email" />
               </label>
             </div>
-            
-            <button className='button' type='submit' >
-              Send Reset Email
+
+            <br/>
+            <div className="buttons-container">
+
+            <button className='button-sign' type='submit' >
+            <span>Send Reset Email</span>
             </button>
-          </form>
   
-          <br />
           <div>
-              <button className='btn btn-primary' onClick={() => googleSignIn()}>
-                Sign in with Google
+              <button className='button-sign' onClick={() => googleSignIn()}>
+                <span>Sign in with Google</span>
               </button>
-          </div>      
+          </div>  
+          </div>  
+
+          </form>
+    
         </div>
       </div>
     );
