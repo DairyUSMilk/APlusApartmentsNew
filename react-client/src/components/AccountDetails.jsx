@@ -70,7 +70,7 @@ function AccountDetails() {
        {accountType === 'landlord' ? (
         <div className="buttons-container">
 
-        <Button className='button-sign'
+        <Button className='button-create'
         variant="contained"
         color="primary"
         onClick={toggleAddForm}
