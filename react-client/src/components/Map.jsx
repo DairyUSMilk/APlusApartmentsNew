@@ -8,7 +8,7 @@ import {Link} from "react-router-dom";
 const libraries = ["places"];
 
 const Map = ({apartments = []}) => {
-    const [center, setCenter] = useState({ lat: 40.745067, lng: -70.024408}); //default near hoboken
+    const [center, setCenter] = useState({ lat: 40.745067, lng: -74.024408}); //default near hoboken
     const [markers, setMarkers] = useState([]); //will use to store markers for each apartment
     const [selectedMarker, setSelectedMarker] = useState(null);
     const [markersLoaded, setMarkersLoaded] = useState(false); 

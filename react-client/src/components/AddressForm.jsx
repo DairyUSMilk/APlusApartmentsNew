@@ -4,7 +4,7 @@ import axios from 'axios';
 
 const libraries = ['places'];
 
-const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.745067, lng: -70.024408} }) => {
+const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.745067, lng: -74.024408} }) => {
     // State to manage user input
 
     // const { isLoaded, loadError } = useLoadScript({
@@ -34,6 +34,7 @@ const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.74
         } 
         else {
             console.log("Geolocation not supported");
+            
         }
     }, []);
 
