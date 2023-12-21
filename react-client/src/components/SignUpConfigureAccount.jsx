@@ -8,7 +8,6 @@ import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations'
 
 function SignUpConfigureAccount() {
   const {currentUser} = useContext(UserContext);
-  const navigate = useNavigate();
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
   const [addRenter] = useMutation(createRenter());
@@ -66,7 +65,6 @@ function SignUpConfigureAccount() {
         alert("Please specify account type.");
       }
       await addUserDisplayName(displayName.value);
-      navigate('/');
     } catch (error) {
       alert(error);
     }
@@ -181,14 +179,17 @@ function SignUpConfigureAccount() {
               </option>
             </select>
           </div> <br/>
+          <div className="buttons-container">
+
         <button
-          className='button'
+          className='button-sign'
           id='submitButton'
           name='submitButton'
           type='submit'
         >
-          Sign Up
+          <span>Sign Up</span>
         </button>
+        </div>
       </form>
     </div>
   );

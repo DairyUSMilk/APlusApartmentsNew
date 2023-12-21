@@ -141,6 +141,33 @@ const exportedMethods = {
           throw new Error(`${varName} must be a valid email`);
       }
       return email;
+    },
+    //defaults to dashes
+    reformatDateForDateInputElement(dateString) {
+        this.checkString(dateString);
+        dateString = dateString.replaceAll("/", "-");
+        const chunks = dateString.split("-");
+        if(chunks.length < 3){
+            throw new Error(`${dateString} is not a valid date`);
+        }
+        let month = chunks[0];
+        if(month.length < 2){
+            month = `0${month}`;
+        }
+        let day = chunks[1];
+        if(day.length < 2){
+            day = `0${day}`;
+        }
+        return `${chunks[2]}-${month}-${day}`
+    },
+    reformatDateForDatabaseCall(dateString) {
+        this.checkString(dateString);
+        dateString = dateString.replaceAll("-", "/");
+        const chunks = dateString.split("/");
+        if(chunks.length < 3){
+            throw new Error(`${dateString} is not a valid date`);
+        }
+        return `${chunks[1]}/${chunks[2]}/${chunks[0]}`
     }
   };
   
