@@ -102,6 +102,7 @@ export const updateUserInfoById = async (
   id,
   name,
   email,
+  gender,
   city,
   state,
   dateOfBirth,
@@ -109,30 +110,29 @@ export const updateUserInfoById = async (
 ) => {
   const updateInfo = {};
   id = helpers.checkString(id, "id");
-  name = helpers.checkString(name, "name");
-  email = helpers.checkEmail(email, "email");
-  city = helpers.checkString(city, "city");
-  state = helpers.checkState(state, "state");
-  dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
-  accountType = helpers.checkString(accountType, "accountType").toLowerCase();
 
   if (name) {
-    updateInfo["name"] = name;
+    updateInfo["name"] = helpers.checkString(name, "name");
   }
   if (email) {
-    updateInfo["email"] = email;
+    updateInfo["email"] = helpers.checkEmail(email, "email");
+  }
+  if (gender) {
+    updateInfo["gender"] = helpers.checkString(gender, "gender");
   }
   if (city) {
-    updateInfo["city"] = city;
+    updateInfo["city"] = helpers.checkString(city, "city");
   }
   if (state) {
-    updateInfo["state"] = state;
+    updateInfo["state"] = helpers.checkState(state, "state");
   }
   if (dateOfBirth) {
-    updateInfo["dateOfBirth"] = dateOfBirth;
+    updateInfo["dateOfBirth"] = helpers.checkDate(dateOfBirth, "dateOfBirth");
   }
   if (accountType) {
-    updateInfo["accountType"] = accountType;
+    updateInfo["accountType"] = helpers
+      .checkString(accountType, "accountType")
+      .toLowerCase();
   }
 
   const userCollection = await users();
@@ -152,10 +152,6 @@ export const validateLoginAttempt = async (email, password) => {
   if (!user) {
     throw `Either the email or password is incorrect`;
   }
-  if (await bcrypt.compare(password, user.password)) {
-    return formatUserObject(user);
-  }
-  throw `Either the email or password is incorrect`;
 };
 
 const getIdFilter = async (id) => {

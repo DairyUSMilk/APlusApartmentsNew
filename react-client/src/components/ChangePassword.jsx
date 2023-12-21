@@ -35,7 +35,7 @@ function ChangePassword() {
         {!passwordsMatch ? (
             <h4 className='error'>{'New passwords do not match'}</h4>
         ) : null}
-        <h2>{currentUser.displayName}, Change Your Password Below</h2>
+        <h2>{currentUser.displayName}, Please Change Your Password Below</h2>
         <form onSubmit={submitForm}>
           <div className='form-group'>
             <label>
@@ -69,21 +69,32 @@ function ChangePassword() {
           <div className='form-group'>
             <label>
               Confirm New Password:
+              <div class="passwordTooltip">&nbsp;?
+                <small id="passValidations" class="passwordTooltipText">
+                Password must be a minimum of 8 characters long,
+                have at least one at least one uppercase and lowercase character, have at least one number, 
+                and has to contain at least one special character (!@#$%&?).
+              </small>
+              </div>
               <input
                 className='form-control'
                 name='matchPassword'
                 id='matchPassword'
                 type='password'
                 placeholder='Confirm Password'
+                pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&?]).{8,})"
+                aria-describedby="passValidations"
                 autoComplete='off'
                 required
               />
             </label>
           </div>
+          <div className="buttons-container">
 
-          <button className='button' type='submit'>
-            Change Password
+          <button className='button-sign' type='submit'>
+            <span>Change Password</span>
           </button>
+          </div>
         </form>
         <br />
       </div>
@@ -94,7 +105,7 @@ function ChangePassword() {
         <h2>
             Accounts created using Google authentication cannot change passwords
         </h2>
-        <a href='/account' className='btn btn-primary'>
+        <a href='/account' className='button-sign'>
             Back to profile page.
         </a>
       </div>

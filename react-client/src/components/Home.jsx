@@ -3,7 +3,6 @@ import { UserContext } from '../context/UserContext';
 import { useLazyQuery } from '@apollo/client';
 import { getApprovedApartments } from '../graphql/Queries';
 import ApartmentCard from './ApartmentCard';
-//import SearchApartmentsByFilter from './ApartmentsByFilter';
 import helpers from './../utils/helpers.js';
 
 import Button from 'react-bootstrap/Button';
@@ -21,7 +20,7 @@ function Home() {
   const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
 
   const [ getApartments, { data, loading, error }] = useLazyQuery(getApprovedApartments());
-
+  
   useEffect(() => {
     getApartments();
   }, []);
@@ -86,11 +85,19 @@ function Home() {
           <Form.Label>Minumum Apartment Rating:</Form.Label>
           <Form.Control type="number" min="0" max="5" placeholder="Rating" onChange={e => setRating(e.target.value)} />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Search
+
+        <div className="buttons-container">
+
+        <Button className='button-sign' style={{ verticalAlign: 'middle' }} variant="primary" type="submit">
+          <span>Search</span>
         </Button>
+
+        </div>
       </Form>
     );
+
+
+  console.log(data);
 
   let apartmentList =  
     data &&
@@ -105,23 +112,39 @@ function Home() {
     });
 
   return (
-    <div className='card'>
+    <div>
+      <div className='card-home_header'>
+      <h1>Apartment Finder</h1>
+      <h4>Welcome to Apartment Finder, your perfect solution for apartment hunting. Our web application is designed to simplify the process of finding the perfect apartment with a user-friendly interface for both landlords and renters.</h4>
+      <h4>At Apartment Finder, we understand the difficulties  of search for a new home. Our platform serves two user groups: Landlords and Renters. Landlords can submit applications for their properties, which are then reviewed by our admin team. This process includes a detailed verification step to ensure that all listings on our site meet our high standards for safety. And for renters, they can submit reviews on apartments.</h4>
       <h2>Apartments for Rent</h2>
-      
+      <h4>Search by:</h4>
+      </div>
+
+      <div className="buttons-container">
+
       <Button 
-        style={{justifyContent: 'center'}}
+        className='button-sign' 
+        style={{ verticalAlign: 'middle' }}
         variant="contained"
         color="primary"
         onClick={toggleSearchForm}
         >
-        Filter Apartments
+        <span>Filter Apartments</span>
       </Button> 
+
+      </div>
       
       {isSearchFormVisible ? searchForm : null}
 
       <CardGroup>{apartmentList}</CardGroup>
     </div>
+
+    
+
   );
 }
 
 export default Home;
+
+

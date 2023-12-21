@@ -5,18 +5,42 @@ import UserReviewList from './ReviewList';
 import PendingReviews from './PendingReviews';
 import PendingApartments from './PendingApartments';
 import AddApartment from './AddApartment';
-
+import helpers from './../utils/helpers.js';
 import CardGroup from 'react-bootstrap/CardGroup';
 import { Button } from '@mui/material';
+import EditRenterModal from './EditRenterModal.jsx';
+import { useMutation } from "@apollo/client";
+import { editRenter } from '../graphql/Mutations.js';
+
 
 
 function AccountDetails() {
+    const [isModalOpen, setIsModalOpen] = useState(false);
     const {userData, accountType} = useContext(UserContext);
     const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+    const [updateRenter, {loading, error}] = useMutation(editRenter());
 
     function toggleAddForm() {
       setIsAddFormVisible(!isAddFormVisible);    
     }
+    const updateAccountInfo = (formData) => {
+        formData.id = userData.id;
+        formData.dateOfBirth = helpers.reformatDateForDatabaseCall(formData.dateOfBirth);
+        try{
+            updateRenter({variables: formData})
+        }
+        catch(e){
+            console.log(e);
+        }
+    }
+
+    const openModal = () => {
+        setIsModalOpen(true);
+    };
+
+    const closeModal = () => {
+    setIsModalOpen(false);
+    };
 
     const savedApartments =  
       userData &&
@@ -69,12 +93,11 @@ function AccountDetails() {
 
        {accountType === 'landlord' ? (
         <Button 
-        style={{justifyContent: 'center'}}
-        variant="contained"
-        color="primary"
-        onClick={toggleAddForm}
-        >
-        Create an Apartment
+            style={{justifyContent: 'center'}}
+            variant="contained"
+            color="primary"
+            onClick={toggleAddForm}>
+            Create an Apartment
         </Button> ):
        null}
 
@@ -101,6 +124,17 @@ function AccountDetails() {
           <h4>Pending Reviews: </h4> 
        }
        <CardGroup>{reviewList}</CardGroup>
+       {accountType === "renter" ? 
+       <>
+        <button onClick={openModal}>Edit Account Info</button>
+        <EditRenterModal
+            isOpen={isModalOpen}
+            closeModal={closeModal}
+            callDatabaseFunction={updateAccountInfo}
+            userData={userData}
+        /> 
+       </> : <br></br>
+    }
    </div>
     );
 

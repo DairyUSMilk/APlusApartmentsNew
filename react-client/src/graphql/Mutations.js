@@ -29,6 +29,19 @@ export function createRenter() {
     `;
 }
 
+export function editRenter() {
+    return gql`
+    mutation Mutation($id: String!, $name: String, $dateOfBirth: String, $gender: String) {
+        editRenter(id: $id, name: $name, dateOfBirth: $dateOfBirth, gender: $gender) {
+          id
+          name
+          gender
+          dateOfBirth
+        }
+      }
+    `
+}
+
 export function createLandlord() {
     return gql`
     mutation AddLandlord(

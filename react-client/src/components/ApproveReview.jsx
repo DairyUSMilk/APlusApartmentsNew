@@ -34,12 +34,17 @@ function ApproveReview ({review}) {
     }
      
     return (
+        <div className="buttons-container">
+
         <Button 
+            className='button-sign'
             variant="primary"
             onClick={handleApprove}
             >
-            Approve
+            <span>Approve</span>
         </Button>
+
+        </div>
         );
     }
     
