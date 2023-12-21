@@ -2,11 +2,14 @@ import React, {useState, useContext} from 'react';
 import { UserContext } from '../context/UserContext';
 import { useNavigate } from 'react-router-dom';
 import { ImageList, ImageListItem } from '@mui/material';
-import { useQuery } from "@apollo/client";
+import { useQuery, useMutation } from "@apollo/client";
 
-import { getApartment, getRenter, getLandlord, getAdmin } from '../graphql/Queries';
+import { getApartment } from '../graphql/Queries';
+import { createReview } from '../graphql/Mutations';
+
 import Review from './ReviewCard';
-import AddReview from './AddReview';
+// import AddReview from './AddReview';
+import CreateReviewModal from './CreateReviewModal';
 import DeleteApartment from './DeleteApartment';
 import AddOrRemoveBookmark from './AddOrRemoveBookmark';
 
@@ -23,15 +26,32 @@ import '../index.css';
 
 function ApartmentDetails({id}) {
     const {userData, accountType} = useContext(UserContext);
-    
-    const [isReviewFormVisible, setIsReviewFormVisible] = useState(false);
+    const [isAddReviewModalOpen, setIsAddReviewModalOpen] = useState(false);
+    const [addReviewCall] = useMutation(createReview());
     const navigate = useNavigate();
 
-    function toggleReviewForm() {
-        setIsReviewFormVisible(!isReviewFormVisible);    
+    const addReview = (formData) => {
+        formData.posterId = userData.id;
+        formData.apartmentId = id;
+        if(formData.rating){
+            formData.rating = Number(formData.rating)
+        }
+        try{
+            addReviewCall({ variables: formData });
+        }catch(e){
+            console.log(e);
+        }
     }
 
-    function ApartmentImages(apartment) {
+    const openAddReviewModal = () => {
+        setIsAddReviewModalOpen(true);
+    }
+
+    const closeAddReviewModal = () => {
+        setIsAddReviewModalOpen(false);
+    }
+
+    function ApartmentImages(apartment) { // not needed unless we add images to apartments
         return (apartment.images ? 
             <ImageList
             sx={{ width: 500, height: 450 }}
@@ -172,18 +192,17 @@ function ApartmentDetails({id}) {
                 </Card>
                 <CardGroup>{reviewList}</CardGroup>
                 <br/><br/>
-                {accountType === 'renter' ? (
-                <Button 
-                    style={{justifyContent: 'center'}}
-                    variant="contained"
-                    color="primary"
-                    onClick={toggleReviewForm}
-                    >
-                    Add a Review
-                </Button> ):
-                null}
-                {isReviewFormVisible ? <AddReview apartmentId={apartment.id} /> : null}
-                <br/><br/>
+                {accountType === "renter" ? 
+                <>
+                    <button onClick={openAddReviewModal}>Add a Review </button>
+                    <CreateReviewModal 
+                        isOpen={isAddReviewModalOpen}
+                        closeModal={closeAddReviewModal}
+                        callDatabaseFunction={addReview}/>
+                </> :
+                <></>
+                }
+                
                 <Button 
                     style={{justifyContent: 'center'}}
                     variant="contained"

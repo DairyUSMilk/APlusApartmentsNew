@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useMutation } from "@apollo/client";
-import { getUserReviews } from '../graphql/Queries';
+import { getPendingReviews } from '../graphql/Queries';
 import { createReview } from '../graphql/Mutations';
 
 import helpers from './../utils/helpers.js';
@@ -10,7 +10,9 @@ import Form from 'react-bootstrap/Form';
 import '../index.css';
 
 
-function AddReview({posterId, apartmentId}) {
+function AddReview({apartmentId}) {
+    const {userData} = useContext(UserContext);
+
     const [rating, setRating] = useState(0);
     const [content, setContent] = useState('');
 
@@ -30,7 +32,14 @@ function AddReview({posterId, apartmentId}) {
 
         console.log(newReview);
         try {
-            addReview({ variables: newReview });
+            addReview({ 
+                variables: newReview, 
+                refetchQueries: [
+                    { query: getPendingReviews() }
+                ]   
+            } );
+
+
         }
         catch (e) {
             alert(e);
@@ -53,6 +62,11 @@ function AddReview({posterId, apartmentId}) {
     }
 
     return (
+        <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Add Apartment Review Modal"
+        >
         <Form onSubmit={handleAdd}>
         <Form.Group className="mb-3" controlId="review.rating">
           <Form.Label>Rating</Form.Label>
@@ -71,6 +85,7 @@ function AddReview({posterId, apartmentId}) {
 
         </div>
       </Form>
+      </Modal>
     );
 }
 

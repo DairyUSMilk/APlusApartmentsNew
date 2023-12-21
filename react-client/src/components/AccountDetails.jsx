@@ -8,14 +8,81 @@ import AddApartment from './AddApartment';
 
 import CardGroup from 'react-bootstrap/CardGroup';
 import { Button } from '@mui/material';
+import EditRenterModal from './EditRenterModal.jsx';
+import { useMutation } from "@apollo/client";
+import { editRenter, createApartment, editLandlord } from '../graphql/Mutations.js';
+import CreateApartmentModal from './CreateApartmentModal.jsx';
+import EditLandlordModal from './EditLandlordModal.jsx';
+
 
 
 function AccountDetails() {
+    const [isRenterModalOpen, setIsRenterModalOpen] = useState(false);
+    const [isLandlordModalOpen, setIsLandlordModalOpen] = useState(false);
+    const [isAddApartmentModalOpen, setIsAddApartmentModalOpen] = useState(false);
     const {userData, accountType} = useContext(UserContext);
-    const [isAddFormVisible, setIsAddFormVisible] = useState(false);
+    const [updateRenter] = useMutation(editRenter());
+    const [updateLandlord] = useMutation(editLandlord());
+    const [addApartmentCall] = useMutation(createApartment());
 
-    function toggleAddForm() {
-      setIsAddFormVisible(!isAddFormVisible);    
+    const updateAccountInfo = (formData) => {
+        formData.id = userData.id;
+        formData.dateOfBirth = helpers.reformatDateForDatabaseCall(formData.dateOfBirth);
+        try{
+            updateRenter({variables: formData})
+        }
+        catch(e){
+            console.log(e);
+        }
+    }
+
+    const updateLandlordInfo = (formData) => {
+        formData.id = userData.id;
+        console.log(JSON.stringify(formData));
+        try{
+            updateLandlord({variables: formData});
+        } catch(e){
+            console.log(e);
+        }
+    }
+
+    const addApartment = (formData) => {
+        formData.landlordId = userData.id;
+        if(formData.amenities){
+            formData.amenities = formData.amenities.split(",");
+        }
+        if(formData.price){
+            formData.price = Number(formData.price)
+        }
+        try{
+            addApartmentCall({ variables: formData });
+        }catch(e){
+            console.log(e);
+        }
+    }
+
+    const openEditRenterModal = () => {
+        setIsRenterModalOpen(true);
+    };
+
+    const closeEditRenterModal = () => {
+        setIsRenterModalOpen(false);
+    };
+
+    const openLandlordModal = () => {
+        setIsLandlordModalOpen(true);
+    }
+
+    const closeLandlordModal = () => {
+        setIsLandlordModalOpen(false);
+    }
+
+    const openAddApartmentModal = () => {
+        setIsAddApartmentModalOpen(true);
+    }
+
+    const closeAddApartmentModal = () => {
+        setIsAddApartmentModalOpen(false);
     }
 
     const savedApartments =  
@@ -66,22 +133,18 @@ function AccountDetails() {
    return (
      <div className='form card'>
        {data}
+       {accountType === "landlord" ? 
+        <>
+            <button onClick={openAddApartmentModal}>Add Apartment Listing</button>
+            <CreateApartmentModal 
+                isOpen={isAddApartmentModalOpen}
+                closeModal={closeAddApartmentModal}
+                callDatabaseFunction={addApartment}/>
+        </> :
+        <></>
+    
+        }
 
-       {accountType === 'landlord' ? (
-        <div className="buttons-container">
-
-        <Button className='button-create'
-        variant="contained"
-        color="primary"
-        onClick={toggleAddForm}
-        >
-        <span>Create An Apartment</span>
-        </Button> 
-        </div>
-        ):
-       null}
-
-       {isAddFormVisible ? <AddApartment userId={uid} /> : null}
 
        <CardGroup>
        <h4> Saved Apartments: </h4> <br />
@@ -104,6 +167,33 @@ function AccountDetails() {
           <h4>Pending Reviews: </h4> 
        }
        <CardGroup>{reviewList}</CardGroup>
+
+       {accountType === "renter" ? 
+       <>
+        <button onClick={openEditRenterModal}>Edit Account Info</button>
+        <EditRenterModal
+            isOpen={isRenterModalOpen}
+            closeModal={closeEditRenterModal}
+            callDatabaseFunction={updateAccountInfo}
+            userData={userData}
+        /> 
+       </> : <br></br>
+        }
+
+        {accountType === "landlord" ? 
+            <>
+                <button onClick={openLandlordModal}>Edit Account Info</button>
+                <EditLandlordModal
+                    isOpen={isLandlordModalOpen}
+                    closeModal={closeLandlordModal}
+                    callDatabaseFunction={updateLandlordInfo}
+                    userData={userData}
+                />
+            </> :
+            <></>
+
+        }
+
    </div>
     );
 

@@ -9,6 +9,7 @@ import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import CardGroup from 'react-bootstrap/CardGroup';
 import '../index.css';
+import Map from './Map';
 
 function Home() {
   const { userData } = useContext(UserContext);
@@ -138,10 +139,9 @@ function Home() {
       {isSearchFormVisible ? searchForm : null}
 
       <CardGroup>{apartmentList}</CardGroup>
+      
+      {data && <Map apartments = {data.apartments}/>}
     </div>
-
-    
-
   );
 }
 
