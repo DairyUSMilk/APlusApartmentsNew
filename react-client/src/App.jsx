@@ -1,16 +1,20 @@
 import NavBar from './components/NavBar';
 
-import {Provider} from './firebase/Context';
+import { AuthProvider } from './context/AuthContext';
+import { UserProvider } from './context/UserContext';
+
 import { Outlet } from "react-router-dom";
 
 function App() {
   return (
-    <Provider>
-    <div>
-      <NavBar />
-      <Outlet />
-    </div>
-    </Provider>
+    <AuthProvider>
+      <UserProvider>
+        <div>
+          <NavBar />
+          <Outlet />
+        </div>
+      </UserProvider>
+    </AuthProvider>
   );
 }
 
