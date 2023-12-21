@@ -69,12 +69,21 @@ function ChangePassword() {
           <div className='form-group'>
             <label>
               Confirm New Password:
+              <div class="passwordTooltip">&nbsp;?
+                <small id="passValidations" class="passwordTooltipText">
+                Password must be a minimum of 8 characters long,
+                have at least one at least one uppercase and lowercase character, have at least one number, 
+                and has to contain at least one special character (!@#$%&?).
+              </small>
+              </div>
               <input
                 className='form-control'
                 name='matchPassword'
                 id='matchPassword'
                 type='password'
                 placeholder='Confirm Password'
+                pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&?]).{8,})"
+                aria-describedby="passValidations"
                 autoComplete='off'
                 required
               />

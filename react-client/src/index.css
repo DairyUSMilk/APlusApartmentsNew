@@ -171,6 +171,30 @@
     margin: 0 5px; 
   }
   
+  .passwordTooltip {
+    display: inline-block;
+    border-bottom: 1px dotted black;
+    font-size: 10px;
+  }
+
+  .passwordTooltip .passwordTooltipText {
+    visibility: hidden;
+    width: 50%;
+    background-color: black;
+    color: #fff;
+    text-align: center;
+    border-radius: 6px;
+    padding: 5px 0;
+    font-size: 14px;
+  
+    /* Position the tooltip */
+    position: absolute;
+    z-index: 1;
+  }
+  
+  .passwordTooltip:hover .passwordTooltipText {
+    visibility: visible;
+  }
 
 
   
