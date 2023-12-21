@@ -124,14 +124,17 @@ function AccountDetails() {
           <h4>Pending Reviews: </h4> 
        }
        <CardGroup>{reviewList}</CardGroup>
-
-       <button onClick={openModal}>Edit Account Info</button>
-       <EditRenterModal
-        isOpen={isModalOpen}
-        closeModal={closeModal}
-        callDatabaseFunction={updateAccountInfo}
-        userData={userData}
-       />
+       {accountType === "renter" ? 
+       <>
+        <button onClick={openModal}>Edit Account Info</button>
+        <EditRenterModal
+            isOpen={isModalOpen}
+            closeModal={closeModal}
+            callDatabaseFunction={updateAccountInfo}
+            userData={userData}
+        /> 
+       </> : <br></br>
+    }
    </div>
     );
 
