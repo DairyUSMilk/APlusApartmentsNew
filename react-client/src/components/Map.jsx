@@ -18,10 +18,7 @@ const Map = ({apartments = []}) => {
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
         libraries: libraries
     });
-    
-    useEffect(() => {
-        console.log("markers", markers)
-    }, [markers])
+
     // Get user's location
     useEffect(() => {
         const success = (position) => {
@@ -109,7 +106,7 @@ const Map = ({apartments = []}) => {
             {markers.length !== 0 && (
                 <>
                     <AddressForm requireSubpremise = {false} returnCoords={updateCoords} mapCenter={center} />
-                    <GoogleMap mapContainerClassName="map-container" center={center} zoom={15} onLoad={console.log("GoogleMap Loaded")}>
+                    <GoogleMap mapContainerClassName="map-container" center={center} zoom={15}>
                         {markers.map((marker, index) => 
                             <Marker
                                 key={index}
