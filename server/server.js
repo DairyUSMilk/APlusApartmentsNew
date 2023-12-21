@@ -12,9 +12,5 @@ const server = new ApolloServer({
 
 const { url } = await startStandaloneServer(server, {
   listen: { port: 3000 },
-  cors: {
-    origin: "http://ec2-52-15-86-109.us-east-2.compute.amazonaws.com",
-    credentials: true,
-  },
 });
 console.log(`🚀  Server ready at: ${url}`);

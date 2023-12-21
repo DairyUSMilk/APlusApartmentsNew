@@ -29,7 +29,7 @@ import "./index.css";
 const client = new ApolloClient({
   cache: new InMemoryCache(),
   link: new HttpLink({
-    uri: "http://ec2-52-15-86-109.us-east-2.compute.amazonaws.com:3000",
+    uri: "http://3.142.218.159/api/",
   }),
 });
 
