@@ -48,7 +48,6 @@ const Map = ({apartments: markerList = []}) => {
     const updateCoords = ({lat, lng}) => { //change map center to user input address
         setCenter({lat, lng});
     }
-    
 
     return (
         <div className="Map">
