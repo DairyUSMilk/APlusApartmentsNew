@@ -2,6 +2,7 @@ import React, {useContext} from 'react';
 import {Navigate} from 'react-router-dom';
 import {UserContext} from '../context/UserContext';
 import {logIn, googleLogIn} from '../firebase/AuthFunctions';
+import '../index.css';
 
 export const googleSignIn = async () => {
     try {
@@ -64,8 +65,8 @@ function SignIn() {
             </label>
           </div>
 
-          <button className='button' type='submit'>
-            Log in
+          <button className='button' style={{ verticalAlign: 'middle' }} type='submit'>
+          <span>Log in</span>
           </button>
         </form>
 
@@ -75,13 +76,15 @@ function SignIn() {
 
         <br />
         <div>
-            <button className='btn btn-primary' onClick={() => googleSignIn()}>
-                Sign in with Google
-            </button>
-        </div>      
+          <button className='button' style={{ verticalAlign: 'middle' }} onClick={() => googleSignIn()}>
+          <span>Sign in</span>
+          </button>
+        </div>
+    
       </div>
     </div>
   );
 }
 
 export default SignIn;
+
