@@ -10,16 +10,19 @@ import CardGroup from 'react-bootstrap/CardGroup';
 import { Button } from '@mui/material';
 import EditRenterModal from './EditRenterModal.jsx';
 import { useMutation } from "@apollo/client";
-import { editRenter, createApartment } from '../graphql/Mutations.js';
+import { editRenter, createApartment, editLandlord } from '../graphql/Mutations.js';
 import CreateApartmentModal from './CreateApartmentModal.jsx';
+import EditLandlordModal from './EditLandlordModal.jsx';
 
 
 
 function AccountDetails() {
     const [isRenterModalOpen, setIsRenterModalOpen] = useState(false);
+    const [isLandlordModalOpen, setIsLandlordModalOpen] = useState(false);
     const [isAddApartmentModalOpen, setIsAddApartmentModalOpen] = useState(false);
     const {userData, accountType} = useContext(UserContext);
     const [updateRenter] = useMutation(editRenter());
+    const [updateLandlord] = useMutation(editLandlord());
     const [addApartmentCall] = useMutation(createApartment());
 
     const updateAccountInfo = (formData) => {
@@ -29,6 +32,16 @@ function AccountDetails() {
             updateRenter({variables: formData})
         }
         catch(e){
+            console.log(e);
+        }
+    }
+
+    const updateLandlordInfo = (formData) => {
+        formData.id = userData.id;
+        console.log(JSON.stringify(formData));
+        try{
+            updateLandlord({variables: formData});
+        } catch(e){
             console.log(e);
         }
     }
@@ -55,6 +68,14 @@ function AccountDetails() {
     const closeEditRenterModal = () => {
         setIsRenterModalOpen(false);
     };
+
+    const openLandlordModal = () => {
+        setIsLandlordModalOpen(true);
+    }
+
+    const closeLandlordModal = () => {
+        setIsLandlordModalOpen(false);
+    }
 
     const openAddApartmentModal = () => {
         setIsAddApartmentModalOpen(true);
@@ -156,7 +177,21 @@ function AccountDetails() {
             userData={userData}
         /> 
        </> : <br></br>
-    }
+        }
+
+        {accountType === "landlord" ? 
+            <>
+                <button onClick={openLandlordModal}>Edit Account Info</button>
+                <EditLandlordModal
+                    isOpen={isLandlordModalOpen}
+                    closeModal={closeLandlordModal}
+                    callDatabaseFunction={updateLandlordInfo}
+                    userData={userData}
+                />
+            </> :
+            <></>
+
+        }
    </div>
     );
 

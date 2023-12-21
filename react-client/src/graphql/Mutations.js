@@ -42,6 +42,18 @@ export function editRenter() {
     `
 }
 
+export function editLandlord() {
+    return gql`
+    mutation Mutation($id: String!, $name: String, $contactInfo: String) {
+        editLandlord(id: $id, name: $name, contactInfo: $contactInfo) {
+          id
+          name
+          contactInfo
+        }
+      }
+    `
+}
+
 export function createLandlord() {
     return gql`
     mutation AddLandlord(
