@@ -58,7 +58,8 @@ function SignUp() {
           <input className="input" required name="email" type="email" placeholder="Email" id="email" />
         </div>
         <div className="field">
-          <label htmlFor="password">Password
+          <label htmlFor="password">Password</label>
+          <input className="input" id="password" name="password" type="password" pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&?]).{8,})" aria-describedby="passValidations" placeholder="Password" autoComplete="off" required />
           <div class="passwordTooltip">
             <small id="passValidations" class="passwordTooltipText">
               Password must be a minimum of 8 characters long,
@@ -66,8 +67,6 @@ function SignUp() {
               and has to contain at least one special character (!@#$%&?).
             </small>
           </div>
-          </label>
-          <input className="input" id="password" name="password" type="password" pattern="((?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&?]).{8,})" aria-describedby="passValidations" placeholder="Password" autoComplete="off" required />
         </div>
         <div className="field">
           <label htmlFor="matchPassword">Confirm Password</label>
