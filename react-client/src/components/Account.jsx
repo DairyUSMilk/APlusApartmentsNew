@@ -21,8 +21,8 @@ function Account() {
     return (
         <div>
             <AccountDetails />
-            <Link to='/change-password' className='btn btn-primary'>
-                Change Password
+            <Link to='/change-password' className='button-sign'>
+                <span>Change Password</span>
             </Link>
         </div>
     );
