@@ -130,7 +130,7 @@ export const typeDefs = `#graphql
             posterId: String!
             apartmentId: String!
             rating: Int!
-            content: String
+            content: String!
             datePosted: String
         ): Review
         updateReview(

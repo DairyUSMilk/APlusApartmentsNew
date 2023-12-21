@@ -1,5 +1,5 @@
 import React, {useContext} from 'react';
-import {Navigate} from 'react-router-dom';
+import {Navigate, useNavigate} from 'react-router-dom';
 import {UserContext} from '../context/UserContext';
 import {logIn, googleLogIn} from '../firebase/AuthFunctions';
 import '../index.css';
@@ -14,6 +14,7 @@ export const googleSignIn = async () => {
 
 function SignIn() {
   const {currentUser} = useContext(UserContext);
+  const navigate = useNavigate();
   
   const handleLogin = async (event) => {
     event.preventDefault();
@@ -21,14 +22,13 @@ function SignIn() {
 
     try {
       await logIn(email.value, password.value);
+      navigate('/');
     } catch (error) {
       alert(error);
     }
   };
 
-  console.log(currentUser)
   if (currentUser) {
-    console.log('here')
     return <Navigate to='/' />;
   }
   return (

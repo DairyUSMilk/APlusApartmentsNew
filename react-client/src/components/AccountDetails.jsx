@@ -1,7 +1,7 @@
 import React, { useContext, useState } from 'react';
 import {UserContext} from '../context/UserContext';
 import ApartmentCard from './ApartmentCard';
-import ReviewList from './ReviewList';
+import UserReviewList from './ReviewList';
 import PendingReviews from './PendingReviews';
 import PendingApartments from './PendingApartments';
 import AddApartment from './AddApartment';
@@ -26,7 +26,7 @@ function AccountDetails() {
 
     let data = null;
     let ownedApartments = null;
-    let reviewList = (<ReviewList />);
+    let reviewList = (<UserReviewList />);
     
     if (accountType === 'renter') {
         data = (
@@ -78,7 +78,7 @@ function AccountDetails() {
         </Button> ):
        null}
 
-       {isAddFormVisible ? <AddApartment userId={uid} /> : null}
+       {isAddFormVisible ? <AddApartment /> : null}
 
        <CardGroup>
        <h4> Saved Apartments: </h4> <br />
@@ -87,7 +87,7 @@ function AccountDetails() {
 
        {ownedApartments ? (
           accountType === "landlord" ? ( 
-          <h4>Owned Apartments:</h4>
+          <h4>Approved Apartments:</h4>
           ): 
           <h4>Pending Apartments: </h4> 
           ): 
@@ -95,8 +95,8 @@ function AccountDetails() {
        }
        <CardGroup>{ownedApartments}</CardGroup>
 
-       {reviewList !== 'admin' ? (
-          <h4>Review History: </h4>
+       {accountType !== 'admin' ? (
+          <h4>Approved Reviews: </h4>
           ): 
           <h4>Pending Reviews: </h4> 
        }

@@ -34,7 +34,7 @@ export const resolvers = {
             });
           }
 
-          const renterFields =  renters.map((renter) => {
+          const renterFields = renters.map((renter) => {
             return reviewFormat(renter);
           });
 
@@ -70,10 +70,10 @@ export const resolvers = {
             });
           }
 
-          const landlordFields =  landlords.map((landlord) => {
+          const landlordFields = landlords.map((landlord) => {
             return reviewFormat(landlord);
           });
-          
+
           await client.set("landlords", JSON.stringify(landlordFields));
           await client.expire("renters", 3600);
           return landlordFields;
@@ -190,36 +190,42 @@ export const resolvers = {
       let hasFilter = false;
 
       if (args.city) {
-          args.city = validation.checkString(args.city, "city");
-          hasFilter = true;
+        args.city = validation.checkString(args.city, "city");
+        hasFilter = true;
       }
 
       if (args.state) {
-          args.state = validation.checkState(args.state, "state");
-          hasFilter = true;
-      }
-  
-      if (args.minPrice) {
-          args.minPrice = validation.checkNumber(args.minPrice, "min price");
-          hasFilter = true;
-      }
-  
-      if (args.maxPrice) {
-          if (args.minPrice && args.maxPrice <= args.minPrice) {
-            throw new GraphQLError(`Max filter price must be greater than min`, {
-              extensions: { code: "INTERNAL_SERVER_ERROR" },
-            });
-          }
-          args.maxPrice = validation.checkNumber(args.maxPrice, "max price");
-          hasFilter = true;
-      }
-  
-      if (args.rating) {
-          args.rating = validation.checkNumber(args.rating, "rating"); 
-          hasFilter = true;
+        args.state = validation.checkState(args.state, "state");
+        hasFilter = true;
       }
 
-      if (!hasFilter) { // get all approved apartments without filering
+      if (args.minPrice) {
+        args.minPrice = validation.checkNumber(args.minPrice, "min price");
+        hasFilter = true;
+      }
+
+      if (args.maxPrice) {
+        if (args.minPrice && args.maxPrice <= args.minPrice) {
+          throw new GraphQLError(`Max filter price must be greater than min`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+        args.maxPrice = validation.checkNumber(args.maxPrice, "max price");
+        hasFilter = true;
+      }
+
+      if (args.rating) {
+        if (args.rating < 1 || args.rating > 5) {
+          throw new GraphQLError(`Please specify a minimum rating between 1 and 5`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
+        args.rating = validation.checkNumber(args.rating, "rating");
+        hasFilter = true;
+      }
+
+      if (!hasFilter) {
+        // get all approved apartments without filering
         let exists = await client.exists("apartments");
         if (exists) {
           console.log("apartments in cache");
@@ -254,7 +260,8 @@ export const resolvers = {
           }
         }
       }
-      try { // use some combination of filters to query Apartments collection in db
+      try {
+        // use some combination of filters to query Apartments collection in db
         const allApartments = await apartments.getApprovedApartmentsByFilter(
           args.city,
           args.state,
@@ -281,6 +288,7 @@ export const resolvers = {
         });
       }
     },
+
     pendingApartments: async () => {
       let exists = await client.exists("pendingApartments");
       if (exists) {
@@ -295,7 +303,8 @@ export const resolvers = {
         }
       } else {
         try {
-          const pendingApartments = await apartments.getAllApartmentsPendingApproval();
+          const pendingApartments =
+            await apartments.getAllApartmentsPendingApproval();
           if (!pendingApartments) {
             return [];
           }
@@ -304,7 +313,10 @@ export const resolvers = {
             return apartmentFormat(apartment);
           });
 
-          await client.set("pendingApartments", JSON.stringify(formattedApartments));
+          await client.set(
+            "pendingApartments",
+            JSON.stringify(formattedApartments)
+          );
           await client.expire("pendingApartments", 3600);
           return formattedApartments;
         } catch (e) {
@@ -338,7 +350,10 @@ export const resolvers = {
           }
           const formattedApartment = apartmentFormat(apartment);
 
-          await client.set(`apartment.${id}`, JSON.stringify(formattedApartment));
+          await client.set(
+            `apartment.${id}`,
+            JSON.stringify(formattedApartment)
+          );
           return formattedApartment;
         } catch (e) {
           throw new GraphQLError(e, {
@@ -371,8 +386,8 @@ export const resolvers = {
         if (!allReviews) {
           return [];
         }
-        const reviewFields =  allReviews.map((review) => {
-            return reviewFormat(review);
+        const reviewFields = allReviews.map((review) => {
+          return reviewFormat(review);
         });
         await client.set(`reviews.${posterId}`, JSON.stringify(reviewFields));
         return reviewFields;
@@ -399,47 +414,55 @@ export const resolvers = {
         if (!pendingReviews) {
           return [];
         }
-        const reviewFields =  pendingReviews.map((review) => {
+        const reviewFields = pendingReviews.map((review) => {
           return reviewFormat(review);
         });
 
         await client.set(`pendingReviews`, JSON.stringify(reviewFields));
-  
+
         return reviewFields;
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
-    }
+    },
   },
   Renter: {
     savedApartments: async (parentValue) => {
-      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(
+        parentValue.id
+      );
       return bookmarkedApartments.map((apartment) => {
         return apartmentFormat(apartment);
       });
-    }
+    },
   },
   Landlord: {
     savedApartments: async (parentValue) => {
-      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(
+        parentValue.id
+      );
       return bookmarkedApartments.map((apartment) => {
         return apartmentFormat(apartment);
       });
     },
     ownedApartments: async (parentValue) => {
-      const ownedApartments = await apartments.getApartmentsByLandlordId(parentValue.id);
+      const ownedApartments = await apartments.getApartmentsByLandlordId(
+        parentValue.id
+      );
       return ownedApartments.map((apartment) => {
         return apartmentFormat(apartment);
       });
-    }
+    },
   },
   Admin: {
     savedApartments: async (parentValue) => {
-      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(parentValue.id);
+      const bookmarkedApartments = await apartments.getUserBookmarkedApartments(
+        parentValue.id
+      );
       return bookmarkedApartments.map((apartment) => {
         return apartmentFormat(apartment);
       });
-    }
+    },
   },
   Apartment: {
     landlord: async (parentValue) => {
@@ -448,11 +471,13 @@ export const resolvers = {
       return landlordFormat(landlord);
     },
     reviews: async (parentValue) => {
-      const apartmentReviews = await reviews.getAllReviewsByApartmentId(parentValue.id);
+      const apartmentReviews = await reviews.getAllReviewsByApartmentId(
+        parentValue.id
+      );
       return apartmentReviews.map((review) => {
         return reviewFormat(review);
       });
-    }
+    },
   },
   Mutation: {
     addRenter: async (_, args) => {
@@ -467,6 +492,7 @@ export const resolvers = {
           args.gender,
           "renter"
         );
+        await client.set(`renter.${newUser._id}`);
         return renterFormat(newUser);
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
@@ -484,13 +510,13 @@ export const resolvers = {
           args.gender,
           "landlord"
         );
+        await client.set(`landlord.${newUser._id}`);
         return landlordFormat(newUser);
-
       } catch (e) {
         throw new GraphQLError(e.message);
       }
     },
-    addAdmin: async(_, args) => {
+    addAdmin: async (_, args) => {
       try {
         const newUser = await users.createUser(
           args.id,
@@ -502,8 +528,8 @@ export const resolvers = {
           args.gender,
           "admin"
         );
+        await client.set(`admin.${newUser._id}`);
         return adminFormat(newUser);
-
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
       }
@@ -555,13 +581,13 @@ export const resolvers = {
       }
       try {
         await client.del(`renter.${renterId}`);
-        await client.del("renters"); 
+        await client.del("renters");
         return renterFormat(editedRenter);
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
-      };
+      }
     },
     removeRenter: async (_, args) => {
       let renterId;
@@ -636,16 +662,16 @@ export const resolvers = {
           apartment.state,
           apartment.dateListed,
           apartment.amenities,
-        // apartment.images /*** SKIP FOR NOW ***/
+          // apartment.images /*** SKIP FOR NOW ***/
           apartment.price,
           apartment.landlordId
         );
         const formatApartment = apartmentFormat(newApartment);
-
         await client.set(
           `apartment.${newApartment._id}`,
           JSON.stringify(formatApartment)
         );
+        await client.del("pendingApartments");
         return formatApartment;
       } catch (e) {
         throw new GraphQLError(e, {
@@ -665,10 +691,14 @@ export const resolvers = {
       }
       try {
         await client.del(`apartment.${id}`);
-        await client.del(`apartments`);
+        if (removedApartment.isApproved) {
+          await client.del(`apartments`)
+        }
+        else {
+          await client.del(`pendingApartments`);
+        }
 
         return apartmentFormat(removedApartment);
-
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -691,7 +721,6 @@ export const resolvers = {
         await client.del(`pendingApartments`);
 
         return apartmentFormat(approvedApartment);
-
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -714,31 +743,103 @@ export const resolvers = {
         await client.del(`pendingReviews`);
 
         return reviewFormat(approvedReview);
-
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
     },
+    createReview: async (_, args) => {
+      let posterId = validation.checkString(args.posterId, "posterId");
+      let apartmentId = validation.checkId(args.apartmentId, "apartmentId");
+      let rating = validation.checkRating(args.rating, "rating");
+      let content = validation.checkString(args.content, "content");
+      let datePosted = new Date().toLocaleDateString("en-US", {
+        year: "numeric",
+        month: "2-digit",
+        day: "2-digit",
+      });
+      let addedReview;
+      try {
+        addedReview = await reviews.createReview(
+          posterId,
+          apartmentId,
+          rating,
+          content,
+          datePosted
+        );
+      } catch (e) {
+        new GraphQLError(
+          `Could not add a review for apartment ${apartmentId} from user ${posterId}`,
+          {
+            extensions: { code: "NOT_FOUND" },
+          }
+        );
+      }
+      const formattedReview = reviewFormat(addedReview);
+      try {
+        await client.set(
+          `review.${addedReview._id}`, 
+          JSON.stringify(formattedReview)
+        );
+        await client.del("pendingReviews");
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+      return formattedReview;
+    },
+    deleteReview: async (_, args) => {
+      let id = validation.checkId(args.id, "delete review id");
+      let deletedReview;
+      try {
+        deletedReview = await reviews.deleteReviewById(id);
+      } catch (e) {
+        new GraphQLError(`Could not delete the review ${id}`, {
+          extensions: { code: "NOT_FOUND" },
+        });
+      }
+      try {
+        if (deletedReview.isApproved) {
+          await client.del(`reviews.${deletedReview.posterId}`)
+        }
+        else {
+          await client.del(`pendingReviews`);
+        }
+        await client.del(`review.${id}`);
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+      return reviewFormat(deletedReview);
+    },
     addBookmark: async (_, args) => {
       let userId = validation.checkString(args.userId, "user id");
       let apartmentId = validation.checkId(args.apartmentId, "apartment id");
       let userWithNewBookmark;
       try {
-        userWithNewBookmark = await users.addApartmentToBookmark(userId, apartmentId);
+        userWithNewBookmark = await users.addApartmentToBookmark(
+          userId,
+          apartmentId
+        );
       } catch (e) {
-        new GraphQLError(`Could not bookmark apartment with id of ${apartmentId} for user ${userId}`, {
-          extensions: { code: "NOT_FOUND" },
-        });
+        new GraphQLError(
+          `Could not bookmark apartment with id of ${apartmentId} for user ${userId}`,
+          {
+            extensions: { code: "NOT_FOUND" },
+          }
+        );
       }
       try {
-        await client.del(`${userWithNewBookmark.accountType}.${userWithNewBookmark}`);
+        await client.del(
+          `${userWithNewBookmark.accountType}.${userWithNewBookmark}`
+        );
         await client.del(`apartments`);
         await client.del(`pendingApartments`);
 
         return userId;
-
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
@@ -750,50 +851,56 @@ export const resolvers = {
       let apartmentId = validation.checkId(args.apartmentId, "apartment id");
       let userWithRemovedBookmark;
       try {
-        userWithRemovedBookmark = await users.removeApartmentFromBookmark(userId, apartmentId);
+        userWithRemovedBookmark = await users.removeApartmentFromBookmark(
+          userId,
+          apartmentId
+        );
       } catch (e) {
-        new GraphQLError(`Could not remove bookmark for apartment with id of ${apartmentId} for user ${userId}`, {
-          extensions: { code: "NOT_FOUND" },
-        });
+        new GraphQLError(
+          `Could not remove bookmark for apartment with id of ${apartmentId} for user ${userId}`,
+          {
+            extensions: { code: "NOT_FOUND" },
+          }
+        );
       }
       try {
-        await client.del(`${userWithRemovedBookmark.accountType}.${userWithRemovedBookmark}`);
+        await client.del(
+          `${userWithRemovedBookmark.accountType}.${userWithRemovedBookmark}`
+        );
         await client.del(`apartments`);
         await client.del(`pendingApartments`);
 
         return userId;
-
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
     },
-  }
+  },
 };
-
 
 function renterFormat(renter) {
   return {
     id: renter._id,
-    name: renter.name, 
+    name: renter.name,
     dateOfBirth: renter.dateOfBirth,
-    gender: renter.gender
-  }
+    gender: renter.gender,
+  };
 }
 
 function landlordFormat(landlord) {
   return {
     id: landlord._id,
     name: landlord.name,
-    contactInfo: landlord.email
+    contactInfo: landlord.email,
   };
 }
 
 function adminFormat(admin) {
   return {
     id: admin._id,
-    name: admin.name
+    name: admin.name,
   };
 }
 
@@ -805,7 +912,7 @@ function apartmentFormat(apartment) {
     description: apartment.description,
     // images: apartment.images, /*** SKIP FOR NOW ***/
     price: apartment.pricePerMonth,
-    amenities: apartment.amenities
+    amenities: apartment.amenities,
   };
 }
 
@@ -816,6 +923,6 @@ function reviewFormat(review) {
     apartmentId: review.apartmentId,
     datePosted: review.datePosted,
     content: review.content,
-    rating: review.rating
+    rating: review.rating,
   };
 }

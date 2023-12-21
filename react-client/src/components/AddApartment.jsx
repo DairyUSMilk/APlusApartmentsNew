@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useContext, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from "@apollo/client";
 import { createApartment } from '../graphql/Mutations';
@@ -8,11 +8,11 @@ import helpers from './../utils/helpers.js';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import '../index.css';
+import { UserContext } from '../context/UserContext.jsx';
 
 
-function AddApartment({userId}) {
-    const navigate = useNavigate();
-
+function AddApartment() {
+    const {userData} = useContext(UserContext);
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
@@ -27,7 +27,7 @@ function AddApartment({userId}) {
     const handleAdd = (event) => {
         event.preventDefault();
         let newApartment = {
-            landlordId: userId
+            landlordId: userData.id
         };
         newApartment.name=helpers.checkString(name, 'name');
         newApartment.address=helpers.checkString(address, 'address');

@@ -16,7 +16,7 @@ function PendingReviews() {
     if (error) {
         throw new Error(error.message);
     }
-
+    
     let reviewList =  
         data &&
         data.pendingReviews.map((review) => {

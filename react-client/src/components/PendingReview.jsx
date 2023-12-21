@@ -1,14 +1,14 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 
+import { useQuery } from '@apollo/client';
 import { getRenter } from '../graphql/Queries';
 import DeleteReview from './DeleteReview';
 import ApproveReview from './ApproveReview';
 
 function PendingReview({review}) {
     const {data, loading, error }  = useQuery(getRenter(), {
-        variables: {uid: review.posterId}
+        variables: {id: review.posterId}
     });
 
     if (loading) {

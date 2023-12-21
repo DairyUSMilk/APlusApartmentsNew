@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useContext, useState, useEffect } from 'react';
 import { useQuery } from '@apollo/client';
 import { getRenter, getLandlord, getAdmin, getUserAccountType } from '../graphql/Queries';
 import { AuthContext } from './AuthContext';
@@ -9,7 +9,16 @@ export const UserContext = React.createContext({
 
 export const UserProvider = ({children}) => {
   const {currentUser} = useContext(AuthContext);
-  const [uid] = useState(currentUser ? currentUser.uid : null);
+  const [uid, setUid] = useState(null);
+  
+  useEffect(() => {
+    const listener = () => {
+      if (currentUser) {
+        setUid(currentUser.uid)
+      }
+    };
+    return listener();
+  }, [currentUser]);
 
   const { data: accountTypeData, loading: accountTypeLoading, error: AccountTypeError } = useQuery(getUserAccountType(), {
     variables: { id: uid },
