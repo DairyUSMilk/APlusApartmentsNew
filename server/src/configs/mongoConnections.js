@@ -10,3 +10,6 @@ export const dbConnection = async () => {
   }
   return _db;
 };
+export const closeConnection = async () => {
+  await _connection.close();
+};
