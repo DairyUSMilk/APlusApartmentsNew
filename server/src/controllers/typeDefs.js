@@ -17,6 +17,7 @@ export const typeDefs = `#graphql
         getAdminById(id: String!): Admin
         getUserAccountType(id: String!): String
         getApartmentById(id: String!): Apartment
+
     }
     type Renter{
         id: String!
@@ -85,6 +86,18 @@ export const typeDefs = `#graphql
             amenities: [String]!
             landlordId: String!
         ): Apartment
+        editApartment(
+            id: String!
+            name: String
+            address: String
+            city: String
+            state: String
+            description: String
+            images: [String]
+            price: Float!
+            amenities: [String]!
+            landlordId: String!
+        )
         removeApartment(
             id: String!
         ): Apartment

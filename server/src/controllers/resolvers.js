@@ -216,9 +216,12 @@ export const resolvers = {
 
       if (args.rating) {
         if (args.rating < 1 || args.rating > 5) {
-          throw new GraphQLError(`Please specify a minimum rating between 1 and 5`, {
-            extensions: { code: "INTERNAL_SERVER_ERROR" },
-          });
+          throw new GraphQLError(
+            `Please specify a minimum rating between 1 and 5`,
+            {
+              extensions: { code: "INTERNAL_SERVER_ERROR" },
+            }
+          );
         }
         args.rating = validation.checkNumber(args.rating, "rating");
         hasFilter = true;
@@ -679,204 +682,294 @@ export const resolvers = {
         });
       }
     },
-    removeApartment: async (_, args) => {
-      let id = validation.checkId(args.id, "apartment id");
-      let removedApartment;
+    editApartment: async (_, args) => {
+      //not supposed to change dateListed, rating and isApproved
+      let editedApartment;
       try {
-        removedApartment = await apartments.deleteApartmentById(id);
+        let id = validation.checkString(args.id);
+        const apartment = await apartments.getApartmentById(id);
+        if (apartment) {
+          if (args.name) {
+            apartment.name = validation.checkName(args.name, "name");
+          }
+          if (args.address) {
+            apartment.address = validation.checkString(
+              args.address,
+              "apartment address"
+            );
+          }
+          if (args.city) {
+            apartment.city = validation.checkString(
+              args.city,
+              "apartment city"
+            );
+          }
+          if (args.state) {
+            apartment.state = validation.checkState(
+              args.state,
+              "apartment state"
+            );
+          }
+          if (args.description) {
+            apartment.description = validation.checkString(
+              args.description,
+              "apartment description"
+            );
+          }
+          if (args.images) {
+            apartment.images = validation.checkStringArray(
+              args.images,
+              "apartment images"
+            );
+          }
+          if (args.price) {
+            apartment.pricePerMonth = validation.checkPrice(
+              args.price,
+              "apartment price"
+            );
+          }
+          if (args.amenities) {
+            apartment.amenities = validation.checkStringArray(
+              args.amenities,
+              "apartment amenities"
+            );
+          }
+          if (args.landlordId) {
+            apartment.landlord = validation.checkString(
+              args.landlordId,
+              "apartment landlordId"
+            );
+          }
+          editedApartment = await apartments.updateApartmentInfoById(
+            id,
+            apartment.name,
+            apartment.description,
+            apartment.address,
+            apartment.city,
+            apartment.state,
+            apartment.dateListed,
+            apartment.amenities,
+            apartment.images,
+            apartment.pricePerMonth,
+            apartment.landlord,
+            apartment.rating,
+            apartment.isApproved
+          );
+        } else
+          throw new GraphQLError(`Can't find apartment with an Id of ${id}`, {
+            extensions: { code: "NOT_FOUND" },
+          });
       } catch (e) {
-        new GraphQLError(`Could not delete apartment with id of ${args.id}`, {
-          extensions: { code: "NOT_FOUND" },
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
       try {
         await client.del(`apartment.${id}`);
-        if (removedApartment.isApproved) {
-          await client.del(`apartments`)
-        }
-        else {
-          await client.del(`pendingApartments`);
-        }
-
-        return apartmentFormat(removedApartment);
+        await client.del("apartment");
+        return apartmentFormat(editedApartment);
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
     },
-    approveApartment: async (_, args) => {
-      let id = validation.checkId(args.id, "apartment id");
-      let approvedApartment;
-      try {
-        approvedApartment = await apartments.approveApartmentById(id);
-      } catch (e) {
-        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
-          extensions: { code: "NOT_FOUND" },
-        });
-      }
-      try {
-        await client.del(`apartment.${id}`);
-        await client.del(`apartments`);
-        await client.del(`pendingApartments`);
-
-        return apartmentFormat(approvedApartment);
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-    },
-    approveReview: async (_, args) => {
-      let id = validation.checkId(args.id, "review id");
-      let approvedReview;
-      try {
-        approvedReview = await reviews.approveReviewById(id);
-      } catch (e) {
-        new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
-          extensions: { code: "NOT_FOUND" },
-        });
-      }
-      try {
-        await client.del(`review.${id}`);
-        await client.del(`reviews`);
-        await client.del(`pendingReviews`);
-
-        return reviewFormat(approvedReview);
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-    },
-    createReview: async (_, args) => {
-      let posterId = validation.checkString(args.posterId, "posterId");
-      let apartmentId = validation.checkId(args.apartmentId, "apartmentId");
-      let rating = validation.checkRating(args.rating, "rating");
-      let content = validation.checkString(args.content, "content");
-      let datePosted = new Date().toLocaleDateString("en-US", {
-        year: "numeric",
-        month: "2-digit",
-        day: "2-digit",
+  },
+  removeApartment: async (_, args) => {
+    let id = validation.checkId(args.id, "apartment id");
+    let removedApartment;
+    try {
+      removedApartment = await apartments.deleteApartmentById(id);
+    } catch (e) {
+      new GraphQLError(`Could not delete apartment with id of ${args.id}`, {
+        extensions: { code: "NOT_FOUND" },
       });
-      let addedReview;
-      try {
-        addedReview = await reviews.createReview(
-          posterId,
-          apartmentId,
-          rating,
-          content,
-          datePosted
-        );
-      } catch (e) {
-        new GraphQLError(
-          `Could not add a review for apartment ${apartmentId} from user ${posterId}`,
-          {
-            extensions: { code: "NOT_FOUND" },
-          }
-        );
+    }
+    try {
+      await client.del(`apartment.${id}`);
+      if (removedApartment.isApproved) {
+        await client.del(`apartments`);
+      } else {
+        await client.del(`pendingApartments`);
       }
-      const formattedReview = reviewFormat(addedReview);
-      try {
-        await client.set(
-          `review.${addedReview._id}`, 
-          JSON.stringify(formattedReview)
-        );
-        await client.del("pendingReviews");
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-      return formattedReview;
-    },
-    deleteReview: async (_, args) => {
-      let id = validation.checkId(args.id, "delete review id");
-      let deletedReview;
-      try {
-        deletedReview = await reviews.deleteReviewById(id);
-      } catch (e) {
-        new GraphQLError(`Could not delete the review ${id}`, {
+
+      return apartmentFormat(removedApartment);
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  approveApartment: async (_, args) => {
+    let id = validation.checkId(args.id, "apartment id");
+    let approvedApartment;
+    try {
+      approvedApartment = await apartments.approveApartmentById(id);
+    } catch (e) {
+      new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    try {
+      await client.del(`apartment.${id}`);
+      await client.del(`apartments`);
+      await client.del(`pendingApartments`);
+
+      return apartmentFormat(approvedApartment);
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  approveReview: async (_, args) => {
+    let id = validation.checkId(args.id, "review id");
+    let approvedReview;
+    try {
+      approvedReview = await reviews.approveReviewById(id);
+    } catch (e) {
+      new GraphQLError(`Could not approve apartment with id of ${args.id}`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    try {
+      await client.del(`review.${id}`);
+      await client.del(`reviews`);
+      await client.del(`pendingReviews`);
+
+      return reviewFormat(approvedReview);
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  createReview: async (_, args) => {
+    let posterId = validation.checkString(args.posterId, "posterId");
+    let apartmentId = validation.checkId(args.apartmentId, "apartmentId");
+    let rating = validation.checkRating(args.rating, "rating");
+    let content = validation.checkString(args.content, "content");
+    let datePosted = new Date().toLocaleDateString("en-US", {
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    });
+    let addedReview;
+    try {
+      addedReview = await reviews.createReview(
+        posterId,
+        apartmentId,
+        rating,
+        content,
+        datePosted
+      );
+    } catch (e) {
+      new GraphQLError(
+        `Could not add a review for apartment ${apartmentId} from user ${posterId}`,
+        {
           extensions: { code: "NOT_FOUND" },
-        });
-      }
-      try {
-        if (deletedReview.isApproved) {
-          await client.del(`reviews.${deletedReview.posterId}`)
         }
-        else {
-          await client.del(`pendingReviews`);
+      );
+    }
+    const formattedReview = reviewFormat(addedReview);
+    try {
+      await client.set(
+        `review.${addedReview._id}`,
+        JSON.stringify(formattedReview)
+      );
+      await client.del("pendingReviews");
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+    return formattedReview;
+  },
+  deleteReview: async (_, args) => {
+    let id = validation.checkId(args.id, "delete review id");
+    let deletedReview;
+    try {
+      deletedReview = await reviews.deleteReviewById(id);
+    } catch (e) {
+      new GraphQLError(`Could not delete the review ${id}`, {
+        extensions: { code: "NOT_FOUND" },
+      });
+    }
+    try {
+      if (deletedReview.isApproved) {
+        await client.del(`reviews.${deletedReview.posterId}`);
+      } else {
+        await client.del(`pendingReviews`);
+      }
+      await client.del(`review.${id}`);
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+    return reviewFormat(deletedReview);
+  },
+  addBookmark: async (_, args) => {
+    let userId = validation.checkString(args.userId, "user id");
+    let apartmentId = validation.checkId(args.apartmentId, "apartment id");
+    let userWithNewBookmark;
+    try {
+      userWithNewBookmark = await users.addApartmentToBookmark(
+        userId,
+        apartmentId
+      );
+    } catch (e) {
+      new GraphQLError(
+        `Could not bookmark apartment with id of ${apartmentId} for user ${userId}`,
+        {
+          extensions: { code: "NOT_FOUND" },
         }
-        await client.del(`review.${id}`);
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-      return reviewFormat(deletedReview);
-    },
-    addBookmark: async (_, args) => {
-      let userId = validation.checkString(args.userId, "user id");
-      let apartmentId = validation.checkId(args.apartmentId, "apartment id");
-      let userWithNewBookmark;
-      try {
-        userWithNewBookmark = await users.addApartmentToBookmark(
-          userId,
-          apartmentId
-        );
-      } catch (e) {
-        new GraphQLError(
-          `Could not bookmark apartment with id of ${apartmentId} for user ${userId}`,
-          {
-            extensions: { code: "NOT_FOUND" },
-          }
-        );
-      }
-      try {
-        await client.del(
-          `${userWithNewBookmark.accountType}.${userWithNewBookmark}`
-        );
-        await client.del(`apartments`);
-        await client.del(`pendingApartments`);
+      );
+    }
+    try {
+      await client.del(
+        `${userWithNewBookmark.accountType}.${userWithNewBookmark}`
+      );
+      await client.del(`apartments`);
+      await client.del(`pendingApartments`);
 
-        return userId;
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-    },
-    removeBookmark: async (_, args) => {
-      let userId = validation.checkString(args.userId, "user id");
-      let apartmentId = validation.checkId(args.apartmentId, "apartment id");
-      let userWithRemovedBookmark;
-      try {
-        userWithRemovedBookmark = await users.removeApartmentFromBookmark(
-          userId,
-          apartmentId
-        );
-      } catch (e) {
-        new GraphQLError(
-          `Could not remove bookmark for apartment with id of ${apartmentId} for user ${userId}`,
-          {
-            extensions: { code: "NOT_FOUND" },
-          }
-        );
-      }
-      try {
-        await client.del(
-          `${userWithRemovedBookmark.accountType}.${userWithRemovedBookmark}`
-        );
-        await client.del(`apartments`);
-        await client.del(`pendingApartments`);
+      return userId;
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
+  },
+  removeBookmark: async (_, args) => {
+    let userId = validation.checkString(args.userId, "user id");
+    let apartmentId = validation.checkId(args.apartmentId, "apartment id");
+    let userWithRemovedBookmark;
+    try {
+      userWithRemovedBookmark = await users.removeApartmentFromBookmark(
+        userId,
+        apartmentId
+      );
+    } catch (e) {
+      new GraphQLError(
+        `Could not remove bookmark for apartment with id of ${apartmentId} for user ${userId}`,
+        {
+          extensions: { code: "NOT_FOUND" },
+        }
+      );
+    }
+    try {
+      await client.del(
+        `${userWithRemovedBookmark.accountType}.${userWithRemovedBookmark}`
+      );
+      await client.del(`apartments`);
+      await client.del(`pendingApartments`);
 
-        return userId;
-      } catch (e) {
-        throw new GraphQLError(e, {
-          extensions: { code: "INTERNAL_SERVER_ERROR" },
-        });
-      }
-    },
+      return userId;
+    } catch (e) {
+      throw new GraphQLError(e, {
+        extensions: { code: "INTERNAL_SERVER_ERROR" },
+      });
+    }
   },
 };
 
