@@ -1,9 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Autocomplete } from '@react-google-maps/api';
+import { Autocomplete, useLoadScript } from '@react-google-maps/api';
 import axios from 'axios';
 
-const AddressForm = ({ updateCoords, mapCenter }) => {
+const libraries = ['places'];
+
+const AddressForm = ({ returnCoords, mapCenter = { lat: 40.745067, lng: -70.024408} }) => {
     // State to manage user input
+
+    const { isLoaded, loadError } = useLoadScript({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: libraries
+    });
+
     const [userAddress, setUserAddress] = useState({
         street_address: '',
         city: '',
@@ -11,6 +19,23 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         postcode: '',
         subpremise: '',
     });
+
+    // Get user's current location
+    useEffect(() => { 
+        const success = (position) => {
+            mapCenter = { lat: position.coords.latitude, lng: position.coords.longitude};
+        }
+        const error = () => {
+            console.log("Unable to retrieve your location");
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
+        } 
+        else {
+            console.log("Geolocation not supported");
+        }
+    }, []);
 
     // useEffect(() => {
     //     console.log(userAddress)
@@ -153,7 +178,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         if (validationResult.status === 'success' || validationResult.status === 'inferred') {
             // Update coordinates if validation is successful
             updateAutocompletes({ lat: validationResult.data.lat, lng: validationResult.data.lng });
-            updateCoords({ lat: validationResult.data.lat, lng: validationResult.data.lng });
+            returnCoords({ lat: validationResult.data.lat, lng: validationResult.data.lng });
             document.getElementById('addressForm').reset();
         } else if (validationResult.status === 'unconfirmed') {
             // Alert the user about unconfirmed components
