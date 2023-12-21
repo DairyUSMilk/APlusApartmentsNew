@@ -87,34 +87,31 @@ export const deleteUserById = async(id) => {
 
 //if a field is left blank, it is left unmodified
 export const updateUserInfoById = async(id, 
-    name, email, city, 
+    name, email, gender, city, 
     state, dateOfBirth, accountType) => {
     const updateInfo = {};
     id = helpers.checkString(id, "id");
-    name = helpers.checkString(name, "name");
-    email = helpers.checkEmail(email, "email");
-    city = helpers.checkString(city, "city");
-    state = helpers.checkState(state, "state");
-    dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
-    accountType = helpers.checkString(accountType, "accountType").toLowerCase();
 
     if(name){
-        updateInfo["name"] = name;
+        updateInfo["name"] = helpers.checkString(name, "name");
     }
     if(email){
-        updateInfo["email"] = email;
+        updateInfo["email"] = helpers.checkEmail(email, "email");
+    }
+    if(gender){
+        updateInfo["gender"] = helpers.checkString(gender, "gender");
     }
     if(city){
-        updateInfo["city"] = city;
+        updateInfo["city"] = helpers.checkString(city, "city");
     }
     if(state){
-        updateInfo["state"] = state;
+        updateInfo["state"] = helpers.checkState(state, "state");
     }
     if(dateOfBirth){
-        updateInfo["dateOfBirth"] = dateOfBirth;
+        updateInfo["dateOfBirth"] = helpers.checkDate(dateOfBirth, "dateOfBirth");
     }
     if(accountType){
-        updateInfo["accountType"] = accountType;
+        updateInfo["accountType"] = helpers.checkString(accountType, "accountType").toLowerCase();
     }
 
     const userCollection = await users();
@@ -138,7 +135,7 @@ export const validateLoginAttempt = async(email, password) => {
     throw `Either the email or password is incorrect`;
 }
 
-const getIdFilter = async(id) => {
+const getIdFilter = (id) => {
     return {_id: id};
 }
 

@@ -1,4 +1,4 @@
-import React, { useContext, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from "@apollo/client";
 import { createApartment } from '../graphql/Mutations';
@@ -8,11 +8,11 @@ import helpers from './../utils/helpers.js';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import '../index.css';
-import { UserContext } from '../context/UserContext.jsx';
 
 
-function AddApartment() {
-    const {userData} = useContext(UserContext);
+function AddApartment({userId}) {
+    const navigate = useNavigate();
+
     const [name, setName] = useState('');
     const [address, setAddress] = useState('');
     const [city, setCity] = useState('');
@@ -27,7 +27,7 @@ function AddApartment() {
     const handleAdd = (event) => {
         event.preventDefault();
         let newApartment = {
-            landlordId: userData.id
+            landlordId: userId
         };
         newApartment.name=helpers.checkString(name, 'name');
         newApartment.address=helpers.checkString(address, 'address');
@@ -95,9 +95,12 @@ function AddApartment() {
           <Form.Label>Amenities (separated by commas):</Form.Label>
           <Form.Control as="textarea" rows={4} placeholder="Ameneties" onChange={e => setAmenities(e.target.value)} />
         </Form.Group>
-        <Button variant="primary" type="submit">
-          Submit
+
+        <div className="buttons-container">
+        <Button className='button-sign' variant="primary" type="submit">
+        <span>Submit</span>
         </Button>
+        </div>
       </Form>
     );
 }
