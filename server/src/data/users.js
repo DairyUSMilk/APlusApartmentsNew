@@ -47,7 +47,7 @@ export const createUser = async (
 };
 
 export const getUserById = async (id) => {
-  id = checkId();
+  id = helpers.checkString(id, "user id");
   const userCollection = await users();
   const user = await userCollection.findOne({ _id: id });
   if (!user) {
