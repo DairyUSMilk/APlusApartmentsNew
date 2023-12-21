@@ -1,46 +1,22 @@
 import React, { useContext, useState } from 'react';
 import {UserContext} from '../context/UserContext';
 import ApartmentCard from './ApartmentCard';
-import UserReviewList from './ReviewList';
+import ReviewList from './ReviewList';
 import PendingReviews from './PendingReviews';
 import PendingApartments from './PendingApartments';
 import AddApartment from './AddApartment';
-import helpers from './../utils/helpers.js';
+
 import CardGroup from 'react-bootstrap/CardGroup';
 import { Button } from '@mui/material';
-import EditRenterModal from './EditRenterModal.jsx';
-import { useMutation } from "@apollo/client";
-import { editRenter } from '../graphql/Mutations.js';
-
 
 
 function AccountDetails() {
-    const [isModalOpen, setIsModalOpen] = useState(false);
     const {userData, accountType} = useContext(UserContext);
     const [isAddFormVisible, setIsAddFormVisible] = useState(false);
-    const [updateRenter, {loading, error}] = useMutation(editRenter());
 
     function toggleAddForm() {
       setIsAddFormVisible(!isAddFormVisible);    
     }
-    const updateAccountInfo = (formData) => {
-        formData.id = userData.id;
-        formData.dateOfBirth = helpers.reformatDateForDatabaseCall(formData.dateOfBirth);
-        try{
-            updateRenter({variables: formData})
-        }
-        catch(e){
-            console.log(e);
-        }
-    }
-
-    const openModal = () => {
-        setIsModalOpen(true);
-    };
-
-    const closeModal = () => {
-    setIsModalOpen(false);
-    };
 
     const savedApartments =  
       userData &&
@@ -50,23 +26,23 @@ function AccountDetails() {
 
     let data = null;
     let ownedApartments = null;
-    let reviewList = (<UserReviewList />);
+    let reviewList = (<ReviewList />);
     
     if (accountType === 'renter') {
         data = (
-        <div className="user">
-              <h2>Renter Details</h2>
-              <h3>{userData.name}</h3>
-              <p>Born: {userData.dateOfBirth}</p>
+        <div className="card-home_header">
+              <h1>Renter Details</h1>
+              <h2>{userData.name}</h2>
+              <h4>Born: {userData.dateOfBirth}</h4>
               <p>{userData.gender}</p>
         </div>
       );
     }
     else if (accountType === 'landlord') {
         data = (
-        <div className="user">
-              <h2>Landlord Details</h2>
-              <h3>{userData.name}</h3>
+        <div className="usecard-home_headerr">
+              <h1>Landlord Details</h1>
+              <h2>{userData.name}</h2>
               <p>Contact email: {userData.contactInfo}</p>
         </div>
       );
@@ -79,8 +55,8 @@ function AccountDetails() {
     else if (accountType === 'admin') {
         data = (
         <div className="user">
-              <h2>Admin Details</h2>
-              <h3>{userData.name}</h3>
+              <h1>Admin Details</h1>
+              <h2>{userData.name}</h2>
         </div>
       );
       ownedApartments = (<PendingApartments />);
@@ -88,20 +64,24 @@ function AccountDetails() {
     }
 
    return (
-     <div className='card'>
+     <div className='form card'>
        {data}
 
        {accountType === 'landlord' ? (
-        <Button 
-            style={{justifyContent: 'center'}}
-            variant="contained"
-            color="primary"
-            onClick={toggleAddForm}>
-            Create an Apartment
-        </Button> ):
+        <div className="buttons-container">
+
+        <Button className='button-create'
+        variant="contained"
+        color="primary"
+        onClick={toggleAddForm}
+        >
+        <span>Create An Apartment</span>
+        </Button> 
+        </div>
+        ):
        null}
 
-       {isAddFormVisible ? <AddApartment /> : null}
+       {isAddFormVisible ? <AddApartment userId={uid} /> : null}
 
        <CardGroup>
        <h4> Saved Apartments: </h4> <br />
@@ -110,7 +90,7 @@ function AccountDetails() {
 
        {ownedApartments ? (
           accountType === "landlord" ? ( 
-          <h4>Approved Apartments:</h4>
+          <h4>Owned Apartments:</h4>
           ): 
           <h4>Pending Apartments: </h4> 
           ): 
@@ -118,23 +98,12 @@ function AccountDetails() {
        }
        <CardGroup>{ownedApartments}</CardGroup>
 
-       {accountType !== 'admin' ? (
-          <h4>Approved Reviews: </h4>
+       {reviewList !== 'admin' ? (
+          <h4>Review History: </h4>
           ): 
           <h4>Pending Reviews: </h4> 
        }
        <CardGroup>{reviewList}</CardGroup>
-       {accountType === "renter" ? 
-       <>
-        <button onClick={openModal}>Edit Account Info</button>
-        <EditRenterModal
-            isOpen={isModalOpen}
-            closeModal={closeModal}
-            callDatabaseFunction={updateAccountInfo}
-            userData={userData}
-        /> 
-       </> : <br></br>
-    }
    </div>
     );
 
