@@ -539,8 +539,9 @@ export const resolvers = {
     },
     editRenter: async (_, args) => {
       let editedRenter;
+      let renterId = validation.checkString(args.id);
+      console.log(JSON.stringify(args));
       try {
-        let renterId = validation.checkString(args.id);
         const renter = await users.getUserById(renterId);
         if (renter) {
           if (args.name) {
@@ -549,8 +550,8 @@ export const resolvers = {
           if (args.email) {
             renter.email = validation.checkString(args.email, "email");
           }
-          if (args.password) {
-            renter.password = args.password;
+          if(args.gender){
+            renter.gender = validation.checkString(args.gender, "gender");
           }
           if (args.city) {
             renter.city = args.city;
@@ -565,7 +566,7 @@ export const resolvers = {
             renterId,
             renter.name,
             renter.email,
-            renter.password,
+            renter.gender,
             renter.city,
             renter.state,
             renter.dateOfBirth
