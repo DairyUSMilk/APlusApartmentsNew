@@ -8,7 +8,10 @@ import flat from "flat";
 import validation from "../utils/helpers.js";
 
 const unflatten = flat.unflatten;
-const client = redis.createClient();
+const client = redis.createClient({
+  url: process.env.REDIS || "redis://redis:6379",
+});
+
 client.connect().then(() => {});
 export const resolvers = {
   Query: {
@@ -550,7 +553,7 @@ export const resolvers = {
           if (args.email) {
             renter.email = validation.checkString(args.email, "email");
           }
-          if(args.gender){
+          if (args.gender) {
             renter.gender = validation.checkString(args.gender, "gender");
           }
           if (args.city) {
