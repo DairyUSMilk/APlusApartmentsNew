@@ -22,8 +22,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         setUserAddress({ ...userAddress, [e.target.name]: e.target.value });
     };
 
-    // Function to update Autocomplete options based on map center
-    const updateAutocomplete = (autocompleteObj, center = { lat: mapCenter.lat, lng: mapCenter.lng }) => {
+    const updateAutocomplete = (autocomplete, center = { lat: mapCenter.lat, lng: mapCenter.lng }) => {
         center = new google.maps.LatLng(center.lat, center.lng);
 
         // Create a circle to bias autocomplete results to a certain area
@@ -31,12 +30,18 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
             center: center,
             radius: 10000,
         });
+        autocomplete.setBounds(circle.getBounds());
+        autocomplete.setComponentRestrictions({ country: 'us' });
+        return autocomplete;
+    }
 
+    // Function to update Autocomplete options based on map center
+    const updateAutocompletes = (center = { lat: mapCenter.lat, lng: mapCenter.lng }) => { // Default val may be unecessary
         // Set bounds and component restrictions for Autocomplete
-        autocompleteObj.setBounds(circle.getBounds());
-        autocompleteObj.setComponentRestrictions({ country: 'us' });
-
-        return autocompleteObj;
+        autocompleteRefStreet.current = updateAutocomplete(autocompleteRefStreet.current, center);
+        autocompleteRefCity.current = updateAutocomplete(autocompleteRefCity.current, center);
+        autocompleteRefState.current = updateAutocomplete(autocompleteRefState.current, center);
+        autocompleteRefZip.current = updateAutocomplete(autocompleteRefZip.current, center);
     };
 
     // Function to handle Autocomplete selection
@@ -128,13 +133,17 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         // Handle different cases based on the validation result
         if (validationResult.status === 'success' || validationResult.status === 'inferred') {
             // Update coordinates if validation is successful
+            updateAutocompletes({ lat: validationResult.data.lat, lng: validationResult.data.lng });
             updateCoords({ lat: validationResult.data.lat, lng: validationResult.data.lng });
+            document.getElementById('addressForm').reset();
         } else if (validationResult.status === 'unconfirmed') {
             // Alert the user about unconfirmed components
             alert('Please confirm the following components: ' + validationResult.data.unconfirmedComponentsArray.join(', '));
-            // You can also add logic to highlight the unconfirmed components in the form
+            // Need to add logic to highlight the unconfirmed components in the form
         }
-        document.getElementById('addressForm').reset();
+        else{
+            alert('Please enter a valid address');
+        }
     };
 
     // Function to prevent form submission on Enter key
@@ -153,14 +162,17 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                     ref={autocompleteRefStreet}
                     onLoad={(autocomplete) => {
                         autocompleteRefStreet.current = updateAutocomplete(autocomplete);
+                        console.log(autocompleteRefStreet)
                     }}
                     onPlaceChanged={() => {
+                        console.log("bruh", autocompleteRefStreet)
                         const place = autocompleteRefStreet.current.getPlace();
+                        
+                        console.log(place)
                         handleAutocompleteSelect(place, 'street_address');
                         // next line mostly just to update map center...
                         // but i think rerendering map updates the autocomplete bounds too?
                         // not sure.
-                        autocompleteRefStreet.current = updateAutocomplete(autocompleteRefStreet.current, place.geometry.location);
                     }}
                     types={['address']}
                 >
@@ -214,6 +226,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                 </Autocomplete>
 
                 <Autocomplete
+                    ref={autocompleteRefZip}
                     onLoad={(autocomplete) => {
                         autocompleteRefZip.current = updateAutocomplete(autocomplete);
                     }}
