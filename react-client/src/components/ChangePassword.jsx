@@ -35,7 +35,7 @@ function ChangePassword() {
         {!passwordsMatch ? (
             <h4 className='error'>{'New passwords do not match'}</h4>
         ) : null}
-        <h2>{currentUser.displayName}, Change Your Password Below</h2>
+        <h2>{currentUser.displayName}, Please Change Your Password Below</h2>
         <form onSubmit={submitForm}>
           <div className='form-group'>
             <label>
@@ -80,10 +80,12 @@ function ChangePassword() {
               />
             </label>
           </div>
+          <div className="buttons-container">
 
-          <button className='button' type='submit'>
-            Change Password
+          <button className='button-sign' type='submit'>
+            <span>Change Password</span>
           </button>
+          </div>
         </form>
         <br />
       </div>
@@ -94,7 +96,7 @@ function ChangePassword() {
         <h2>
             Accounts created using Google authentication cannot change passwords
         </h2>
-        <a href='/account' className='btn btn-primary'>
+        <a href='/account' className='button-sign'>
             Back to profile page.
         </a>
       </div>
