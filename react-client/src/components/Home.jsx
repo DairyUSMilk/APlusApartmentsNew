@@ -3,7 +3,6 @@ import { UserContext } from '../context/UserContext';
 import { useLazyQuery } from '@apollo/client';
 import { getApprovedApartments } from '../graphql/Queries';
 import ApartmentCard from './ApartmentCard';
-//import SearchApartmentsByFilter from './ApartmentsByFilter';
 import helpers from './../utils/helpers.js';
 
 import Button from 'react-bootstrap/Button';
@@ -21,7 +20,7 @@ function Home() {
   const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
 
   const [ getApartments, { data, loading, error }] = useLazyQuery(getApprovedApartments());
-
+  
   useEffect(() => {
     getApartments();
   }, []);
