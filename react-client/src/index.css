@@ -1,8 +1,8 @@
-
 /* sign in - sign in button */
 /* sign up - sign up button */
+/* Home - Search button */
 
-.button {
+.button-sign {
     display: inline-block;
     border-radius: 7px;
     border: none;
@@ -18,14 +18,14 @@
     cursor: pointer;
    }
    
-   .button span {
+   .button-sign span {
     cursor: pointer;
     display: inline-block;
     position: relative;
     transition: 0.4s;
    }
    
-   .button span:after {
+   .button-sign span:after {
     content: 'now';
     position: absolute;
     opacity: 0;
@@ -34,11 +34,143 @@
     transition: 0.7s;
    }
    
-   .button:hover span {
+   .button-sign:hover span {
     padding-right: 3.55em;
    }
    
-   .button:hover span:after {
+   .button-sign:hover span:after {
     opacity: 4;
     right: 0;
    }
+
+/* sign in - forget button */
+.button-forget {
+    display: inline-block;
+    border-radius: 7px;
+    border: none;
+    background: #1875FF;
+    color: white;
+    font-family: inherit;
+    text-align: center;
+    font-size: 13px;
+    box-shadow: 0px 14px 56px -11px #1875FF;
+    width: 10em;
+    padding: 1em;
+    transition: all 0.4s;
+    cursor: pointer;
+   }
+   
+   .button-forget span {
+    cursor: pointer;
+    display: inline-block;
+    position: relative;
+    transition: 0.4s;
+   }
+   
+   .button-forget span:after {
+    content: ':(';
+    position: absolute;
+    opacity: 0;
+    top: 0;
+    right: -20px;
+    transition: 0.7s;
+   }
+   
+   .button-forget:hover span {
+    padding-right: 3.55em;
+   }
+   
+   .button-forget:hover span:after {
+    opacity: 4;
+    right: 0;
+   }
+
+/* Signin - form */
+/* Signup - form */
+
+   .card {
+    width: 190px;
+    height: 400px;
+    background: #F4F6FB;
+    border: 1px solid white;
+    box-shadow: 10px 10px 64px 0px rgba(180, 180, 207, 0.75);
+    -webkit-box-shadow: 10px 10px 64px 0px rgba(186, 186, 202, 0.75);
+    -moz-box-shadow: 10px 10px 64px 0px rgba(208, 208, 231, 0.75);
+  }
+  
+  .form {
+    padding: 25px;
+  }
+  
+  .card_header {
+    display: flex;
+    align-items: center;
+  }
+  
+  .card svg {
+    color: #79bfe4;
+    margin-bottom: 20px;
+    margin-right: 5px;
+  }
+  
+  .form_heading {
+    padding-bottom: 20px;
+    font-size: 21px;
+    color: #1376b8;
+  }
+  
+  .field {
+    padding-bottom: 10px;
+  }
+  
+  .input {
+    border-radius: 5px;
+    background-color: #e9e9f7;
+    padding: 5px;
+    width: 100%;
+    color: #7a7ab3;
+    border: 1px solid #dadaf7
+  }
+  
+  .input:focus-visible {
+    outline: 1px solid #4d88f5;
+  }
+  
+  .input::placeholder {
+    color: #a7c5e7;
+  }
+  
+  label {
+    color: #045a67;
+    font-size: 14px;
+    display: block;
+    padding-bottom: 4px;
+  }
+
+
+  .form-container {
+    display: flex;
+    justify-content: center; 
+    align-items: center; 
+    height: 100vh; 
+  }
+  
+  .form.card {
+    width: 50%; 
+    margin: auto; 
+  }
+  
+  .buttons-container {
+    display: flex;
+    justify-content: space-around; 
+    align-items: center;
+    margin-top: 10px; 
+  }
+  
+  .button-sign, .button-link {
+    margin: 0 5px; 
+  }
+  
+
+
+  
