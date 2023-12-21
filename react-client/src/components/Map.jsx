@@ -5,6 +5,18 @@ import AddressForm from "./AddressForm";
 import "../../public/Map.css";
 import {Link} from "react-router-dom";
 
+
+const mapStyles = [
+    {
+        featureType: "poi",
+        elementType: "labels",
+        stylers: [
+            {
+            visibility: "off",
+            },
+        ],
+    },
+];
 const libraries = ["places"];
 
 const Map = ({apartments = []}) => {
@@ -101,12 +113,14 @@ const Map = ({apartments = []}) => {
         return <div>Loading markers</div>;
     }
 
+    
+
     return (
         <div className="Map">
             {markers.length !== 0 && (
                 <>
                     <AddressForm requireSubpremise = {false} returnCoords={updateCoords} mapCenter={center} />
-                    <GoogleMap mapContainerClassName="map-container" center={center} zoom={15}>
+                    <GoogleMap mapContainerClassName="map-container" center={center} zoom={15} options = {{styles: mapStyles}}>
                         {markers.map((marker, index) => 
                             <Marker
                                 key={index}
