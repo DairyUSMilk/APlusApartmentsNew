@@ -97,7 +97,7 @@ export const typeDefs = `#graphql
             price: Float!
             amenities: [String]!
             landlordId: String!
-        )
+        ): Apartment
         removeApartment(
             id: String!
         ): Apartment
