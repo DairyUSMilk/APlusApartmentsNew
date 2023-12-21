@@ -41,68 +41,43 @@ function SignUp() {
   }
 
   return (
-    <div className="card">
-      <h1>Sign up</h1>
-      {!passwordsMatch ? (
+    <div className="form card">
+      <div className="card_header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path fill="currentColor" d="M4 15h2v5h12V4H6v5H4V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm6-4V8l5 4-5 4v-3H2v-2h8z"></path>
+        </svg>
+        <h1 className="form_heading">Sign Up</h1>
+      </div>
+      {!passwordsMatch && (
         <h4 className="error">{"Passwords do not match"}</h4>
-      ) : null}
+      )}
       <form onSubmit={handleSignUp}>
-        <div className="form-group">
-          <label>
-            Email:
-            <br />
-            <input
-              className="form-control"
-              required
-              name="email"
-              type="email"
-              placeholder="Email"
-            />
-          </label>
+        <div className="field">
+          <label htmlFor="email">Email</label>
+          <input className="input" required name="email" type="email" placeholder="Email" id="email" />
         </div>
-        <div className="form-group">
-          <label>
-            Password:
-            <br />
-            <input
-              className="form-control"
-              id="password"
-              name="password"
-              type="password"
-              placeholder="Password"
-              autoComplete="off"
-              required
-            />
-          </label>
+        <div className="field">
+          <label htmlFor="password">Password</label>
+          <input className="input" id="password" name="password" type="password" placeholder="Password" autoComplete="off" required />
         </div>
-        <div className="form-group">
-          <label>
-            Confirm Password:
-            <br />
-            <input
-              className="form-control"
-              name="matchPassword"
-              type="password"
-              placeholder="Confirm Password"
-              autoComplete="off"
-              required
-            />
-          </label>
+        <div className="field">
+          <label htmlFor="matchPassword">Confirm Password</label>
+          <input className="input" name="matchPassword" type="password" placeholder="Confirm Password" autoComplete="off" required />
         </div>
-        <button
-          className="button"
-          id="submitButton"
-          name="submitButton"
-          type="submit"
-        >
+
+        <div className="buttons-container">
+
+        <button className='button-sign' id="submitButton" name="submitButton" type="submit">
           <span>Sign Up</span>
         </button>
-      </form>
-      <br />
-      <button className='button' style={{ verticalAlign: 'middle' }}  onClick={handleGoogleSignUp}>
-      <span>Sign up with Google</span>
-      </button>
-    </div>
+
+        <button className='button-sign' onClick={handleGoogleSignUp}>
+        <span>Sign up with Google</span>
+        </button>
+        </div>
+        </form>
+        </div>
   );
 }
 
