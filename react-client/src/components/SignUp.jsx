@@ -95,12 +95,12 @@ function SignUp() {
           name="submitButton"
           type="submit"
         >
-          Sign Up
+          <span>Sign Up</span>
         </button>
       </form>
       <br />
-      <button className="btn btn-primary" onClick={handleGoogleSignUp}>
-        Sign up with Google
+      <button className='button' style={{ verticalAlign: 'middle' }}  onClick={handleGoogleSignUp}>
+      <span>Sign up with Google</span>
       </button>
     </div>
   );
