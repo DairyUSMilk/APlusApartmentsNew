@@ -11,13 +11,17 @@ const Map = ({apartments = []}) => {
     const [center, setCenter] = useState({ lat: 40.745067, lng: -70.024408}); //default near hoboken
     const [markers, setMarkers] = useState([]); //will use to store markers for each apartment
     const [selectedMarker, setSelectedMarker] = useState(null);
+    const [markersLoaded, setMarkersLoaded] = useState(false); 
 
     // Load Google Maps API script
     const { isLoaded, loadError } = useLoadScript({
         googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
         libraries: libraries
     });
-
+    
+    useEffect(() => {
+        console.log("markers", markers)
+    }, [markers])
     // Get user's location
     useEffect(() => {
         const success = (position) => {
@@ -66,15 +70,14 @@ const Map = ({apartments = []}) => {
             const geocodePromises = apartmentAddresses.map(async (address) => {
                 return await geocode(address);
             });
-        
-            // Use Promise.all to wait for all geocoding promises to resolve
+
             const resolvedGeocodes = await Promise.all(geocodePromises);
             setMarkers(resolvedGeocodes);
         };
     
         fetchGeocodes();
-        console.log("markers", markers)
-    }, []);    
+        setMarkersLoaded(true);
+    }, [apartments]);    
 
     const updateCoords = ({lat, lng}) => { //change map center to user input address
         setCenter({lat, lng});
@@ -97,41 +100,40 @@ const Map = ({apartments = []}) => {
         return <div>Loading map</div>;
     }
 
+    if(!markersLoaded){
+        return <div>Loading markers</div>;
+    }
+
     return (
         <div className="Map">
-            {!isLoaded ? (
-                <h1>Loading Map...</h1>
-            ) :  markers.length !== 0 && (
+            {markers.length !== 0 && (
                 <>
-                <AddressForm requireSubpremise = {false} returnCoords={updateCoords} mapCenter={center} />
-                <GoogleMap mapContainerClassName="map-container" center={center} zoom={15}>
-                    {markers.map((marker, index) => 
-                        <Marker
-                            key={index}
-                            position={marker}
-                            onClick={() => handleMarkerClick(index)}
-                        />
-                    )}
-
-                    {selectedMarker && (
-                    <InfoWindow
-                        position={markers[selectedMarker]}
-                        onCloseClick={closeInfoWindow}
-                    >
-                        { selectedMarker &&
-                            <div>
-                                <Link to={`/apartment/${apartments[selectedMarker].id}`}>
-                                    <p><b>{apartments[selectedMarker].name}</b></p>
-                                    <p>{apartments[selectedMarker].address}</p>
-                                </Link>
-                                <p>Landlord: {apartments[selectedMarker].landlord.name}</p>
-                                <p>Rent: ${apartments[selectedMarker].price}/mo</p>
-                            </div>
-                        }
+                    <AddressForm requireSubpremise = {false} returnCoords={updateCoords} mapCenter={center} />
+                    <GoogleMap mapContainerClassName="map-container" center={center} zoom={15} onLoad={console.log("GoogleMap Loaded")}>
+                        {markers.map((marker, index) => 
+                            <Marker
+                                key={index}
+                                position={marker}
+                                onClick={() => handleMarkerClick(index)}
+                            />
+                        )}
                         
-                    </InfoWindow>
-                    )}
-                </GoogleMap>
+                        {selectedMarker !== null && markers.length > selectedMarker && (
+                            <InfoWindow
+                                position={markers[selectedMarker]}
+                                onCloseClick={closeInfoWindow}
+                            >
+                                <div>
+                                    <Link to={`/apartment/${apartments[selectedMarker].id}`}>
+                                        <p><b>{apartments[selectedMarker].name}</b></p>
+                                        <p>{apartments[selectedMarker].address}</p>
+                                    </Link>
+                                    <p>Landlord: {apartments[selectedMarker].landlord.name}</p>
+                                    <p>Rent: ${apartments[selectedMarker].price}/mo</p>
+                                </div>
+                            </InfoWindow>
+                        )}
+                    </GoogleMap>
                 </>
             )}
         </div>
