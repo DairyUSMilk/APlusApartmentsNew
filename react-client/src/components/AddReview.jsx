@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useMutation } from "@apollo/client";
-import { getUserReviews } from '../graphql/Queries';
+import { getPendingReviews } from '../graphql/Queries';
 import { createReview } from '../graphql/Mutations';
 
 import helpers from './../utils/helpers.js';
@@ -14,7 +14,6 @@ import { UserContext } from '../context/UserContext.jsx';
 
 function AddReview({apartmentId}) {
     const {userData} = useContext(UserContext);
-    const navigate = useNavigate();
 
     const [rating, setRating] = useState(0);
     const [content, setContent] = useState('');
@@ -36,8 +35,13 @@ function AddReview({apartmentId}) {
 
         console.log(newReview);
         try {
-            addReview({ variables: newReview });
-            //navigate(0);
+            addReview({ 
+                variables: newReview, 
+                refetchQueries: [
+                    { query: getPendingReviews() }
+                ]   
+            } );
+
         }
         catch (e) {
             alert(e);
@@ -60,6 +64,11 @@ function AddReview({apartmentId}) {
     }
 
     return (
+        <Modal
+        isOpen={isModalOpen}
+        onRequestClose={closeModal}
+        contentLabel="Add Apartment Review Modal"
+        >
         <Form onSubmit={handleAdd}>
         <Form.Group className="mb-3" controlId="review.rating">
           <Form.Label>Rating</Form.Label>
@@ -74,6 +83,7 @@ function AddReview({apartmentId}) {
           Submit
         </Button>
       </Form>
+      </Modal>
     );
 }
 
