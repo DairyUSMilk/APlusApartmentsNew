@@ -15,7 +15,19 @@ const exportedMethods = {
       );
     return strVal;
   },
+  checkStringArray(arr, varName) {
+    if (!arr || !Array.isArray(arr))
+      throw `You must provide an array of ${varName}`;
+    if (arr.length < 1) throw "array must have at least 1";
+    for (let i in arr) {
+      if (typeof arr[i] !== "string" || arr[i].trim().length === 0) {
+        throw `One or more elements in ${varName} array is not a string or is an empty string`;
+      }
+      arr[i] = arr[i].trim();
+    }
 
+    return arr;
+  },
   checkName(strVal, varName) {
     strVal = this.checkString(strVal, varName);
     if (!/^[a-zA-Z\s\-']+$/.test(strVal))
@@ -150,7 +162,11 @@ const exportedMethods = {
       throw new Error(`${varName} must be a whole number`);
     return num;
   },
-
+  checkPrice(price, varName) {
+    price = this.checkNumber(num, varName);
+    if (price <= 0) throw new Error(`${varName} must be a positive number`);
+    return price;
+  },
   checkEmail(email, varName) {
     this.checkString(email);
     const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;

@@ -216,9 +216,12 @@ export const resolvers = {
 
       if (args.rating) {
         if (args.rating < 1 || args.rating > 5) {
-          throw new GraphQLError(`Please specify a minimum rating between 1 and 5`, {
-            extensions: { code: "INTERNAL_SERVER_ERROR" },
-          });
+          throw new GraphQLError(
+            `Please specify a minimum rating between 1 and 5`,
+            {
+              extensions: { code: "INTERNAL_SERVER_ERROR" },
+            }
+          );
         }
         args.rating = validation.checkNumber(args.rating, "rating");
         hasFilter = true;
@@ -679,6 +682,98 @@ export const resolvers = {
         });
       }
     },
+    editApartment: async (_, args) => {
+      //not supposed to change dateListed, rating and isApproved
+      let editedApartment;
+      try {
+        let id = validation.checkString(args.id);
+        const apartment = await apartments.getApartmentById(id);
+        if (apartment) {
+          if (args.name) {
+            apartment.name = validation.checkName(args.name, "name");
+          }
+          if (args.address) {
+            apartment.address = validation.checkString(
+              args.address,
+              "apartment address"
+            );
+          }
+          if (args.city) {
+            apartment.city = validation.checkString(
+              args.city,
+              "apartment city"
+            );
+          }
+          if (args.state) {
+            apartment.state = validation.checkState(
+              args.state,
+              "apartment state"
+            );
+          }
+          if (args.description) {
+            apartment.description = validation.checkString(
+              args.description,
+              "apartment description"
+            );
+          }
+          if (args.images) {
+            apartment.images = validation.checkStringArray(
+              args.images,
+              "apartment images"
+            );
+          }
+          if (args.price) {
+            apartment.pricePerMonth = validation.checkPrice(
+              args.price,
+              "apartment price"
+            );
+          }
+          if (args.amenities) {
+            apartment.amenities = validation.checkStringArray(
+              args.amenities,
+              "apartment amenities"
+            );
+          }
+          if (args.landlordId) {
+            apartment.landlord = validation.checkString(
+              args.landlordId,
+              "apartment landlordId"
+            );
+          }
+          editedApartment = await apartments.updateApartmentInfoById(
+            id,
+            apartment.name,
+            apartment.description,
+            apartment.address,
+            apartment.city,
+            apartment.state,
+            apartment.dateListed,
+            apartment.amenities,
+            apartment.images,
+            apartment.pricePerMonth,
+            apartment.landlord,
+            apartment.rating,
+            apartment.isApproved
+          );
+        } else
+          throw new GraphQLError(`Can't find apartment with an Id of ${id}`, {
+            extensions: { code: "NOT_FOUND" },
+          });
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+      try {
+        await client.del(`apartment.${id}`);
+        await client.del("apartment");
+        return apartmentFormat(editedApartment);
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+    },
     removeApartment: async (_, args) => {
       let id = validation.checkId(args.id, "apartment id");
       let removedApartment;
@@ -692,9 +787,8 @@ export const resolvers = {
       try {
         await client.del(`apartment.${id}`);
         if (removedApartment.isApproved) {
-          await client.del(`apartments`)
-        }
-        else {
+          await client.del(`apartments`);
+        } else {
           await client.del(`pendingApartments`);
         }
 
@@ -779,7 +873,7 @@ export const resolvers = {
       const formattedReview = reviewFormat(addedReview);
       try {
         await client.set(
-          `review.${addedReview._id}`, 
+          `review.${addedReview._id}`,
           JSON.stringify(formattedReview)
         );
         await client.del("pendingReviews");
@@ -802,9 +896,8 @@ export const resolvers = {
       }
       try {
         if (deletedReview.isApproved) {
-          await client.del(`reviews.${deletedReview.posterId}`)
-        }
-        else {
+          await client.del(`reviews.${deletedReview.posterId}`);
+        } else {
           await client.del(`pendingReviews`);
         }
         await client.del(`review.${id}`);
