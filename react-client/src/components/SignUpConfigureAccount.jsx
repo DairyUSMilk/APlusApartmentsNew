@@ -7,7 +7,11 @@ import { useMutation } from "@apollo/client";
 import { createRenter, createLandlord, createAdmin } from '../graphql/Mutations';
 
 function SignUpConfigureAccount() {
+<<<<<<< HEAD
   const {currentUser} = useContext(UserContext);
+=======
+  const {currentUser, userData} = useContext(UserContext);
+>>>>>>> 48aabea0b4cb3d8a75959c806c30491a44895f76
   const [accountTypeDropdownValue, setAccountTypeDropdownValue] = useState("");
 
   const [addRenter] = useMutation(createRenter());
@@ -70,15 +74,15 @@ function SignUpConfigureAccount() {
     }
   };
 
-  if (currentUser && currentUser.displayName) {
+  if (!currentUser) {
+    return <Navigate to='/sign-up' />;
+  }
+
+  if (userData) {
     return <Navigate to='/account' />;
   }
 
-  if (!currentUser) {
-    return <Navigate to='sign-up' />;
-  }
 
-  console.log(currentUser.uid);
 
   return (
     <div className='card'>

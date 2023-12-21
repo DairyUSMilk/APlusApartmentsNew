@@ -20,7 +20,9 @@ function SignIn() {
     let {email, password} = event.target.elements;
 
     try {
+      console.log("here");
       await logIn(email.value, password.value);
+      console.log("done")
     } catch (error) {
       alert(error);
     }
@@ -28,7 +30,6 @@ function SignIn() {
 
   console.log(currentUser)
   if (currentUser) {
-    console.log('here')
     return <Navigate to='/' />;
   }
   return (
@@ -70,7 +71,7 @@ function SignIn() {
         </a>
 
           <button className='button-sign' onClick={() => googleSignIn()}>
-          <span>Sign in</span>
+          <span>Sign in with Google</span>
           </button>
     
         </div>

@@ -98,11 +98,11 @@ export const deleteUserById = async (id) => {
 };
 
 //if a field is left blank, it is left unmodified
-
 export const updateUserInfoById = async (
   id,
   name,
   email,
+  gender,
   city,
   state,
   dateOfBirth,
@@ -110,12 +110,30 @@ export const updateUserInfoById = async (
 ) => {
   const updateInfo = {};
   id = helpers.checkString(id, "id");
-  name = helpers.checkString(name, "name");
-  email = helpers.checkEmail(email, "email");
-  city = helpers.checkString(city, "city");
-  state = helpers.checkState(state, "state");
-  dateOfBirth = helpers.checkDate(dateOfBirth, "dateOfBirth");
-  accountType = helpers.checkString(accountType, "accountType").toLowerCase();
+
+  if (name) {
+    updateInfo["name"] = helpers.checkString(name, "name");
+  }
+  if (email) {
+    updateInfo["email"] = helpers.checkEmail(email, "email");
+  }
+  if (gender) {
+    updateInfo["gender"] = helpers.checkString(gender, "gender");
+  }
+  if (city) {
+    updateInfo["city"] = helpers.checkString(city, "city");
+  }
+  if (state) {
+    updateInfo["state"] = helpers.checkState(state, "state");
+  }
+  if (dateOfBirth) {
+    updateInfo["dateOfBirth"] = helpers.checkDate(dateOfBirth, "dateOfBirth");
+  }
+  if (accountType) {
+    updateInfo["accountType"] = helpers
+      .checkString(accountType, "accountType")
+      .toLowerCase();
+  }
 
   if (name) {
     updateInfo["name"] = name;
@@ -153,35 +171,10 @@ export const validateLoginAttempt = async (email, password) => {
   if (!user) {
     throw `Either the email or password is incorrect`;
   }
-  if (await bcrypt.compare(password, user.password)) {
-    return formatUserObject(user);
-  }
-  throw `Either the email or password is incorrect`;
-};
-const getIdFilter = async (id) => {
-  return { _id: id };
-};
 
-const formatUserObject = async (userObject) => {
-  //delete userObject.password;
-  //userObject._id = userObject._id.toString();
-  return userObject;
-};
-
-export const addApartmentToBookmark = async (userId, apartmentId) => {
-  userId = helpers.checkString(userId, "userId");
-  apartmentId = helpers.checkId(apartmentId, "apartmentId");
-
-  const userCollection = await users();
-  const updateResult = await userCollection.updateOne(
-    { _id: userId },
-    { $addToSet: { bookmarkedApartments: new ObjectId(apartmentId) } }
-  );
-
-  if (updateResult.modifiedCount !== 1) {
-    throw `Apartment ${apartmentId} could not be bookmarked by user ${userId}`;
-  }
-  return await getUserById(userId);
+  const getIdFilter = (id) => {
+    return { _id: id };
+  };
 };
 
 export const removeApartmentFromBookmark = async (userId, apartmentId) => {
