@@ -3,6 +3,7 @@ import { UserContext } from "../context/UserContext";
 import { useMutation } from "@apollo/client";
 import { editRenter } from "../graphql/Mutations";
 import EditRenterModal from "./EditRenterModal";
+import helpers from './../utils/helpers.js';
 
 const RenterDetails = () => {
     const [isModalVisible, setModalVisibility] = useState(false);
