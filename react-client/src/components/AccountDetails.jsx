@@ -55,8 +55,8 @@ function AccountDetails() {
     else if (accountType === 'admin') {
         data = (
         <div className="user">
-              <h2>Admin Details</h2>
-              <h3>{userData.name}</h3>
+              <h1>Admin Details</h1>
+              <h2>{userData.name}</h2>
         </div>
       );
       ownedApartments = (<PendingApartments />);
