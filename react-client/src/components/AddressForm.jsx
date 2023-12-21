@@ -4,13 +4,13 @@ import axios from 'axios';
 
 const libraries = ['places'];
 
-const AddressForm = ({ returnCoords, mapCenter = { lat: 40.745067, lng: -70.024408} }) => {
+const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.745067, lng: -70.024408} }) => {
     // State to manage user input
 
-    const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: libraries
-    });
+    // const { isLoaded, loadError } = useLoadScript({
+    //     googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+    //     libraries: libraries
+    // });
 
     const [userAddress, setUserAddress] = useState({
         street_address: '',
@@ -36,10 +36,6 @@ const AddressForm = ({ returnCoords, mapCenter = { lat: 40.745067, lng: -70.0244
             console.log("Geolocation not supported");
         }
     }, []);
-
-    // useEffect(() => {
-    //     console.log(userAddress)
-    // }, [userAddress]) //debugging
 
     // Refs for Autocomplete components
     const autocompleteRefStreet = useRef(null);
@@ -154,7 +150,7 @@ const AddressForm = ({ returnCoords, mapCenter = { lat: 40.745067, lng: -70.0244
                 // Address is incomplete or unconfirmed
                 const unconfirmedComponentsArray = address.unconfirmedComponentTypes || [];
                 const missingComponentsArray = address.missingComponentTypes || [];
-                return { status: 'unconfirmed', data: { unconfirmedComponentsArray, missingComponentsArray } };
+                return { status: 'unconfirmed', data: { address, unconfirmedComponentsArray, missingComponentsArray } };
             } else {
                 // Address is validated successfully
                 const latLong = geocode.location;
@@ -171,9 +167,7 @@ const AddressForm = ({ returnCoords, mapCenter = { lat: 40.745067, lng: -70.0244
     // Function to handle form submission
     const handleSubmit = async (e) => {
         e.preventDefault();
-        console.log(userAddress)
         const validationResult = await handlePlaceValidation(userAddress);
-        console.log(validationResult)
         // Handle different cases based on the validation result
         if (validationResult.status === 'success' || validationResult.status === 'inferred') {
             // Update coordinates if validation is successful

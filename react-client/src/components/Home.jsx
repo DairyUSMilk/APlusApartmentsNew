@@ -112,6 +112,10 @@ function Home() {
         );
     });
 
+  let map = 
+    data && <Map apartments = {data.apartments}/>
+
+
   return (
     <div>
       <div className='card-home_header'>
@@ -139,7 +143,8 @@ function Home() {
       {isSearchFormVisible ? searchForm : null}
 
       <CardGroup>{apartmentList}</CardGroup>
-      <Map />
+      
+      {map}
     </div>
 
     
