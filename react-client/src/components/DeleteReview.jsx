@@ -7,16 +7,14 @@ import Button from 'react-bootstrap/Button';
 import '../index.css';
 
 function DeleteReview ({review}) {
+    console.log(review.id);
     const [removeReview, { loading, error }] = useMutation(deleteReview(), {
-        variables: {id: review.id},
-        refetchQueries: [
-            { query: getUserReviews(), variables: { posterId: review.posterId }
-            }
-        ]
+        variables: {id: review.id}
     });
 
     function handleDelete() {
         removeReview();
+        navigate(0);
     }
     
     if (loading) { 

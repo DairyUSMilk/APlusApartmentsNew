@@ -10,7 +10,7 @@ export const createReview = async (
   content,
   datePosted
 ) => {
-  posterId = helpers.checkId(posterId, "posterId");
+  posterId = helpers.checkString(posterId, "posterId");
   apartmentId = helpers.checkId(apartmentId, "apartmentId");
   rating = helpers.checkNumber(rating, "rating");
   if (rating < 1 || rating > 5) throw "rating not valid";
@@ -96,7 +96,7 @@ export const deleteReviewById = async (id) => {
   if (result.deletedCount !== 1) {
     throw `No review exists with id ${id}`;
   }
-  await apartmentFunctions.updateApartmentRatingById(id);
+  await apartmentFunctions.updateApartmentRatingById(review.apartmentId);
   return review;
 };
 

@@ -84,10 +84,12 @@ function ApartmentDetails({id}) {
         }
     }    
 
+    console.log(apartment.reviews)
     let reviewList = 
         apartment &&
         apartment.reviews.map((review) => {
-            return <Review review={review} userId={userId} accountType={accountType} key={review.id} />;
+            console.log(review);
+            return <Review review={review} key={review.id} />;
         });;
 
     return (
@@ -180,7 +182,7 @@ function ApartmentDetails({id}) {
                     Add a Review
                 </Button> ):
                 null}
-                {isReviewFormVisible ? <AddReview posterId={userId} apartmentId={apartment.id} /> : null}
+                {isReviewFormVisible ? <AddReview apartmentId={apartment.id} /> : null}
                 <br/><br/>
                 <Button 
                     style={{justifyContent: 'center'}}

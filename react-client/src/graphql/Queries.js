@@ -97,6 +97,7 @@ export function getApartment() {
             contactInfo
         }
         reviews {
+            id
             posterId
             rating
             content
@@ -112,6 +113,7 @@ export function getUserReviews() {
     query ($posterId: String!) {
     reviews(posterId: $posterId) {
         id
+        posterId
         apartmentId
         rating
         content
@@ -125,6 +127,8 @@ export function getPendingReviews() {
     return gql`
     {
     pendingReviews {
+        id
+        posterId
         apartmentId
         rating
         content
@@ -156,6 +160,7 @@ export function getApprovedApartments() {
         price
         amenities
         reviews {
+            id
             posterId
             rating
             content

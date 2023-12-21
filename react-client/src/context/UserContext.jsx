@@ -30,8 +30,6 @@ export const UserProvider = ({children}) => {
     accountType = accountTypeData.getUserAccountType;
   }
 
-  console.log(accountTypeData);
-
   let query = getRenter();
   if (accountType === 'landlord') {
      query = getLandlord();

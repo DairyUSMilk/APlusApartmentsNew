@@ -26,7 +26,6 @@ export const createApartment = async (
   //images = helpers.checkStringArray(images, "images"); /****SKIP FOR NOW *** */
   pricePerMonth = helpers.checkNumber(pricePerMonth, "pricePerMonth");
   landlord = helpers.checkString(landlord, "landlord");
-
   const apartment = {
     name: name,
     description: description,
@@ -47,7 +46,7 @@ export const createApartment = async (
     throw `Apartment named ${name} was not inserted into database`;
   }
 
-  return await getApartmentById(output.insertedId);
+  return await getApartmentById(output.insertedId.toString());
 };
 
 export const getApartmentById = async (id) => {
@@ -115,7 +114,8 @@ export const approveApartmentById = async (id) => {
 };
 
 export const getApartmentsByLandlordId = async (id) => {
-  id = helpers.checkId(id);
+  id = helpers.checkString(id, "landlord id");
+
   const apartmentCollection = await apartments();
   const landlordApartments = await apartmentCollection
     .find({ landlord: id, isApproved: true })
@@ -263,7 +263,6 @@ export async function updateApartmentInfoById(
 export const getUserBookmarkedApartments = async (userId) => {
   userId = helpers.checkString(userId, "userId");
   const user = await users.getUserById(userId);
-
   let bookmarkedApartments = [];
   for (const id of user.bookmarkedApartments) {
     try {

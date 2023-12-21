@@ -1,13 +1,16 @@
-import React from 'react';
+import React, { useContext } from 'react';
 import { Link } from 'react-router-dom';
 import Card from 'react-bootstrap/Card';
 
+import { useQuery } from '@apollo/client';
 import { getRenter } from '../graphql/Queries';
 import DeleteReview from './DeleteReview';
+import { UserContext } from '../context/UserContext';
 
-function Review({review, userId, accountType}) {
+function Review({review}) {
+    const {userData, accountType} = useContext(UserContext);
     const {data, loading, error }  = useQuery(getRenter(), {
-        variables: {uid: review.posterId}
+        variables: {id: review.posterId}
     });
 
     if (loading) {
@@ -30,7 +33,7 @@ function Review({review, userId, accountType}) {
             <Card.Text>
             {review.content}
             </Card.Text>
-            {userId === review.posterId || accountType === 'admin' ? (
+            {userData.id === review.posterId || accountType === 'admin' ? (
             <DeleteReview review={review} />):
             null}
         </Card.Body>

@@ -7,7 +7,7 @@ import CardGroup from 'react-bootstrap/CardGroup';
 import { getUserReviews } from '../graphql/Queries';
 import Review from './ReviewCard';
 
-function ReviewList() {
+function UserReviewList() {
     const {userData} = useContext(UserContext);
     const {data, loading, error }  = useQuery(getUserReviews(), {
         variables: {posterId: userData.id}
@@ -34,4 +34,4 @@ function ReviewList() {
     );
 }
 
-export default ReviewList;
+export default UserReviewList;

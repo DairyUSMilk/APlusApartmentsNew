@@ -146,7 +146,7 @@ export function createReview() {
         $posterId: String!, 
         $apartmentId: String!, 
         $rating: Int!,
-        $content: String, 
+        $content: String!, 
         $datePosted: String) {
         createReview(
             posterId: $posterId, 

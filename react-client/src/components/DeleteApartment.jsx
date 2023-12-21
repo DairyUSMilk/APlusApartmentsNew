@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useMutation } from "@apollo/client";
 import { deleteApartment } from '../graphql/Mutations';
 
@@ -8,6 +8,7 @@ import '../index.css';
 
 function DeleteApartment ({apartment}) {
     const navigate = useNavigate();
+    const location = useLocation();
 
     const [removeApartment, { loading, error }] = useMutation(deleteApartment(), {
         variables: {id: apartment.id}
@@ -15,7 +16,12 @@ function DeleteApartment ({apartment}) {
 
     function handleDelete() {
         removeApartment();
-        navigate(0); // todo - figure out refetchQuery after mutation; this is hacky
+        if (location.pathname === '/account')
+            navigate(0); // todo - figure out refetchQuery after mutation; this is hacky
+        else {
+            navigate('/');
+            navigate(0);
+        }
     }
     
     if (loading) { 

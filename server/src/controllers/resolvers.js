@@ -215,6 +215,11 @@ export const resolvers = {
       }
 
       if (args.rating) {
+        if (args.rating < 1 || args.rating > 5) {
+          throw new GraphQLError(`Please specify a minimum rating between 1 and 5`, {
+            extensions: { code: "INTERNAL_SERVER_ERROR" },
+          });
+        }
         args.rating = validation.checkNumber(args.rating, "rating");
         hasFilter = true;
       }
@@ -487,6 +492,7 @@ export const resolvers = {
           args.gender,
           "renter"
         );
+        await client.set(`renter.${newUser._id}`);
         return renterFormat(newUser);
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
@@ -504,6 +510,7 @@ export const resolvers = {
           args.gender,
           "landlord"
         );
+        await client.set(`landlord.${newUser._id}`);
         return landlordFormat(newUser);
       } catch (e) {
         throw new GraphQLError(e.message);
@@ -521,6 +528,7 @@ export const resolvers = {
           args.gender,
           "admin"
         );
+        await client.set(`admin.${newUser._id}`);
         return adminFormat(newUser);
       } catch (e) {
         throw new GraphQLError(`Internal Server Error`);
@@ -659,11 +667,11 @@ export const resolvers = {
           apartment.landlordId
         );
         const formatApartment = apartmentFormat(newApartment);
-
         await client.set(
           `apartment.${newApartment._id}`,
           JSON.stringify(formatApartment)
         );
+        await client.del("pendingApartments");
         return formatApartment;
       } catch (e) {
         throw new GraphQLError(e, {
@@ -683,7 +691,12 @@ export const resolvers = {
       }
       try {
         await client.del(`apartment.${id}`);
-        await client.del(`apartments`);
+        if (removedApartment.isApproved) {
+          await client.del(`apartments`)
+        }
+        else {
+          await client.del(`pendingApartments`);
+        }
 
         return apartmentFormat(removedApartment);
       } catch (e) {
@@ -737,7 +750,7 @@ export const resolvers = {
       }
     },
     createReview: async (_, args) => {
-      let posterId = validation.checkId(args.posterId, "posterId");
+      let posterId = validation.checkString(args.posterId, "posterId");
       let apartmentId = validation.checkId(args.apartmentId, "apartmentId");
       let rating = validation.checkRating(args.rating, "rating");
       let content = validation.checkString(args.content, "content");
@@ -763,15 +776,19 @@ export const resolvers = {
           }
         );
       }
+      const formattedReview = reviewFormat(addedReview);
       try {
-        await client.set(`review.${addedReview._id}`);
-        await client.del("reviews");
+        await client.set(
+          `review.${addedReview._id}`, 
+          JSON.stringify(formattedReview)
+        );
+        await client.del("pendingReviews");
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
-      return addedReview;
+      return formattedReview;
     },
     deleteReview: async (_, args) => {
       let id = validation.checkId(args.id, "delete review id");
@@ -784,13 +801,19 @@ export const resolvers = {
         });
       }
       try {
-        await client.del(`review.${deletedReview._id}`);
+        if (deletedReview.isApproved) {
+          await client.del(`reviews.${deletedReview.posterId}`)
+        }
+        else {
+          await client.del(`pendingReviews`);
+        }
+        await client.del(`review.${id}`);
       } catch (e) {
         throw new GraphQLError(e, {
           extensions: { code: "INTERNAL_SERVER_ERROR" },
         });
       }
-      return deletedReview;
+      return reviewFormat(deletedReview);
     },
     addBookmark: async (_, args) => {
       let userId = validation.checkString(args.userId, "user id");
