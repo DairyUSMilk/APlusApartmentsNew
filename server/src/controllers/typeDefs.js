@@ -94,10 +94,10 @@ export const typeDefs = `#graphql
             state: String
             description: String
             images: [String]
-            price: Float!
-            amenities: [String]!
-            landlordId: String!
-        )
+            price: Float
+            amenities: [String]
+            landlordId: String
+        ): Apartment
         removeApartment(
             id: String!
         ): Apartment
