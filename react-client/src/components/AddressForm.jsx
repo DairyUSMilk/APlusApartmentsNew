@@ -8,7 +8,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         street_address: '',
         city: '',
         state: '',
-        zip_code: '',
+        postcode: '',
     });
 
     // Refs for Autocomplete components
@@ -45,49 +45,60 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
     };
 
     // Function to handle Autocomplete selection
-    const handleAutocompleteSelect = (place, fieldName) => {
+    const handleAutocompleteSelect = (place) => {
         // Extract address components based on the selected field
         let street_address = '';
         let city = '';
         let state = '';
-        let zip_code = '';
+        let postcode = '';
+        console.log(place.address_components)
+        for (const component of place.address_components) {
 
-        switch (fieldName) {
-            case 'street_address':
-                street_address = place.address_components[0].long_name + ' ' + place.address_components[1].long_name;
-                city = place.address_components[2].long_name;
-                state = place.address_components[4].long_name;
-                zip_code = place.address_components[6].long_name;
+            const componentType = component.types[0];
+        
+            switch (componentType) {
+              case "street_number": {
+                street_address = `${component.long_name} ${street_address}`;
                 break;
-
-            case 'city':
-                city = place.address_components[0].long_name;
-                state = place.address_components[3].long_name;
+              }
+        
+              case "route": {
+                street_address += component.short_name;
                 break;
-
-            case 'state':
-                state = place.address_components[0].long_name;
+              }
+        
+              case "postal_code": {
+                postcode = `${component.long_name}${postcode}`;
                 break;
-
-            case 'zip_code':
-                zip_code = place.address_components[0].long_name;
-                state = place.address_components[3].long_name;
+              }
+        
+              case "postal_code_suffix": {
+                postcode = `${postcode}-${component.long_name}`;
                 break;
-        }
+              }
+              case "locality":
+                city = component.long_name;
+                document.getElementById("city").value = component.long_name;
+                break;
+              case "administrative_area_level_1": {
+                state = component.short_name;
+                document.getElementById("state").value = component.short_name;
+                break;
+              }
+            }
+          }
 
         // Update the form fields and userAddress state
         document.getElementById('street_address').value = street_address;
-        document.getElementById('city').value = city;
-        document.getElementById('state').value = state;
-        document.getElementById('zip_code').value = zip_code;
-        setUserAddress({ ...userAddress, street_address, city, state, zip_code });
+        document.getElementById('postcode').value = postcode;
+        setUserAddress({ ...userAddress, street_address, city, state, postcode});
     };
 
     // Function to handle address validation with Google API
     const handlePlaceValidation = async (inputAddress) => {
-        const { street_address, city, state, zip_code } = inputAddress;
+        const { street_address, city, state, postcode } = inputAddress;
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        console.log(street_address, city, state, zip_code)
+        
         try {
             // Send a POST request to Google's address validation API
             const response = await axios.post(
@@ -95,7 +106,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                 {
                     address: {
                         regionCode: 'US',
-                        addressLines: [street_address, `${city}, ${state}, ${zip_code}`],
+                        addressLines: [street_address, `${city}, ${state}, ${postcode}`],
                     },
                     previousResponseId: '', // Need to update this if follow-up request?
                     enableUspsCass: false,
@@ -129,7 +140,6 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
         e.preventDefault();
 
         const validationResult = await handlePlaceValidation(userAddress);
-        console.log(validationResult)
         // Handle different cases based on the validation result
         if (validationResult.status === 'success' || validationResult.status === 'inferred') {
             // Update coordinates if validation is successful
@@ -162,14 +172,10 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                     ref={autocompleteRefStreet}
                     onLoad={(autocomplete) => {
                         autocompleteRefStreet.current = updateAutocomplete(autocomplete);
-                        console.log(autocompleteRefStreet)
                     }}
                     onPlaceChanged={() => {
-                        console.log("bruh", autocompleteRefStreet)
                         const place = autocompleteRefStreet.current.getPlace();
-                        
-                        console.log(place)
-                        handleAutocompleteSelect(place, 'street_address');
+                        handleAutocompleteSelect(place);
                         // next line mostly just to update map center...
                         // but i think rerendering map updates the autocomplete bounds too?
                         // not sure.
@@ -192,7 +198,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                     }}
                     onPlaceChanged={() => {
                         const place = autocompleteRefCity.current.getPlace();
-                        handleAutocompleteSelect(place, 'city');
+                        handleAutocompleteSelect(place);
                     }}
                     types={['(cities)']}
                 >
@@ -212,7 +218,7 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                     }}
                     onPlaceChanged={() => {
                         const place = autocompleteRefState.current.getPlace();
-                        handleAutocompleteSelect(place, 'state');
+                        handleAutocompleteSelect(place);
                     }}
                     types={['administrative_area_level_1']}
                 >
@@ -232,13 +238,13 @@ const AddressForm = ({ updateCoords, mapCenter }) => {
                     }}
                     onPlaceChanged={() => {
                         const place = autocompleteRefZip.current.getPlace();
-                        handleAutocompleteSelect(place, 'zip_code');
+                        handleAutocompleteSelect(place);
                     }}
                     types={['postal_code']}
                 >
                     <input
-                        id="zip_code"
-                        name="zip_code"
+                        id="postcode"
+                        name="postcode"
                         placeholder="Zipcode"
                         onChange={handleChange}
                         onKeyDown={handleEnterKey}
