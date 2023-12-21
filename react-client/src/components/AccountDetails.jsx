@@ -19,8 +19,8 @@ function AccountDetails() {
     const [isRenterModalOpen, setIsRenterModalOpen] = useState(false);
     const [isAddApartmentModalOpen, setIsAddApartmentModalOpen] = useState(false);
     const {userData, accountType} = useContext(UserContext);
-    const [updateRenter, {loading, error}] = useMutation(editRenter());
-    const [addApartmentCall, { loading1, error1 }] = useMutation(createApartment());
+    const [updateRenter] = useMutation(editRenter());
+    const [addApartmentCall] = useMutation(createApartment());
 
     const updateAccountInfo = (formData) => {
         formData.id = userData.id;
