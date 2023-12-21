@@ -59,7 +59,7 @@ function SignUp() {
         </div>
         <div className="field">
           <label htmlFor="password">Password
-          <div class="passwordTooltip">&nbsp;?
+          <div class="passwordTooltip">
             <small id="passValidations" class="passwordTooltipText">
               Password must be a minimum of 8 characters long,
               have at least one at least one uppercase and lowercase character, have at least one number, 
