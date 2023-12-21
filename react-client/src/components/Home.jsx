@@ -112,10 +112,6 @@ function Home() {
         );
     });
 
-  let map = 
-    data && <Map apartments = {data.apartments}/>
-
-
   return (
     <div>
       <div className='card-home_header'>
@@ -144,11 +140,8 @@ function Home() {
 
       <CardGroup>{apartmentList}</CardGroup>
       
-      {map}
+      {data && <Map apartments = {data.apartments}/>}
     </div>
-
-    
-
   );
 }
 

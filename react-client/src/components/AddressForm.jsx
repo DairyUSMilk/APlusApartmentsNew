@@ -123,44 +123,75 @@ const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.74
     const handlePlaceValidation = async (inputAddress) => {
         const { street_address, city, state, postcode, subpremise } = inputAddress;
         const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
-        
-        try {
-            // Send a POST request to Google's address validation API
-            const response = await axios.post(
-                `https://addressvalidation.googleapis.com/v1:validateAddress?key=${apiKey}`,
-                {
-                    address: {
-                        regionCode: 'US',
-                        addressLines: [street_address, `${subpremise} ${city}, ${state}, ${postcode}`],
-                    },
-                    previousResponseId: '', // Need to update this if follow-up request?
-                    enableUspsCass: false,
-                }
-            );
+        if(requireSubpremise){
+            try {
+                // Send a POST request to Google's address validation API
+                const response = await axios.post(
+                    `https://addressvalidation.googleapis.com/v1:validateAddress?key=${apiKey}`,
+                    {
+                        address: {
+                            regionCode: 'US',
+                            addressLines: [street_address, `${subpremise} ${city}, ${state}, ${postcode}`],
+                        },
+                        previousResponseId: '', // Need to update this if follow-up request?
+                        enableUspsCass: false,
+                    }
+                );
 
-            // Extract relevant information from the API response
-            const { verdict, address, geocode } = response.data.result;
-            console.log(response.data.result)
-            // Handle different cases based on the validation result
-            if (!verdict.addressComplete) {
-                if(address.missingComponentTypes.length === 1 && address.missingComponentTypes[0] !== 'subpremise'){
-                    // Tell user to enter apartment number
-                    alert('Please enter an apartment number');
+                // Extract relevant information from the API response
+                const { verdict, address, geocode } = response.data.result;
+                console.log(response.data.result)
+                // Handle different cases based on the validation result
+                if (!verdict.addressComplete) {
+                    if(address.missingComponentTypes.length === 1 && address.missingComponentTypes[0] !== 'subpremise'){
+                        // Tell user to enter apartment number
+                        alert('Please enter an apartment number');
+                    }
+                    // Address is incomplete or unconfirmed
+                    const unconfirmedComponentsArray = address.unconfirmedComponentTypes || [];
+                    const missingComponentsArray = address.missingComponentTypes || [];
+                    return { status: 'unconfirmed', data: { address, unconfirmedComponentsArray, missingComponentsArray } };
+                } else {
+                    // Address is validated successfully
+                    const latLong = geocode.location;
+                    const status = verdict.hasInferredComponents ? 'inferred' : 'success';
+                    return { status: status, data: { address: address.postalAddress, lat: latLong.latitude, lng: latLong.longitude } };
                 }
-                // Address is incomplete or unconfirmed
-                const unconfirmedComponentsArray = address.unconfirmedComponentTypes || [];
-                const missingComponentsArray = address.missingComponentTypes || [];
-                return { status: 'unconfirmed', data: { address, unconfirmedComponentsArray, missingComponentsArray } };
-            } else {
-                // Address is validated successfully
-                const latLong = geocode.location;
-                const status = verdict.hasInferredComponents ? 'inferred' : 'success';
-                return { status: status, data: { address: address.postalAddress, lat: latLong.latitude, lng: latLong.longitude } };
+            } catch (error) {
+                // Handle errors during address validation
+                console.error('Error validating address', error);
+                return { status: 'error', data: error };
             }
-        } catch (error) {
-            // Handle errors during address validation
-            console.error('Error validating address', error);
-            return { status: 'error', data: error };
+        }
+        else{
+            const geocode = async (inputAddress) => {
+                const parsedAddress = inputAddress.split(' ').join('%20');
+                const apiKey = import.meta.env.VITE_GOOGLE_MAPS_API_KEY;
+                
+                try {
+                    // Send a POST request to Google's address validation API
+                    const response = await axios.post(
+                        `https://maps.googleapis.com/maps/api/geocode/json?address=${parsedAddress}&components=country:US&key=${apiKey}`
+                    );
+                    if(response.status === 200){
+                        return response.data.results[0].geometry.location
+                    }
+                    else{
+                        console.log("Error retrieving geocode for address", inputAddress);
+                        return null;
+                    }
+                } catch (error) {
+                    // Handle errors during address validation
+                    console.error(`Error retrieving geocode for address ${inputAddress}`, error);
+                }
+            };
+            const latLong = await geocode(`${street_address} ${city}, ${state}, ${postcode}`);
+            if(latLong){
+                return { status: 'success', data: { address: {street_address, city, state, postcode}, lat: latLong.lat, lng: latLong.lng } };
+            }
+            else{
+                return { status: 'error', data: 'Error retrieving geocode' };
+            }
         }
     };
 

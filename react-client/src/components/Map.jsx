@@ -12,6 +12,29 @@ const Map = ({apartments = []}) => {
     const [markers, setMarkers] = useState([]); //will use to store markers for each apartment
     const [selectedMarker, setSelectedMarker] = useState(null);
 
+    // Load Google Maps API script
+    const { isLoaded, loadError } = useLoadScript({
+        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
+        libraries: libraries
+    });
+
+    // Get user's location
+    useEffect(() => {
+        const success = (position) => {
+            setCenter({ lat: position.coords.latitude, lng: position.coords.longitude});
+        }
+        const error = () => {
+            console.log("Unable to retrieve your location");
+        }
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
+        } 
+        else {
+            console.log("Geolocation not supported");
+        }
+    }, []);
+
     // Convert addresses to lat/lng
     const geocode = async (inputAddress) => {
         const parsedAddress = inputAddress.split(' ').join('%20');
@@ -50,38 +73,8 @@ const Map = ({apartments = []}) => {
         };
     
         fetchGeocodes();
-    }, [apartments]);    
-    
-    useEffect(() => {
-        const success = (position) => {
-            setCenter({ lat: position.coords.latitude, lng: position.coords.longitude});
-        }
-        const error = () => {
-            console.log("Unable to retrieve your location");
-        }
-
-        if (navigator.geolocation) {
-            navigator.geolocation.getCurrentPosition(success, error, {enableHighAccuracy: true});
-        } 
-        else {
-            console.log("Geolocation not supported");
-        }
-    }, []);
-
-
-    const { isLoaded, loadError } = useLoadScript({
-        googleMapsApiKey: import.meta.env.VITE_GOOGLE_MAPS_API_KEY,
-        libraries: libraries
-    });
-    
-    if (loadError) {
-        console.log("error", loadError)
-        return <div>Error loading map</div>;
-    }
-    
-    if (!isLoaded) {
-        return <div>Loading map</div>;
-    }
+        console.log("markers", markers)
+    }, []);    
 
     const updateCoords = ({lat, lng}) => { //change map center to user input address
         setCenter({lat, lng});
@@ -95,13 +88,22 @@ const Map = ({apartments = []}) => {
         setSelectedMarker(null);
     };
 
+    if (loadError) {
+        console.log("error", loadError)
+        return <div>Error loading map</div>;
+    }
+    
+    if (!isLoaded) {
+        return <div>Loading map</div>;
+    }
+
     return (
         <div className="Map">
             {!isLoaded ? (
                 <h1>Loading Map...</h1>
             ) :  markers.length !== 0 && (
                 <>
-                <AddressForm returnCoords={updateCoords} mapCenter={center} />
+                <AddressForm requireSubpremise = {false} returnCoords={updateCoords} mapCenter={center} />
                 <GoogleMap mapContainerClassName="map-container" center={center} zoom={15}>
                     {markers.map((marker, index) => 
                         <Marker
