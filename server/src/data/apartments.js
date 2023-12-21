@@ -80,7 +80,7 @@ export const deleteApartmentById = async (id) => {
 };
 
 export const updateApartmentRatingById = async (id) => {
-  id = helpers.checkId(id);
+  id = helpers.checkId(id, "apartment id");
   const apartmentCollection = await apartments();
   const reviews = await reviewFunctions.getAllReviewsByApartmentId(id);
   let sum = 0.0;
@@ -100,7 +100,7 @@ export const updateApartmentRatingById = async (id) => {
 };
 
 export const approveApartmentById = async (id) => {
-  id = helpers.checkId(id);
+  id = helpers.checkId(id, "apartment id");
   const apartmentCollection = await apartments();
   const updateInfo = { $set: { isApproved: true } };
   const result = await apartmentCollection.updateOne(
@@ -209,7 +209,7 @@ export async function updateApartmentInfoById(
   rating,
   isApproved
 ) {
-  id = helpers.checkId(id, "id");
+  id = helpers.checkId(id, "apartment id");
   const updateInfo = {};
 
   if (name !== undefined) updateInfo.name = helpers.checkString(name, "name");
