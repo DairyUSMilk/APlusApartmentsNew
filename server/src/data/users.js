@@ -47,7 +47,11 @@ export const createUser = async (
 };
 
 export const getUserById = async (id) => {
+<<<<<<< HEAD
   id = helpers.checkString(id, "user id");
+=======
+  id = helpers.checkString(id);
+>>>>>>> docker
   const userCollection = await users();
   const user = await userCollection.findOne({ _id: id });
   if (!user) {
