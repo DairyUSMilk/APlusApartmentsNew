@@ -37,7 +37,11 @@ const RenterDetails = () => {
               <p>Born: {userData.dateOfBirth}</p>
               <p>{userData.gender}</p>
             </div>
-            <button onClick={showModal}>Edit Account Info</button>
+            <div className="buttons-container">
+            <button className='button-sign' onClick={showModal}>
+                <span>Edit Account Info</span>
+            </button>
+            </div>
             <EditRenterModal
                 isOpen={isModalVisible}
                 closeModal={hideModal}

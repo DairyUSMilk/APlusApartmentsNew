@@ -70,7 +70,11 @@ const LandlordDetails = () => {
             </div>
 
             <div>
-                <button onClick={showAddModal}>Add Apartment Listing</button>
+                <div className="buttons-container">
+                <button className='button-sign' onClick={showAddModal}>
+                    <span>Add Apartment Listing</span>
+                </button>
+                </div>
                 <CreateApartmentModal 
                     isOpen={isAddModalVisible}
                     closeModal={hideAddModal}
@@ -82,7 +86,11 @@ const LandlordDetails = () => {
             <CardGroup>{reviewList}</CardGroup>
 
             <div>
-                <button onClick={showEditModal}>Edit Account Info</button>
+                <div className="buttons-container">
+                <button className='button-sign' onClick={showEditModal}>
+                    <span>Edit Account Info</span>
+                </button>
+                </div>
                     <EditLandlordModal
                         isOpen={isEditModalVisible}
                         closeModal={hideEditModal}

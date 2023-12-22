@@ -72,44 +72,57 @@ function Home() {
 
   const searchForm = (
     <Modal
-    style={{ verticalAlign: 'middle' }}
-    appElement={document.getElementById('root') || undefined}
-    isOpen={isFilterModalOpen}
-    onRequestClose={CloseFilterModal}
-    contentLabel="Search Apartments Modal"
-    >
-      <Form onSubmit={handleSearch}>
-        <Form.Group className="mb-3" controlId="apartment.city">
-          <Form.Label>City:</Form.Label>
-          <Form.Control type="text" placeholder="City" onChange={e => setCity(e.target.value)} />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="apartment.state">
-          <Form.Label>State:</Form.Label>
-          <Form.Control type="text" placeholder="State" onChange={e => setState(e.target.value)} />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="apartment.minPrice">
-          <Form.Label>Minimum Monthly Price:</Form.Label>
-          <Form.Control type="number" min="0.00" step="0.01" placeholder="Min Price" onChange={e => setMinPrice(e.target.value)} />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="apartment.maxPrice">
-          <Form.Label>Maximum Monthly Price:</Form.Label>
-          <Form.Control type="number" min="0.00" step="0.01" placeholder="Max Price" onChange={e => setMaxPrice(e.target.value)} />
-        </Form.Group>
-        <Form.Group className="mb-3" controlId="apartment.rating">
-          <Form.Label>Minumum Apartment Rating:</Form.Label>
-          <Form.Control type="number" min="0" max="5" step="any" placeholder="Rating" onChange={e => setRating(e.target.value)} />
-        </Form.Group>
-
-        <div className="buttons-container">
-
-        <Button className='button-sign' style={{ verticalAlign: 'middle' }} variant="primary" type="submit">
-          <span>Search</span>
-        </Button>
-
+      style={{ verticalAlign: 'middle' }}
+      appElement={document.getElementById('root') || undefined}
+      isOpen={isFilterModalOpen}
+      onRequestClose={CloseFilterModal}
+      contentLabel="Search Apartments Modal"
+      >
+      <div className="form card">
+        <div className="card_header">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+            <path fill="none" d="M0 0h24v24H0z"></path>
+            <path fill="currentColor" d="M4 15h2v5h12V4H6v5H4V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm6-4V8l5 4-5 4v-3H2v-2h8z"></path>
+          </svg>
+          <h1 className="form_heading">Search Apartments</h1>
         </div>
-      </Form>
-      </Modal>
-    );
+    
+        <form onSubmit={handleSearch}>
+          <div className='field'>
+            <label htmlFor="apartment.city">City:</label>
+            <input className="input" type="text" placeholder="City" onChange={e => setCity(e.target.value)} />
+          </div>
+          
+          <div className='field'>
+            <label htmlFor="apartment.state">State:</label>
+            <input className="input" type="text" placeholder="State" onChange={e => setState(e.target.value)} />
+          </div>
+    
+          <div className='field'>
+            <label htmlFor="apartment.minPrice">Minimum Monthly Price:</label>
+            <input className="input" type="number" min="0.00" step="0.01" placeholder="Min Price" onChange={e => setMinPrice(e.target.value)} />
+          </div>
+    
+          <div className='field'>
+            <label htmlFor="apartment.maxPrice">Maximum Monthly Price:</label>
+            <input className="input" type="number" min="0.00" step="0.01" placeholder="Max Price" onChange={e => setMaxPrice(e.target.value)} />
+          </div>
+    
+          <div className='field'>
+            <label htmlFor="apartment.rating">Minimum Apartment Rating:</label>
+            <input className="input" type="number" min="0" max="5" step="any" placeholder="Rating" onChange={e => setRating(e.target.value)} />
+          </div>
+  
+        <div className="buttons-container">
+          <button className='button-sign' variant="primary" type="submit">
+            <span>Search</span>
+          </button>
+        </div>
+      </form>
+    </div>
+    </Modal>
+  );
+  
 
   let apartmentList =  
     data &&
