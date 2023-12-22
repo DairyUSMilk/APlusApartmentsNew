@@ -18,7 +18,7 @@ function Home() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [rating, setRating] = useState(0);
-  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const [ getApartments, { data, loading, error }] = useLazyQuery(getApprovedApartments());
   
@@ -155,7 +155,6 @@ function Home() {
 
       </div>
       <br/>
-      {isSearchFormVisible ? searchForm : null}
 
       <CardGroup>{apartmentList}</CardGroup>
       
