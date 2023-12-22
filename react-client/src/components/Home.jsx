@@ -5,7 +5,6 @@ import { getApprovedApartments } from '../graphql/Queries';
 import ApartmentCard from './ApartmentCard';
 import helpers from './../utils/helpers.js';
 
-import Modal from 'react-modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import CardGroup from 'react-bootstrap/CardGroup';
@@ -19,7 +18,7 @@ function Home() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [rating, setRating] = useState(0);
-  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
+  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
 
   const [ getApartments, { data, loading, error }] = useLazyQuery(getApprovedApartments());
   
@@ -36,12 +35,8 @@ function Home() {
       throw new Error(error.message);
   }
 
-  const OpenFilterModal = () => {
-    setIsFilterModalOpen(true);
-  }
-
-  const CloseFilterModal = () => {
-    setIsFilterModalOpen(false);
+  function toggleSearchForm() {
+    setIsSearchFormVisible(!isSearchFormVisible);    
   }
 
   const handleSearch = (event) => {
@@ -63,7 +58,6 @@ function Home() {
         setMinPrice(0);
         setMaxPrice(0);
         setRating(0);
-        CloseFilterModal();
     }
     catch (e) {
         alert(e);
@@ -71,47 +65,40 @@ function Home() {
   };
 
   const searchForm = (
-    <Modal
-      style={{ verticalAlign: 'middle' }}
-      appElement={document.getElementById('root') || undefined}
-      isOpen={isFilterModalOpen}
-      onRequestClose={CloseFilterModal}
-      contentLabel="Search Apartments Modal"
-      >
-      <div className="form card">
-        <div className="card_header">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
-            <path fill="none" d="M0 0h24v24H0z"></path>
-            <path fill="currentColor" d="M4 15h2v5h12V4H6v5H4V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm6-4V8l5 4-5 4v-3H2v-2h8z"></path>
-          </svg>
-          <h1 className="form_heading">Search Apartments</h1>
+    <div className="form card">
+      <div className="card_header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path fill="currentColor" d="M4 15h2v5h12V4H6v5H4V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm6-4V8l5 4-5 4v-3H2v-2h8z"></path>
+        </svg>
+        <h1 className="form_heading">Search Apartments</h1>
+      </div>
+  
+      <form onSubmit={handleSearch}>
+        <div className='field'>
+          <label htmlFor="apartment.city">City:</label>
+          <input className="input" type="text" placeholder="City" onChange={e => setCity(e.target.value)} />
         </div>
-    
-        <form onSubmit={handleSearch}>
-          <div className='field'>
-            <label htmlFor="apartment.city">City:</label>
-            <input className="input" type="text" placeholder="City" onChange={e => setCity(e.target.value)} />
-          </div>
-          
-          <div className='field'>
-            <label htmlFor="apartment.state">State:</label>
-            <input className="input" type="text" placeholder="State" onChange={e => setState(e.target.value)} />
-          </div>
-    
-          <div className='field'>
-            <label htmlFor="apartment.minPrice">Minimum Monthly Price:</label>
-            <input className="input" type="number" min="0.00" step="0.01" placeholder="Min Price" onChange={e => setMinPrice(e.target.value)} />
-          </div>
-    
-          <div className='field'>
-            <label htmlFor="apartment.maxPrice">Maximum Monthly Price:</label>
-            <input className="input" type="number" min="0.00" step="0.01" placeholder="Max Price" onChange={e => setMaxPrice(e.target.value)} />
-          </div>
-    
-          <div className='field'>
-            <label htmlFor="apartment.rating">Minimum Apartment Rating:</label>
-            <input className="input" type="number" min="0" max="5" step="any" placeholder="Rating" onChange={e => setRating(e.target.value)} />
-          </div>
+        
+        <div className='field'>
+          <label htmlFor="apartment.state">State:</label>
+          <input className="input" type="text" placeholder="State" onChange={e => setState(e.target.value)} />
+        </div>
+  
+        <div className='field'>
+          <label htmlFor="apartment.minPrice">Minimum Monthly Price:</label>
+          <input className="input" type="number" min="0.00" step="0.01" placeholder="Min Price" onChange={e => setMinPrice(e.target.value)} />
+        </div>
+  
+        <div className='field'>
+          <label htmlFor="apartment.maxPrice">Maximum Monthly Price:</label>
+          <input className="input" type="number" min="0.00" step="0.01" placeholder="Max Price" onChange={e => setMaxPrice(e.target.value)} />
+        </div>
+  
+        <div className='field'>
+          <label htmlFor="apartment.rating">Minimum Apartment Rating:</label>
+          <input className="input" type="number" min="0" max="5" placeholder="Rating" onChange={e => setRating(e.target.value)} />
+        </div>
   
         <div className="buttons-container">
           <button className='button-sign' variant="primary" type="submit">
@@ -120,9 +107,11 @@ function Home() {
         </div>
       </form>
     </div>
-    </Modal>
   );
   
+
+
+  console.log(data);
 
   let apartmentList =  
     data &&
@@ -146,14 +135,21 @@ function Home() {
       <h4>Search by:</h4>
       </div>
 
-     
       <div className="buttons-container">
-      <button className='button-sign' onClick={OpenFilterModal}>
-        <span>Filter</span>
-      </button>
+
+      <Button 
+        className='button-sign' 
+        style={{ verticalAlign: 'middle' }}
+        variant="contained"
+        color="primary"
+        onClick={toggleSearchForm}
+        >
+        <span>Filter Apartments</span>
+      </Button> 
+
       </div>
-        {searchForm}
-      <div/>
+      <br/>
+      {isSearchFormVisible ? searchForm : null}
 
       <CardGroup>{apartmentList}</CardGroup>
       
