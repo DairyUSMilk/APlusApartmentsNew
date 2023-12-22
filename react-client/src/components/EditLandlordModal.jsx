@@ -59,7 +59,12 @@ const EditLandlordModal = ({ isOpen, closeModal, callDatabaseFunction, userData 
           />
         </div>
 
-        <button type="submit">Submit Changes</button>
+        <br/>
+        <button className='button-sign' type="submit">
+          <span>Submit Changes</span>
+        </button>
+
+
       </form>
     </Modal>
   );
