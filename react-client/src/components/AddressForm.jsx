@@ -333,9 +333,15 @@ const AddressForm = ({ requireSubpremise, returnCoords, mapCenter = { lat: 40.74
                         onKeyDown={handleEnterKey}
                     />
                 </Autocomplete>
-                <button type="submit">
-                    Submit
+
+                <div className="buttons-container">
+                <button 
+                    className='button-sign' type="submit">
+                    <span>Submit</span>
                 </button>
+                </div>
+
+
             </form>
         </div>
     );
