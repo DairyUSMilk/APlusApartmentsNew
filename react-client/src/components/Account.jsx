@@ -6,6 +6,7 @@ import { useQuery } from "@apollo/client";
 import { getUserAccountType } from '../graphql/Queries';
 
 import AccountDetails from './AccountDetails';
+import AccountDetails1 from './AccountDetails1';
 
 function Account() {
     const  {currentUser} = useContext(UserContext);
@@ -21,9 +22,11 @@ function Account() {
     return (
         <div>
             <AccountDetails />
+            <div className="buttons-container">
             <Link to='/change-password' className='button-sign'>
                 <span>Change Password</span>
             </Link>
+            </div>
         </div>
     );
 }

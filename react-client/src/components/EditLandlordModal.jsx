@@ -2,18 +2,16 @@ import React, { useState, useEffect } from 'react';
 import Modal from 'react-modal';
 import helpers from '../utils/helpers.js';
 
-const EditRenterModal = ({ isOpen, closeModal, callDatabaseFunction, userData }) => {
-  const [formData, setFormData] = useState({
+const EditLandlordModal = ({ isOpen, closeModal, callDatabaseFunction, userData }) => {
+    const [formData, setFormData] = useState({
     name: '',
-    gender: '',
-    dateOfBirth: ''
+    contactInfo: ""
   });
 
   useEffect(() => {
     setFormData({
       name: userData.name || '',
-      gender: userData.gender || '',
-      dateOfBirth: helpers.reformatDateForDateInputElement(userData.dateOfBirth) || ''
+      contactInfo: userData.contactInfo || ''
     });
   }, [isOpen, userData]);
 
@@ -34,7 +32,7 @@ const EditRenterModal = ({ isOpen, closeModal, callDatabaseFunction, userData })
     <Modal
       isOpen={isOpen}
       onRequestClose={closeModal}
-      contentLabel="Edit Renter Info Modal"
+      contentLabel="Edit Landlord Info Modal"
     >
       <div className="form card">
         <div className="card_header">
@@ -59,29 +57,13 @@ const EditRenterModal = ({ isOpen, closeModal, callDatabaseFunction, userData })
           </div>
   
           <div className='field'>
-            <label htmlFor="gender">Gender:</label>
-            <select
-              className="input"
-              id="gender"
-              name="gender"
-              value={formData.gender}
-              onChange={handleInputChange}
-            >
-              <option value="male">Male</option>
-              <option value="female">Female</option>
-              <option value="other">Other</option>
-              <option value="not_specified">Prefer not to say</option>
-            </select>
-          </div>
-  
-          <div className='field'>
-            <label htmlFor="dateOfBirth">Date of Birth:</label>
+            <label htmlFor="contactEmail">Contact Email:</label>
             <input
               className="input"
-              type="date"
-              id="dateOfBirth"
-              name="dateOfBirth"
-              value={formData.dateOfBirth}
+              type="text"
+              id="contactEmail"
+              name="contactEmail"
+              value={formData.contactInfo}
               onChange={handleInputChange}
             />
           </div>
@@ -98,4 +80,4 @@ const EditRenterModal = ({ isOpen, closeModal, callDatabaseFunction, userData })
   
 };
 
-export default EditRenterModal;
+export default EditLandlordModal;

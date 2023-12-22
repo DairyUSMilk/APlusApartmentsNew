@@ -2,39 +2,26 @@ import * as users from "./data/users.js";
 import * as apartments from "./data/apartments.js";
 import * as reviews from "./data/reviews.js";
 
+import { initializeApp, cert } from "firebase-admin/app";
+import { getAuth } from "firebase-admin/auth";
+import { FirebaseAdminConfig } from "./firebase/adminConfig.js";
+
 import { dbConnection, closeConnection } from "./configs/mongoConnections.js";
-const db = await dbConnection();
-await db.dropDatabase();
+import redis from "redis";
 
 /****
  ALL RENTER/LANDLORD/ADMIN ACCOUNTS HAVE THE PASSWORD: 
- Password123!
  *****/
+const fireBaseUserPassword = "Password123!";
 
 // These auth accounts have already been created in firebase
 // with the specified user id below. The email saved in db is
 // the email you'll sigh in with.
-const renterIds = [
-  "rUQIELok8IgFb7SWlJLLgk5LGuC3",
-  "wy0Q9dwpvNTOLjJE35BxRf0QkhH3",
-  "acdBvWG56VQlRokowkuEhIDKFrj2",
-  "raJ5EWxpmWdy7PKDyCtZA9TvS9v1",
-  "o0faL0ao1sbOYY9ZGMg2zqHxpUn1",
-];
-
-const landlordIds = [
-  "Vg6Tz2nHKtTyt7hCN5RrcOrtRF63",
-  "KMRb5uTNNjWMx4Hc8K23mIIKo3N2",
-  "vJc4GkpWota7DgztnUDBSZnbPUH2",
-  "MjFvFURVxcfeaf2LIuuhKJFKhBo1",
-  "1PF6g1AXs9WSbV6sjzsx0gnmpwy1",
-];
-
-const adminIds = [
-  "kusC2VshdYPx2eajJChR0WI8p4H2",
-  "sLwGgCRIH5QerMURKIdPqCWIFSL2",
-  "cBEfSVXhBTaDowaICBcvHqQsGKj2",
-];
+const userIds = {
+  renter: [],
+  landlord: [],
+  admin: [],
+};
 
 const addresses = [
   ["132 Adams St", "Hoboken", "NJ"], // 07030-2518 USA
@@ -57,12 +44,13 @@ const addresses = [
 
 const populateUsers = async () => {
   const genders = ["male", "female", "other", "prefer not to say"];
-  for (let i = 1; i <= renterIds.length; i++) {
-    // create renters
+
+  // create renters
+  for (let i = 1; i <= 10; i++) {
     const randomAddressIndex = getRandomInt(0, addresses.length);
     const genderIndex = getRandomInt(0, 4);
-    await users.createUser(
-      renterIds[i - 1],
+
+    await createNewUser(
       `Renter ${i}`,
       `testrenter${i}@email.com`,
       addresses[randomAddressIndex][1],
@@ -74,10 +62,9 @@ const populateUsers = async () => {
   }
 
   // create landlords
-  for (let i = 1; i <= landlordIds.length; i++) {
+  for (let i = 1; i <= 5; i++) {
     const randomAddressIndex = getRandomInt(0, addresses.length);
-    await users.createUser(
-      landlordIds[i - 1],
+    await createNewUser(
       `Landlord ${i}`,
       `testlandlord${i}@email.com`,
       addresses[randomAddressIndex][1],
@@ -89,10 +76,9 @@ const populateUsers = async () => {
   }
 
   // create admins
-  for (let i = 1; i <= adminIds.length; i++) {
+  for (let i = 1; i <= 3; i++) {
     const randomAddressIndex = getRandomInt(0, addresses.length);
-    await users.createUser(
-      adminIds[i - 1],
+    await createNewUser(
       `Admin ${i}`,
       `testadmin${i}@email.com`,
       addresses[randomAddressIndex][1],
@@ -123,7 +109,7 @@ const populateApartments = async () => {
       randomAmenityLists[randomAmenityIndex],
       //[`Image for Apartment ${i}`],
       getRandomInt(500, 4000),
-      landlordIds[getRandomInt(0, landlordIds.length)]
+      userIds.landlord[getRandomInt(0, userIds.landlord.length)]
     );
     await apartments.approveApartmentById(apartment._id.toString());
   }
@@ -135,7 +121,7 @@ const populateReviews = async () => {
   for (let i = 0; i < 100; i++) {
     const reviewRating = getRandomInt(1, 6);
     const review = await reviews.createReview(
-      renterIds[getRandomInt(0, renterIds.length)],
+      userIds.renter[getRandomInt(0, userIds.renter.length)],
       apartmentsList[getRandomInt(0, apartmentsList.length)]._id.toString(),
       reviewRating,
       `${reviewContents[reviewRating - 1]} Review Content for Review ${i}`,
@@ -145,12 +131,83 @@ const populateReviews = async () => {
   }
 };
 
+const deleteAllFirebaseUsers = async (nextPageToken) => {
+  const result = await getAuth().listUsers(1000, nextPageToken);
+  const uids = result.users.map((userRecord) => userRecord.uid);
+
+  await getAuth().deleteUsers(uids);
+  if (result.pageToken) {
+    await deleteAllUsers(listUsersResult.pageToken);
+  }
+};
+
+const createNewUser = async (
+  name,
+  email,
+  city,
+  state,
+  dateOfBirth,
+  gender,
+  accountType
+) => {
+  // creates user in firebase
+  let userRecord;
+  //console.log("creating user with email:", email, "password:", fireBaseUserPassword, "and name:", name);
+  try {
+    userRecord = await getAuth().createUser({
+      email: email,
+      password: fireBaseUserPassword,
+      displayName: name,
+    });
+  } catch (e) {
+    console.log("Error creating new user:", e);
+  }
+
+  // creates user in mongodb
+  try {
+    await users.createUser(
+      userRecord.uid,
+      name,
+      email,
+      city,
+      state,
+      dateOfBirth,
+      gender,
+      accountType
+    );
+
+    if (userIds.hasOwnProperty(accountType)) {
+      userIds[accountType].push(userRecord.uid);
+    } else {
+      await getAuth().deleteUser(userRecord.uid);
+      throw new Error("Invalid account type");
+    }
+  } catch (e) {
+    console.log("Error creating new user:", e);
+  }
+};
+
 const getRandomInt = (min, max) => {
   min = Math.ceil(min);
   max = Math.floor(max) - 1;
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
+// clear redis cache
+const client = redis.createClient();
+client.connect().then(() => {});
+await client.flushAll("ASYNC");
+
+// reset mongodb
+const db = await dbConnection();
+await db.dropDatabase();
+
+// delete all firebase users
+initializeApp({
+  credential: cert(FirebaseAdminConfig),
+});
+
+await deleteAllFirebaseUsers();
 await populateUsers();
 await populateApartments();
 await populateReviews();

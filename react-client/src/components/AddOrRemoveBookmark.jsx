@@ -28,26 +28,31 @@ function AddOrRemoveBookmark ({apartment, inBookmark}) {
         removeBookmark();
         setInBookmark(false);
     }
-     
+    //
     return (
         userData.id !== apartment.landlord.id ? (
-            isInBookmark ? 
-            <Button 
-                className='addBookmark'
-                variant="primary"
-                onClick={handleRemoveBookmark}
-                >
-                Unsave
-            </Button> :
-            <Button 
-                className='removeBookmark'
-                variant="primary"
-                onClick={handleAddBookmark}
-                >
-                Save
-            </Button> 
+            <div className="buttons-container">
+                {isInBookmark ? (
+                    <Button 
+                        className='button-sign'
+                        variant="primary"
+                        onClick={handleRemoveBookmark}
+                    >
+                        <span>Unsave</span>
+                    </Button>
+                ) : (
+                    <Button 
+                        className='button-sign'
+                        variant="primary"
+                        onClick={handleAddBookmark}
+                    >
+                        <span>Save</span>
+                    </Button>
+                )}
+            </div>
         ) : null
     );
+    
     }
     
     export default AddOrRemoveBookmark;

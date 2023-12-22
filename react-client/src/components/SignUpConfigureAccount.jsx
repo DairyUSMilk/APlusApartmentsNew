@@ -78,121 +78,82 @@ function SignUpConfigureAccount() {
     return <Navigate to='/account' />;
   }
 
-
-
   return (
-    <div className='card'>
-      <h1>Set Up Account</h1>
+    <div className='form card'>
+  
+      <div className="card_header">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
+          <path fill="none" d="M0 0h24v24H0z"></path>
+          <path fill="currentColor" d="M4 15h2v5h12V4H6v5H4V3a1 1 0 0 1 1-1h14a1 1 0 0 1 1 1v18a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6zm6-4V8l5 4-5 4v-3H2v-2h8z"></path>
+        </svg>
+        <h1 className="form_heading">Set Up Account</h1>
+      </div>
+  
       <form onSubmit={handleSignUp}>
-        <div className='form-group'>
-          <label>
+        <div className='field'>
+          <label htmlFor="displayName">
             Name:
-            <br />
-            <input
-              className='form-control'
-              required
-              name='displayName'
-              type='text'
-              placeholder='Name'
-              autoFocus={true}
-            />
+            <input className="input" required name='displayName' type='text' placeholder='Name' autoFocus={true} />
           </label>
         </div>
-        <br />
-        <div className='form-group'>
-          <label>
+  
+        <div className='field'>
+          <label htmlFor="dateOfBirth">
             Date of Birth:
-            <br />
-            <input
-              className='form-control'
-              required
-              name='dateOfBirth'
-              type='date'
-            />
+            <input className="input" required name='dateOfBirth' type='date' />
           </label>
         </div>
-        <br />
-        <div className='form-group'>
-          <label>
+  
+        <div className='field'>
+          <label htmlFor="gender">
             Gender:
-            <br />
-            <select name="gender" id="gender" required>
-                <option value="">-Select Gender-</option>
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-                <option value="Other">Other</option>
+            <select className="input" name="gender" id="gender" required>
+              <option value="">-Select Gender-</option>
+              <option value="Male">Male</option>
+              <option value="Female">Female</option>
+              <option value="Other">Other</option>
             </select>
           </label>
         </div>
-        <br />
-        <div className='form-group'>
-          <label>
+  
+        <div className='field'>
+          <label htmlFor="city">
             City:
-            <br />
-            <input
-              className='form-control'
-              name='city'
-              type='text'
-              placeholder='City'
-              autoComplete='off'
-              required
-            />
+            <input className="input" name='city' type='text' placeholder='City' autoComplete='off' required />
           </label>
         </div>
-        <br />
-        <div className='form-group'>
-          <label>
+  
+        <div className='field'>
+          <label htmlFor="state">
             State:
-            <br />
-            <input
-              className='form-control'
-              name='state'
-              type='text'
-              placeholder='State'
-              autoComplete='off'
-              required
-            />
+            <input className="input" name='state' type='text' placeholder='State' autoComplete='off' required />
           </label>
         </div>
-        <br />
-        <div className='form-group'>
-          <label>
-          Account Type:
-          </label>
-          <br />
-          <select className={'form-group'}
-              name='accountType'
-              value = {accountTypeDropdownValue}
-              onChange = {handleAccountTypeDropdownValue}
-              required>
-              <option className={'drop-item drop-main'} value='main'>
-                -Select Account Type-
-              </option>
-              <option value="renter">
-                Renter
-              </option>
-              <option value="landlord">
-                Landlord
-              </option>
-              <option value="admin">
-                Admin
-              </option>
+  
+        <div className='field'>
+          <label htmlFor="accountType">
+            Account Type:
+            <select className="input" name='accountType' value={accountTypeDropdownValue} onChange={handleAccountTypeDropdownValue} required>
+              <option value="">-Select Account Type-</option>
+              <option value="renter">Renter</option>
+              <option value="landlord">Landlord</option>
+              <option value="admin">Admin</option>
             </select>
-          </div> <br/>
-          <div className="buttons-container">
+          </label>
+        </div>
+  
+        <br/>
+        <br/>
 
-        <button
-          className='button-sign'
-          id='submitButton'
-          name='submitButton'
-          type='submit'
-        >
-          <span>Sign Up</span>
-        </button>
+        <div className="buttons-container">
+          <button className='button-sign' id='submitButton' name='submitButton' type='submit'>
+            <span>Sign Up</span>
+          </button>
         </div>
       </form>
     </div>
   );
+  
 }
 
 export default SignUpConfigureAccount;

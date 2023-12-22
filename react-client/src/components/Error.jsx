@@ -1,6 +1,7 @@
 import React from 'react';
 import { useNavigate, useRouteError } from "react-router-dom";
 import { Button } from '@mui/material';
+import '../index.css';
 
  function Error() {
   const error = useRouteError();
@@ -15,13 +16,20 @@ import { Button } from '@mui/material';
   };
 
   return (
-    <div id="error-page">
+    <div className='form card'>
       <h1>Oops!</h1>
-      <p>Sorry, an unexpected error has occurred.</p>
+      <br/>
+      <h4>Sorry, an unexpected error has occurred.</h4>
       <p>
+        <h4>Details shows below:</h4>
+        <br/>
         <i>{errorMessage()}</i>
       </p>
+
+
+      <div className="buttons-container">
             <Button
+                className='button-error'
                 variant="contained"
                 color="primary"
                 onClick={(e) => {
@@ -30,10 +38,11 @@ import { Button } from '@mui/material';
                   navigate(0);
                 }}
             >
-                Home
+                <span>Home</span>
             </Button>
-        <br /><br />
-        <Button 
+        <br />
+        <Button
+            className='button-error' 
             variant="contained"
             color="primary"
             onClick={() => {
@@ -41,8 +50,9 @@ import { Button } from '@mui/material';
                 navigate(-1);
             }}
         >
-            Previous
+            <span>Previous</span>
         </Button>
+        </div>
     </div>
   );
 }
