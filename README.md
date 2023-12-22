@@ -1,5 +1,8 @@
 # CS554Project
 # Instruction
 
-Install Docker: https://www.docker.com/get-started/
-```docker compose up --build -d```
+Install Docker: https://www.docker.com/get-started/ <br />
+Run <br />
+```docker compose up --build -d``` <br />
+
+Go to http://localhost:5173/
