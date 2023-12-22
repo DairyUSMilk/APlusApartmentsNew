@@ -36,8 +36,7 @@ function AccountDetails1() {
 
        {userDetails}
     
-   </div>
-    );
+   </div>);
 
 }
 
