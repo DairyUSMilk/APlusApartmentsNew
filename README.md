@@ -1,5 +1,5 @@
 # Apartment Finder
-
+AWS EC2 hosting: http://3.142.218.159/
 ### To Run via Docker:
 
 Clone the project locally using `git clone` <br /><br />
