@@ -135,7 +135,11 @@ function AccountDetails() {
        {data}
        {accountType === "landlord" ? 
         <>
-            <button onClick={openAddApartmentModal}>Add Apartment Listing</button>
+            <div className="buttons-container">
+            <button className='button-sign' onClick={openAddApartmentModal}>
+                <span>Add Apartment Listing</span>
+            </button>
+            </div>
             <CreateApartmentModal 
                 isOpen={isAddApartmentModalOpen}
                 closeModal={closeAddApartmentModal}
@@ -170,7 +174,13 @@ function AccountDetails() {
 
        {accountType === "renter" ? 
        <>
-        <button onClick={openEditRenterModal}>Edit Account Info</button>
+
+        <div className="buttons-container">
+        <button className='button-sign' onClick={openEditRenterModal}>
+            <span>Edit Account Info</span>
+        </button>
+        </div>
+
         <EditRenterModal
             isOpen={isRenterModalOpen}
             closeModal={closeEditRenterModal}
@@ -182,7 +192,11 @@ function AccountDetails() {
 
         {accountType === "landlord" ? 
             <>
-                <button onClick={openLandlordModal}>Edit Account Info</button>
+                <div className="buttons-container">
+                <button className='button-sign' onClick={openEditRenterModal}>
+                <span>Edit Account Info</span>
+                </button>
+                </div>
                 <EditLandlordModal
                     isOpen={isLandlordModalOpen}
                     closeModal={closeLandlordModal}
