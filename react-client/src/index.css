@@ -174,7 +174,7 @@
 /* Signup - form */
 
  .card {
-  width: 190px;
+  width: 290px;
   height: 500px;
   background: #F4F6FB;
   border: 1px solid white;
@@ -240,7 +240,7 @@ label {
 }
 
 .form.card {
-  width: 50%; 
+  width: 60%; 
   margin: auto; 
 }
 
