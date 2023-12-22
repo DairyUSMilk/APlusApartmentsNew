@@ -134,7 +134,7 @@ function SignUpConfigureAccount() {
           <label htmlFor="accountType">
             Account Type:
             <select className="input" name='accountType' value={accountTypeDropdownValue} onChange={handleAccountTypeDropdownValue} required>
-              <option value="main">-Select Account Type-</option>
+              <option value="">-Select Account Type-</option>
               <option value="renter">Renter</option>
               <option value="landlord">Landlord</option>
               <option value="admin">Admin</option>
