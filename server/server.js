@@ -12,5 +12,10 @@ const server = new ApolloServer({
 const port = process.env.PORT || 3000;
 const { url } = await startStandaloneServer(server, {
   listen: { port: port },
+  cors: {
+    origin: "http://localhost:5173",
+    credentials: true, // Allows setting of cookies
+    methods: "GET,POST,PUT,DELETE", // Allowed HTTP methods
+  },
 });
 console.log(`🚀  Server ready at: ${url}`);

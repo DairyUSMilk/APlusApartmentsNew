@@ -18,6 +18,7 @@ services:
 
   server:
     build: ./server
+    container_name: server_d
     ports:
       - "3000:3000"
     depends_on:
@@ -30,14 +31,16 @@ services:
       sh -c "node ./src/seed.js && npm start"
   react-client:
     build: ./react-client
+    container_name: react-client_d
     ports:
       - "5173:5173"
-    depends_on:
-      - server
+      - "9229:9229"
     environment:
       - REACT_APP_SERVER=http://server:3000
     env_file:
       - ./react-client/.env
+    stdin_open: true
+    tty: true
 volumes:
   mongo-data:
   redis-data:
