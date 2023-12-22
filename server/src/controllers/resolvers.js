@@ -8,7 +8,7 @@ import flat from "flat";
 import validation from "../utils/helpers.js";
 
 const unflatten = flat.unflatten;
-const client = redis.createClient({
+export const client = redis.createClient({
   url: process.env.REDIS || "redis://redis:6379",
 });
 
@@ -595,62 +595,63 @@ export const resolvers = {
         });
       }
     },
-    editLandlord: async(_, args) => {
-        let editedLandlord;
-        let landlordId = validation.checkString(args.id);
-        console.log(JSON.stringify(args));
-        try{
-            const landlord = await users.getUserById(landlordId);
-            if(landlord){
-                if(args.name){
-                    landlord.name = validation.checkName(args.name, "name");
-                }
-                if(args.contactInfo){
-                    landlord.contactInfo = validation.checkEmail(args.contactInfo, "contactInfo");
-                }
-                if(args.gender){
-                    landlord.gender = validation.checkString(args.gender, "gender");
-                }
-                if(args.city){
-                    landlord.city = args.city;
-                }
-                if(args.state){
-                    landlord.state = args.state;
-                }
-                if(args.dateOfBirth){
-                    landlord.dateOfBirth = args.dateOfBirth;
-                }
-                editedLandlord = await users.updateUserInfoById(
-                    landlordId,
-                    landlord.name,
-                    landlord.contactInfo,
-                    landlord.gender,
-                    landlord.city,
-                    landlord.state,
-                    landlord.dateOfBirth
-                );
-            } 
-            else{
-                throw new GraphQLError(`Can't find landlord with id: ${landlordId}`, {
-                    extensions: { code: "NOT_FOUND" },
-                  }
-                );
-            }
-        } catch(e){
-            throw new GraphQLError(e, {
-                extensions: { code: "INTERNAL_SERVER_ERROR" },
-              });
-        }
-
-        try{
-            await client.del(`landlord.${landlordId}`);
-            await client.del("landlords");
-            return landlordFormat(editedLandlord);
-        } catch (e) {
-            throw new GraphQLError(e, {
-              extensions: { code: "INTERNAL_SERVER_ERROR" },
-            });
+    editLandlord: async (_, args) => {
+      let editedLandlord;
+      let landlordId = validation.checkString(args.id);
+      console.log(JSON.stringify(args));
+      try {
+        const landlord = await users.getUserById(landlordId);
+        if (landlord) {
+          if (args.name) {
+            landlord.name = validation.checkName(args.name, "name");
           }
+          if (args.contactInfo) {
+            landlord.contactInfo = validation.checkEmail(
+              args.contactInfo,
+              "contactInfo"
+            );
+          }
+          if (args.gender) {
+            landlord.gender = validation.checkString(args.gender, "gender");
+          }
+          if (args.city) {
+            landlord.city = args.city;
+          }
+          if (args.state) {
+            landlord.state = args.state;
+          }
+          if (args.dateOfBirth) {
+            landlord.dateOfBirth = args.dateOfBirth;
+          }
+          editedLandlord = await users.updateUserInfoById(
+            landlordId,
+            landlord.name,
+            landlord.contactInfo,
+            landlord.gender,
+            landlord.city,
+            landlord.state,
+            landlord.dateOfBirth
+          );
+        } else {
+          throw new GraphQLError(`Can't find landlord with id: ${landlordId}`, {
+            extensions: { code: "NOT_FOUND" },
+          });
+        }
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
+
+      try {
+        await client.del(`landlord.${landlordId}`);
+        await client.del("landlords");
+        return landlordFormat(editedLandlord);
+      } catch (e) {
+        throw new GraphQLError(e, {
+          extensions: { code: "INTERNAL_SERVER_ERROR" },
+        });
+      }
     },
     removeRenter: async (_, args) => {
       let renterId;

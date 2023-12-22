@@ -7,7 +7,7 @@ import { getAuth } from "firebase-admin/auth";
 import { FirebaseAdminConfig } from "./firebase/adminConfig.js";
 
 import { dbConnection, closeConnection } from "./configs/mongoConnections.js";
-import redis from "redis";
+import { client } from "./controllers/resolvers.js";
 
 /****
  ALL RENTER/LANDLORD/ADMIN ACCOUNTS HAVE THE PASSWORD: 
@@ -193,9 +193,6 @@ const getRandomInt = (min, max) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-// clear redis cache
-const client = redis.createClient();
-client.connect().then(() => {});
 await client.flushAll("ASYNC");
 
 // reset mongodb

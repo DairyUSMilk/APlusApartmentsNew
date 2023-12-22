@@ -28,7 +28,7 @@ services:
       - MONGODB_URL=mongodb://mongodb:27017/Apartment-Finder
       - REDIS_URL=redis://redis:6379
     command: >
-      sh -c "node ./src/seed.js && npm start"
+      sh -c "npm start"
   react-client:
     build: ./react-client
     container_name: react-client_d
