@@ -5,8 +5,8 @@ import { getApprovedApartments } from '../graphql/Queries';
 import ApartmentCard from './ApartmentCard';
 import helpers from './../utils/helpers.js';
 
+import Modal from 'react-modal';
 import Button from 'react-bootstrap/Button';
-import Form from 'react-bootstrap/Form';
 import CardGroup from 'react-bootstrap/CardGroup';
 import '../index.css';
 import Map from './Map';
@@ -35,8 +35,12 @@ function Home() {
       throw new Error(error.message);
   }
 
-  function toggleSearchForm() {
-    setIsSearchFormVisible(!isSearchFormVisible);    
+  const OpenFilterModal = () => {
+    setIsFilterModalOpen(true);
+  }
+
+  const CloseFilterModal = () => {
+    setIsFilterModalOpen(false);
   }
 
   const handleSearch = (event) => {
@@ -58,6 +62,7 @@ function Home() {
         setMinPrice(0);
         setMaxPrice(0);
         setRating(0);
+        CloseFilterModal();
     }
     catch (e) {
         alert(e);
@@ -65,6 +70,13 @@ function Home() {
   };
 
   const searchForm = (
+    <Modal
+    style={{ verticalAlign: 'middle' }}
+    appElement={document.getElementById('root') || undefined}
+    isOpen={isFilterModalOpen}
+    onRequestClose={CloseFilterModal}
+    contentLabel="Search Apartments Modal"
+    >
     <div className="form card">
       <div className="card_header">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" width="24" height="24">
@@ -107,11 +119,9 @@ function Home() {
         </div>
       </form>
     </div>
+    </Modal>
   );
   
-
-
-  console.log(data);
 
   let apartmentList =  
     data &&
@@ -137,15 +147,11 @@ function Home() {
 
       <div className="buttons-container">
 
-      <Button 
-        className='button-sign' 
-        style={{ verticalAlign: 'middle' }}
-        variant="contained"
-        color="primary"
-        onClick={toggleSearchForm}
-        >
-        <span>Filter Apartments</span>
-      </Button> 
+      <button className='button-sign' onClick={OpenFilterModal}>
+        <span>Filter</span>
+      </button>
+
+      {searchForm}
 
       </div>
       <br/>
