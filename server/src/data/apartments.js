@@ -266,7 +266,7 @@ export const getUserBookmarkedApartments = async (userId) => {
   let bookmarkedApartments = [];
   for (const id of user.bookmarkedApartments) {
     try {
-      const apartment = await getApartmentById(id);
+      const apartment = await getApartmentById(id.toString());
       bookmarkedApartments.push(apartment);
     } catch (e) {
       // apartment not found, means it was deleted --> remove id from bookmark
