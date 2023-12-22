@@ -16,8 +16,7 @@ Additional commands:
 
 ## How to run via Docker
 
-Install Docker: https://www.docker.com/get-started/ <br />
-
-Run ```docker compose up --build -d``` <br />
-
-Go to http://localhost:5173/
+Clone the project locally using `git clone` <br /><br />
+Install Docker: https://www.docker.com/get-started/ <br /><br />
+Run ```docker compose up --build -d``` in the root project directory <br /><br />
+#### Site will run on http://localhost:5173/
