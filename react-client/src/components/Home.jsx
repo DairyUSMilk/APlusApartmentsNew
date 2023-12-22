@@ -5,6 +5,7 @@ import { getApprovedApartments } from '../graphql/Queries';
 import ApartmentCard from './ApartmentCard';
 import helpers from './../utils/helpers.js';
 
+import Modal from 'react-modal';
 import Button from 'react-bootstrap/Button';
 import Form from 'react-bootstrap/Form';
 import CardGroup from 'react-bootstrap/CardGroup';
@@ -18,7 +19,7 @@ function Home() {
   const [minPrice, setMinPrice] = useState(0);
   const [maxPrice, setMaxPrice] = useState(0);
   const [rating, setRating] = useState(0);
-  const [isSearchFormVisible, setIsSearchFormVisible] = useState(false);
+  const [isFilterModalOpen, setIsFilterModalOpen] = useState(false);
 
   const [ getApartments, { data, loading, error }] = useLazyQuery(getApprovedApartments());
   
@@ -35,8 +36,12 @@ function Home() {
       throw new Error(error.message);
   }
 
-  function toggleSearchForm() {
-    setIsSearchFormVisible(!isSearchFormVisible);    
+  const OpenFilterModal = () => {
+    setIsFilterModalOpen(true);
+  }
+
+  const CloseFilterModal = () => {
+    setIsFilterModalOpen(false);
   }
 
   const handleSearch = (event) => {
@@ -58,6 +63,7 @@ function Home() {
         setMinPrice(0);
         setMaxPrice(0);
         setRating(0);
+        CloseFilterModal();
     }
     catch (e) {
         alert(e);
@@ -65,6 +71,13 @@ function Home() {
   };
 
   const searchForm = (
+    <Modal
+    style={{ verticalAlign: 'middle' }}
+    appElement={document.getElementById('root') || undefined}
+    isOpen={isFilterModalOpen}
+    onRequestClose={CloseFilterModal}
+    contentLabel="Search Apartments Modal"
+    >
       <Form onSubmit={handleSearch}>
         <Form.Group className="mb-3" controlId="apartment.city">
           <Form.Label>City:</Form.Label>
@@ -84,7 +97,7 @@ function Home() {
         </Form.Group>
         <Form.Group className="mb-3" controlId="apartment.rating">
           <Form.Label>Minumum Apartment Rating:</Form.Label>
-          <Form.Control type="number" min="0" max="5" placeholder="Rating" onChange={e => setRating(e.target.value)} />
+          <Form.Control type="number" min="0" max="5" step="any" placeholder="Rating" onChange={e => setRating(e.target.value)} />
         </Form.Group>
 
         <div className="buttons-container">
@@ -95,10 +108,8 @@ function Home() {
 
         </div>
       </Form>
+      </Modal>
     );
-
-
-  console.log(data);
 
   let apartmentList =  
     data &&
@@ -122,21 +133,14 @@ function Home() {
       <h4>Search by:</h4>
       </div>
 
+     
       <div className="buttons-container">
-
-      <Button 
-        className='button-sign' 
-        style={{ verticalAlign: 'middle' }}
-        variant="contained"
-        color="primary"
-        onClick={toggleSearchForm}
-        >
-        <span>Filter Apartments</span>
-      </Button> 
-
+      <button className='button-sign' onClick={OpenFilterModal}>
+        <span>Filter</span>
+      </button>
       </div>
-      
-      {isSearchFormVisible ? searchForm : null}
+        {searchForm}
+      <div/>
 
       <CardGroup>{apartmentList}</CardGroup>
       
