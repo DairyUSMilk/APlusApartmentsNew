@@ -154,7 +154,7 @@ export const validateLoginAttempt = async (email, password) => {
   }
 };
 
-const getIdFilter = async (id) => {
+const getIdFilter = (id) => {
   return { _id: id };
 };
 
